@@ -1,0 +1,36 @@
+
+var RecaptchaState = {
+    site : '6LdbCwcAAAAAAFOcg3exLwCOC9jox6OlFtf9-PuO',
+    rtl : false,
+    challenge : '03AHJ_Vuv2Ra93XmZb9GWkS6g0CO6m8PxJX67zt_ZQhXJlOULqB4b3jLSIOkbVkX4Vao2bjafjW7_9XB4PjFJDlsJSdfSS4OOUakz-IFMH-cCB_8LNV97VylGxj2yegjX4hOFGsj4tn1V5LMxPGpOSUuXqtwBz_D2iI5DYaimps4paJNmR402yaCQ',
+    is_incorrect : false,
+    programming_error : '',
+    error_message : '',
+    server : 'https://web.archive.org/web/20130328023741/http://www.google.com/recaptcha/api/',
+    lang : 'en-US',
+    timeout : 1800
+};
+
+document.write('<scr'+'ipt type="text/javascript" s'+'rc="' + RecaptchaState.server + 'js/recaptcha.js"></scr'+'ipt>');
+
+/*
+     FILE ARCHIVED ON 02:37:41 Mar 28, 2013 AND RETRIEVED FROM THE
+     INTERNET ARCHIVE ON 04:47:45 May 07, 2020.
+     JAVASCRIPT APPENDED BY WAYBACK MACHINE, COPYRIGHT INTERNET ARCHIVE.
+
+     ALL OTHER CONTENT MAY ALSO BE PROTECTED BY COPYRIGHT (17 U.S.C.
+     SECTION 108(a)(3)).
+*/
+/*
+playback timings (ms):
+  PetaboxLoader3.resolve: 83.488
+  load_resource: 169.221
+  LoadShardBlock: 323.185 (3)
+  exclusion.robots.policy: 0.117
+  RedisCDXSource: 5.669
+  esindex: 0.018
+  PetaboxLoader3.datanode: 256.398 (4)
+  CDXLines.iter: 14.065 (3)
+  captures_list: 345.335
+  exclusion.robots: 0.127
+*/
