@@ -33,17 +33,17 @@ def getversion():
     users = mongo.db.users
 
     if username == "":
-        return make_response("Please enter your username.", 400)
+        return make_response("Bad login", 400)
     elif password == "":
-        return make_response("Please enter your password.", 400)
+        return make_response("Bad login", 400)
     elif not users.find_one({"user": username}):
-        return make_response("User not found.", 400)
+        return make_response("Bad login", 400)
     else:
         try:
             user = users.find_one({"user": username})
             matched = bcrypt.hashpw(password.encode('utf-8'), user['password'].encode('utf-8')) == user['password']
             if matched:
-                return make_response("Incorrect password.", 400)
+                return make_response("Bad login", 400)
             if user:
                 session = jwt.encode({
                     "id": str(user['_id']),
@@ -85,6 +85,24 @@ def joinserver():
         return make_response("Invalid Session", 401)
 
     return make_response("Invalid Session", 401)
+
+@app.route('/login/session')
+def checksession():
+    username = request.args.get('name')
+    session = request.args.get('session')
+
+    try:
+        jwt.decode(session.encode('utf-8'), secretkey, algorithm='HS256')
+
+        if session['owns_minecraft']:
+            response = Response("ok")
+            return response
+        else:
+            return make_response("Invalid Session", 400)
+    except:
+        return make_response("Invalid Session", 400)
+
+    return make_response("Invalid Session", 400)
 
 @app.route('/game/checkserver')
 def checkserver():
