@@ -42,7 +42,7 @@ def checkserver():
 
 @app.route('/MinecraftSkins/<username>.png')
 def skin(username):
-    if path != "" and os.path.exists("public/MinecraftSkins" + username + ".png"):
+    if username != "" and os.path.exists("public/MinecraftSkins" + username + ".png"):
         return send_file("public/MinecraftSkins" + username + ".png", mimetype="image/png")
     else:
         return abort(404)
