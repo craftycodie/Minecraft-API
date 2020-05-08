@@ -24,20 +24,11 @@
         top.location = self.location;
     </script>
     <script type="text/javascript" src="res/jquery.js"></script>
-    <script type="text/javascript">
-
-      var _gaq = _gaq || [];
-      _gaq.push(['_setAccount', 'UA-9482675-1']);
-      _gaq.push(['_trackPageview']);
-      _gaq.push(['_trackPageLoadTime']);
-
-      (function() {
-        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-      })();
-
+    {% if jwtInvalid %}
+    <script>
+      document.cookie = ""
     </script>
+    {% endif %}
   </head>
   <body>
     <div id="centerpage">
@@ -74,7 +65,7 @@
 
                 <div id="loginpanel">
                     {% if session %}
-                        Logged in as {{session.user}} | <a href="/logout" class="loginpanel">Log out</a>
+                        Logged in as {{session.user}} | <a href="javascript:;"  onclick="document.cookie='jwt= ; expires = Thu, 01 Jan 1970 00:00:00 GMT';window.location.href = '/';" class="loginpanel">Log out</a>
                     {% else %}
                         <a href="/login" class="loginpanel">Log in</a> | <a href="/register" class="loginpanel">Register</a>
                     {% endif %}
@@ -115,18 +106,11 @@
           }
       </script>
 
-
-
-
-      
-
-
-            <div id="page" style="z-index: 4;">
-
-              <div id="content">
-                {% block content %}{% endblock %}
-              </div>
- </div>
+  <div id="page" style="z-index: 4;">
+    <div id="content">
+      {% block content %}{% endblock %}
+    </div>
+  </div>
 <br>
 
 </div> <!-- page end-->

@@ -2,6 +2,19 @@
 
 {% block content %}
 
+{% if jwt %}
+<script>
+function addDays(date, days) {
+  var result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
+}
+
+document.cookie = "jwt={{jwt}}; path=/"
+window.location.href = '/';
+</script>
+{% endif %}
+
 <div class="oneColeDiv">
   <h1>Login</h1>
 
@@ -11,6 +24,11 @@
     <form name="input" action="/login" method="post">
       
       <table>
+        <tr>
+          {% if error %}
+            <p style="color: red">{{error}}</p>
+          {% endif %}
+        </tr>
         <tr>
           <td>Username:</td>
           <td><input type="text" name="username" value=""/></td>
