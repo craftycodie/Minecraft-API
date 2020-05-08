@@ -42,8 +42,12 @@ def checkserver():
 
 @app.route('/MinecraftSkins/<username>.png')
 def skin(username):
+    if path != "" and os.path.exists("public/MinecraftSkins" + username + ".png"):
+        return send_file("public/MinecraftSkins" + username + ".png", mimetype="image/png")
+    else:
+        return abort(404)
 
-    return send_file("public/testskin.png", mimetype="image/png")
+
 
 @app.route('/MinecraftDownload/minecraft.jar')
 def downloadgame():
@@ -55,12 +59,6 @@ def downloadgame():
 @app.route('/')
 def index():
     return serve("index");
-
-# @app.route('/download')
-# def download():
-#     return send_file("src\download.html")
-
-
 
 
 @app.route('/', defaults={'path': ''})
