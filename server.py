@@ -79,4 +79,4 @@ def serve(path):
 
 # If the file is being run, call the main function.
 if __name__ == '__main__':
-  app.run(port=port)
+  app.run(host= '0.0.0.0', port=port)
