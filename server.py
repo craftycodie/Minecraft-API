@@ -21,7 +21,7 @@ ALLOWED_EXTENSIONS = ['png']
 
 mongo = PyMongo(app)
 
-latestVersion = "0.1.0"
+latestVersion = "1.0.0"
 
 @app.route('/game/getversion', methods = ["POST"])
 def getversion():
