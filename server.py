@@ -137,7 +137,7 @@ def uploadSkin():
     if file and allowed_file(file.filename):
         filename = session['user'] + ".png"
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        return render_template("private/profile.html")
+        return render_template("private/profile.html", error="No file selected.", session=session)
 
 @app.route('/MinecraftDownload/minecraft.jar')
 def downloadgame():
