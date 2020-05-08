@@ -92,7 +92,7 @@ def checksession():
     session = request.args.get('session')
 
     try:
-        jwt.decode(session.encode('utf-8'), secretkey, algorithm='HS256')
+        session = jwt.decode(session.encode('utf-8'), secretkey, algorithm='HS256')
 
         if session['owns_minecraft']:
             response = Response("ok")
