@@ -1,22 +1,24 @@
 from config import port
-from flask import Flask, Response, request, send_from_directory, abort, send_file
+from flask import Flask, Response, request, send_from_directory, abort, send_file, render_template
 import json
 import os
 
 
 app = Flask(__name__,
-            static_folder='public/',)
+            static_folder='public/',
+            template_folder='templates')
 
+
+latestVersion = "0.0.3"
 
 @app.route('/game/getversion', methods = ["POST"])
 def getversion():
     username = request.form['user']
     password = request.form['password']
 
-    version = "0.0.2"
     downloadToken = "download"
     sessionId = "sessionId"
-    response = Response(':'.join([version, downloadToken, username, sessionId]))
+    response = Response(':'.join([latestVersion, downloadToken, username, sessionId]))
     return response
 
 @app.route('/game/joinserver')
@@ -41,7 +43,7 @@ def checkserver():
 @app.route('/MinecraftSkins/<username>.png')
 def skin(username):
 
-    return send_file("src/testskin.png", mimetype="image/png")
+    return send_file("public/testskin.png", mimetype="image/png")
 
 @app.route('/MinecraftDownload/minecraft.jar')
 def downloadgame():
@@ -52,11 +54,11 @@ def downloadgame():
 
 @app.route('/')
 def index():
-    return send_file("src\index.html")
+    return serve("index");
 
-@app.route('/download')
-def download():
-    return send_file("src\download.html")
+# @app.route('/download')
+# def download():
+#     return send_file("src\download.html")
 
 
 
@@ -64,6 +66,10 @@ def download():
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve(path):
+    if path != "" and os.path.exists("templates/" + path + ".html"):
+        # session = { "user": "codieradical", "downloadticket": "yeet", "id": "yeet" }
+        session = None
+        return render_template(path + ".html", session=session, latestVersion=latestVersion)
     if path != "" and os.path.exists(app.static_folder + '/' + path):
         return send_from_directory(app.static_folder, path)
     else:
