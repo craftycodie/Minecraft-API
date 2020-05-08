@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+<script type="text/javascript">
+
+  function checkform(){
+    var check = $('#terms').is(':checked');
+    if (check) {
+      return true
+    } else {
+      alert("You have to read and agree to the terms!");
+      return false;
+    }
+  }
+</script>
+
+<div style="margin-left:0px;">
+  <table width="900" border="0" id="buy-table">
+    <tr>
+      <td id="left" style="vertical-align:top;">
+        <br/><br/>
+        <h1>Buy <strong class="code-amount">1</strong> gift <span class="code-amount-plural">code</span></h1>
+        [ <a href="#" id="code-amount-min">min</a> |
+        <a href="#" id="code-amount-less">less</a> |
+        <a href="#" id="code-amount-more">more</a> |
+        <a href="#" id="code-amount-max">max</a> ]
+
+        <p>
+
+          You're about to buy <span class="code-amount">1</span> gift <span class="code-amount-plural">code</span> for <strong><span class="totalsum">&euro;14.95</span></strong><br>
+        </p>
+        <p>
+          Once the purchase is complete and has cleared, you will receive an email with the gift codes,
+          and you will see them listed on your profile page.
+        </p>
+
+
+
+      </td>
+      <td id="right">
+
+        <div class="buynow">
+          <br/><br/>
+
+          
+          {% if not session %}
+          <div class="infoBox" style="height:40px; width:320px; padding:12px;">
+            <span style="font-size:16px;">
+              Please <a href="login">log in</a> or <a href="register">register</a> to buy gift codes.</span>
+          </div>
+          {% endif %}
+          
+          </div> <!-- buy now end -->
+      </td>
+    </tr>
+  </table>
+</div> <!-- table end -->
+{% endblock %}

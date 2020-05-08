@@ -54,7 +54,6 @@ h1 {
 }
 
 .footer {
-	position: fixed;
 	left: 0px;
     bottom: 0px;
 	text-align: center;
@@ -81,7 +80,8 @@ h1 {
 	background: #111;
 }
 
-html { /*	border: none;
+html {
+	/*	border: none;
 	margin: auto auto;
 	padding: 0 ;
 	background-color: #111;
@@ -90,7 +90,8 @@ html { /*	border: none;
 	font-family:  Arial, Helvetica, sans-serif;hy
     height:100%;
 	width:100%;*/
-
+	height: calc(100% - 45px);
+	overflow: hidden;
 }
 
 body {
@@ -98,11 +99,11 @@ body {
 	background-color: #222;
 	color: #e0d0d0;
 	background-image: url('bg.gif');
-	/*background-image: url('/web/20110714083921im_/http://www.minecraft.net/img/bg-dev.gif');*/
+	/* background-image: url('bg-dev.gif'); */
 	font-weight: normal;
 	font-family: Arial, Helvetica, sans-serif;
-        line-height:1.5em;
-	height: 200px;
+	line-height:1.5em;
+	height: 100%;
 	width: 100%;
 	margin: 0px auto;
 }
@@ -110,6 +111,7 @@ body {
 #centerpage {
 	text-align: center;
 	margin: 0px auto;
+	height: 100%;
 }
 
 #content {
@@ -125,8 +127,9 @@ body {
 #page {
 	z-index: 4;
 	margin-top: 0px;
-        padding-top:30px;
-	height: 100%;
+	padding-top:30px;
+	height: calc(100% - 70px);
+	overflow: auto;
 }
 
 #container {
@@ -192,7 +195,7 @@ div { /*border:#FFF solid 1px;*/
 	margin-left: 10px;
 	margin-right: 5px;
 	text-align: left;
-	width: 370px;
+	width: 415px;
 	font-size: 11px;
 	font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
 }

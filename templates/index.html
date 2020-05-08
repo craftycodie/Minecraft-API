@@ -1,0 +1,263 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="margin-left:0px;">
+  <table style="width:900px;">
+    <tr>
+      <td style="width:600px;">
+        <br/><br/><br/>
+
+        <div class="videoEmbed">
+          <object width="640" height="385"><param name="movie" value="https://www.youtube.com/v/m_yqOoUMHPg?fs=1&amp;hl=sv_SE&amp;color1=0x3a3a3a&amp;color2=0x999999"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="https://web.archive.orgres/m_yqOoUMHPg?fs=1&amp;hl=sv_SE&amp;color1=0x3a3a3a&amp;color2=0x999999" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="640" height="385"></embed></object>
+        </div>
+        
+        <p style="font-size:13px;">Minecraft is a game about placing blocks to build anything you can imagine. At night monsters come out, make sure to build a shelter before that happens.  It also has music by <a href="http://c418.org/" target="_blank">C418</a>! So far 10,512,475 people have registered and 2,790,194 people bought the game. <a href="stats">More stats here</a>. </p>
+      </td>
+      <td style="width:300px; text-align:center; vertical-align:text-top;">
+        <!-- <img src="res/figurer.jpg" style="border: 1px solid yellow; width: 250px; height:300px;"> -->
+
+        <div style="width: 300px; height:400px; margin-left: 50px; margin-top: -10px; text-align:center;">
+
+          <div style="width: 250px; height:230px; margin-left: 0px; margin-top: 70px; text-align:center;">
+
+            <img src="res/animals.png" alt="Animals" width="300" height="202">
+
+          </div>
+          
+          <div style="width: 150px; height:50px; margin-left: 50px; margin-top: 10px; text-align:center;">
+            <a href="prepurchase"><img src="res/buy_now.png" class="linkButton" alt="Buy Now"></a>
+          </div>
+          
+
+          <br/>
+          <br/>
+          <font style="font-size:15px;">
+          Play Minecraft Beta:<br>
+          <a href="game">In browser</a> | <a href="download">Download</a><br>
+          <br/>
+          </font>
+          <font style="font-size:11px;">
+          Play Minecraft Classic (Outdated, but free):<br><a href="play">Single player</a> | <a href="servers">Multi player</a><br>
+          </font>
+      </td>
+    </tr>
+  </table>
+</div>
+
+
+
+<div style="background:none; width:1024px; margin-left: -30px; margin-bottom: -40px; height:500px;">
+
+          
+
+
+
+  <table id="tumblrfeed" style="vertical-align:middle; margin-left:0px; margin-top:30px; left:0 auto;" cellpadding="22">
+
+    <tr>
+    <td id="feedslot1">
+
+    <div id="feedObj" style=" width: 300px; height: 420px;">
+      <div class="feed-title" style="height:10%; font:Verdana, Geneva, sans-serif; font-size: 18px; vertical-align: middle; font-weight:bold; padding-left:0px; margin-top: 20px;">
+        <table>
+        <tr>
+        <td style="padding-top: 10px; padding-right:10px;">
+          <img width="32" height="32" src="res/facebook_icon.png" alt="fb-icon" style=" vertical-align: middle; margin-left:0px;margin-top:0px; width:32; height:32;">
+        </td>
+        <td style="padding-top:0px;">
+            <span>
+              <b>
+                <a href="http://www.facebook.com/minecraft" target="_blank" style="text-decoration: none;margin-bottom:5px; color:#FFF;">Join us on Facebook</a>
+              </b>
+            </span>
+        </td>
+        </tr>
+        </table>
+      </div>
+
+      <div class="feed-description" style="height:86px; text-align:justify; font:Verdana, Geneva, sans-serif; font-size: 13px; margin-top:12px; margin-bottom:0px;">
+        Join the Minecraft community on Facebook by liking our page <a href="http://www.facebook.com/minecraft">facebook.com/minecraft</a>
+      </div>
+
+      <iframe src="https://www.facebook.com/plugins/likebox.php?href=http%3A%2F%2Fwww.facebook.com%2Fminecraft&width=292&colorscheme=dark&connections=10&stream=false&header=false&height=255" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:292px; height:255px;" allowtransparency="true"></iframe>
+
+    </div>
+
+    </td>
+    <td id="feedslot2"></td>
+    <td id="feedslot3"></td>
+    </tr>
+
+  </table>
+
+
+
+<script type="text/javascript">
+
+
+
+function goXML(docname){
+	var xmlDoc;
+	if (window.XMLHttpRequest)
+	  {
+	  xmlDoc=new window.XMLHttpRequest();
+	  xmlDoc.open("GET",docname,false);
+	  xmlDoc.send("");
+	  return xmlDoc.responseXML;
+	  }
+	// IE 5 and IE 6
+	else if (ActiveXObject("Microsoft.XMLDOM"))
+	  {
+	  xmlDoc=new ActiveXObject("Microsoft.XMLDOM");
+	  xmlDoc.async=false;
+	  xmlDoc.load(docname);
+	  return xmlDoc;
+	  }
+	xmlDoc = null;
+	alert("Error loading feeds.xml");
+	return null;
+}
+
+
+function getFeed(contentXMLDoc){
+	var newPosts = "";
+	var newTitle = "";
+	var xmlDoc;
+	this.contentXMLDoc = contentXMLDoc;
+
+	try{
+		xmlDoc=goXML(contentXMLDoc);
+	}catch(err){
+		//alert("Could not load" + err);
+		}
+
+
+	try{
+
+		var linkTag = xmlDoc.getElementsByTagName("link");
+		var guidTag = xmlDoc.getElementsByTagName("guid");
+		var titleTag = xmlDoc.getElementsByTagName("title");
+		var dateTag = xmlDoc.getElementsByTagName("pubDate");
+	}catch(e){
+
+		newTitle = "Error loading title";
+		newPosts = "Error loading posts";
+
+		}
+	try{
+
+
+
+			newTitle += "<a href='"+guidTag[0].firstChild.nodeValue+"' target='_blank'style='text-decoration: none;margin-bottom:5px; color:#FFF;'>";
+			newTitle += titleTag[0].firstChild.nodeValue + "<br /><font size='1'><br /></font>";
+			newTitle += "</a>";
+
+		for(i=1; i<=3; i++) {
+			//alert(i);
+			var dateArray = dateTag[i-1].firstChild.nodeValue.split(" ");
+			newPosts +=  dateArray[0] + dateArray[1] + "&nbsp;" + dateArray[2] + "&nbsp;" + dateArray[4] +"<br />"
+			newPosts += "<a href='"+guidTag[i-1].firstChild.nodeValue+"' target='_blank'>";
+			newPosts += titleTag[i].firstChild.nodeValue + "<br /><font size='1'><br /></font>";
+			newPosts += "</a>";
+
+			}
+			//alert(xmlDoc.getElementsByTagName("link")[i].firstChild.nodeValue);
+			//alert("startloop");
+			//alert(xmlDoc.getElementsByTagName("link")[2].firstChild);
+
+
+
+
+
+
+	} catch(err){
+		newTitle += "Error loading title";
+		newPosts += "Error loading posts";
+
+		//newContent = xmlDoc.getElementsByTagName("cv")[0].getElementsByTagName(tag)[0].childNodes[0].nodeValue;
+	}
+
+	xmlDoc = null;
+	return [newTitle, newPosts];
+}
+
+
+
+
+
+
+
+
+function feedObj(id, medium, description, feed, mainurl, title)
+{
+	var strHtml = "";
+	var feedContent = getFeed(feed);
+	var postType = "posts"
+	if(medium=="Twitter") postType = "tweets";
+
+	//hardcoded url and title. use feedContent[0] to get it from feed
+	var newTitle = "<a href='"+mainurl+"' target='_blank'style='text-decoration: none;margin-bottom:5px; color:#FFF;'>";
+	newTitle += title + "<br /><font size='1'><br /></font>";
+	newTitle += "</a>";
+
+
+	strHtml = "<div id='feedObj' style=' width: 300px; height: 420px;'>"+
+
+
+	"<div class='feed-title' style='height:10%; font:Verdana, Geneva, sans-serif; font-size: 18px; vertical-align: middle; font-weight:bold; padding-left:0px;'><table><tr><td>"
+	+ "<img width='32' height='32' src='res/"+ medium +".png' alt='"+ medium +"-logo' style='margin-left:0px;margin-top:5px; margin-right: 10px; width:32; height:32;'></td><td style='padding-top:15px;'> <span><b>" + newTitle + "</span></b></td></tr></table>"+
+
+        "</div>" +
+        "<div class='feed-description' style='height:20%; text-align:justify; font:Verdana, Geneva, sans-serif; font-size: 13px; margin-top:22px; margin-bottom:0px;'>"
+
+            + description +
+
+       "</div>"+
+
+
+	   "<table border='0' cellpadding='0' cellspacing='0'><tr style='height: 5px; margin:0px;'><td style='width: 5px; background-image:url(res/box/images/greybox_01.png);'></td><td style='background-image:url(res/box/images/greybox_03.png); background-repeat:repeat-x; width:288px;'></td><td style='width:5px; background-image:url(res/box/images/greybox_05.png);'></td></tr><tr height='200px;'><td style='background-image:url(res/box/images/greybox_09.png); background-repeat:repeat-y;'></td>"+
+
+	   "<td style='background-image:url(res/box/images/greybox_c.png); background-repeat:repeat; vertical-align:top;'>"+
+
+
+    	"<div class='feed-posts' style='height:100%;font-size:12px; padding:px; padding-top:5px;  overflow:hidden; padding:8px;'>" +
+
+		"<h3 style='margin-top:0px;margin-bottom:7px;'>Recent "+postType+"</h3>"
+
+            + feedContent[1] +
+
+
+		"</div>"
+
+		+ "</td><td style='background-image:url(res/box/images/greybox_10.png); background-repeat:repeat-y;'></td></tr><tr style='height:8px;'><td style='background-image: url(res/box/images/greybox_13.png);'></td><td style='background-image: url(res/box/images/greybox_15.png); background-repeat:repeat-x;'></td><td style='background-image: url(res/box/images/greybox_17.png);'></td></tr>" + "</div>";
+
+	return strHtml;
+
+	}
+
+
+
+descrip = "Minecraft is still in alpha, but is rapidly nearing beta. We've only got one more feature to add; multiplayer support.<br /><br /> We are renaming the old version of the game 'Minecraft Classic', and will be slowly phasing it out. We won't remove it, though. Just hide it.";
+
+
+descrip = "Read up on the latest Minecraft development in Notch's personal blog."
+
+document.getElementById("feedslot2").innerHTML += feedObj(0,"Tumblr",descrip,"res/wordofnotch.xml","http://notch.tumblr.com","The Word of Notch");
+
+descrip = "Notch is also on twitter. We strongly suggest you <a href='http://twitter.com/notch' target='_blank'>follow his flabbergasted tweets.</a>";
+
+
+document.getElementById("feedslot3").innerHTML = feedObj(0,"Twitter",descrip,"res/twitter.xml","http://twitter.com/notch","Twitter / notch");
+
+
+//descrip = "Mojang has also has a blog. Check it out.";
+
+//document.getElementById("feedslot3").innerHTML += feedObj(0,"Tumblr",descrip,"resourcesmojang.xml","https://web.archive.org/web/20110714010607/http://mojang.tumblr.com","Mojang");
+
+</script>
+
+<!-- <script type="text/javascript" src="http://notch.tumblr.com/js"></script> -->
+
+</div>
+
+{% endblock %}

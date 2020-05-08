@@ -2,8 +2,6 @@
 
 
 
-
-
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 
 
@@ -17,7 +15,7 @@
 
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     <link rel="stylesheet" type="text/css" href="res/style2.css">
-    <link rel="shortcut icon" href="res/favicon.png"/>
+    <link rel="shortcut icon" href="/favicon.png"/>
 
 
     <title>Minecraft</title>
@@ -35,21 +33,13 @@
 
       (function() {
         var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-        ga.src = ('https:' == document.location.protocol ? 'https://web.archive.org/web/20110719042734/https://ssl' : 'https://web.archive.org/web/20110719042734/http://www') + '.google-analytics.com/ga.js';
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
         var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
       })();
 
     </script>
-
-
-
   </head>
   <body>
-
-
-
-
-
     <div id="centerpage">
 
       <div id="toppanel" style="z-index: 3;">
@@ -62,15 +52,19 @@
                 <div id="prepurchasesplash" style="height: 88px;">
 
                   
-                  <a href="/web/20110719042734/http://www.minecraft.net/prepurchase" border="0"><img src="res/logo_pps.png" width="243" height="78" border="0" alt="">
+                  <a href="/prepurchase" border="0"><img src="res/logo_pps.png" width="243" height="78" border="0" alt="">
                   </a>
                   
 
                 </div></td>
               <td>
                 <div id="links">
-                  <a href="/web/20110719042734/http://www.minecraft.net/" id="menu_" class="menuItem">Home</a>&nbsp; &nbsp; <a href="/web/20110719042734/http://www.minecraft.net/about" id="menu_about" class="menuItem">About</a>
-                  &nbsp; &nbsp; <a href="/web/20110719042734/http://www.minecraft.net/community" id="menu_community" class="menuItem">Community</a>&nbsp;&nbsp; <a href="/web/20110719042734/http://www.minecraft.net/merch" id="menu_merch" class="menuItem">Merch</a>&nbsp;&nbsp; <a href="/web/20110719042734/http://www.minecraft.net/help" id="menu_help" class="menuItem">Help</a>&nbsp; &nbsp;
+                  <a href="/" id="menu_" class="menuItem">Home</a>&nbsp; &nbsp; <a href="/about" id="menu_about" class="menuItem">About</a>
+                  &nbsp; &nbsp; <a href="/community" id="menu_community" class="menuItem">Community</a>
+                  &nbsp;&nbsp; <a href="/merch" id="menu_merch" class="menuItem">Merch</a>
+                  &nbsp;&nbsp; <a href="/profile" id="menu_profile" class="menuItem">Profile</a>
+                  &nbsp;&nbsp; <a href="/help" id="menu_help" class="menuItem">Help</a>
+                  &nbsp; &nbsp;
 
                   
 
@@ -79,14 +73,17 @@
               <td>
 
                 <div id="loginpanel">
-                  
-                  <a href="/web/20110719042734/http://www.minecraft.net/login" class="loginpanel">Log in</a> | <a href="/web/20110719042734/http://www.minecraft.net/register" class="loginpanel">Register</a>
+                    {% if session %}
+                        Logged in as {{session.user}} | <a href="/logout" class="loginpanel">Log out</a>
+                    {% else %}
+                        <a href="/login" class="loginpanel">Log in</a> | <a href="/register" class="loginpanel">Register</a>
+                    {% endif %}
                   
                 </div></td>
             </tr>
           </table>
         </div>
-        <a href="/web/20110719042734/http://www.minecraft.net/buy_gift_codes">Gift codes now available</a>
+        <a href="/buy_gift_codes">Gift codes now available</a>
       </div>
 
       <div id="toppanel_bg" style="z-index: 1;"></div>
@@ -96,7 +93,7 @@
         //script for linkbuttons
 
         
-          var siteurl = "https://web.archive.org/web/20110719042734/http://www.minecraft.net/";
+          var siteurl = "/";
         
           var menu_items = ["","about","community","help","profile"];
           var pathnames = ["","about","community","help","profile/"];
@@ -127,38 +124,15 @@
             <div id="page" style="z-index: 4;">
 
               <div id="content">
-                
-<div class="oneColeDiv">
-  <h2>Forgot Password or Username</h2>
-  
-
-  
-  <p>If you forgot your password or your username, enter your username or email address here, and we will send an email to you with further instructions.<br>
-    If you're still having trouble accessing your account, check out our <a href="/web/20110719042734/http://www.minecraft.net/support">support page</a>.</p>
-  <form name="input" action="forgotpass" method="post">
-    <table>
-      <tr><td>Username:</td><td><input type="text" name="username"/></td></tr>
-      <tr><td><i>or</i> Email:</td><td><input type="text" name="email"/></td></tr>
-      <tr><td></td><td><input type="submit" value="Send email!"/></td></tr>
-    </table>
-    <br>
-  </form>
-  
-
-</div>
-
-
-
-
+                {% block content %}{% endblock %}
+              </div>
  </div>
-
-
 <br>
 
 </div> <!-- page end-->
 
 </div> <!-- pagecenter end-->
-<div class="footer" id="footer">Copyright 2009-2011 Mojang AB. <a href="/web/20110719042734/http://www.minecraft.net/copyright">Terms and conditions</a>. <a href="/web/20110719042734/http://www.minecraft.net/credits">Credits</a>. <a href="/web/20110719042734/http://www.minecraft.net/support">Support / FAQ</a>. </div>
+<div class="footer" id="footer">Copyright 2009-2011 Mojang AB. <a href="/copyright">Terms and conditions</a>. <a href="/credits">Credits</a>. <a href="/support">Support / FAQ</a>. </div>
 
 <script type="text/javascript">
 var IE7 = false;
@@ -196,40 +170,11 @@ function checkVersion()
 }
 
 checkVersion();
-
-
 	if(IE7){
 		//document.getElementById("footer").style.top = "100%";
 		document.getElementById("footer").className = "footerIE7";
 
 	}
-
 </script>
-
-
-
-
-
 </body>
 </html>
-<!--
-     FILE ARCHIVED ON 04:27:34 Jul 19, 2011 AND RETRIEVED FROM THE
-     INTERNET ARCHIVE ON 05:00:35 May 07, 2020.
-     JAVASCRIPT APPENDED BY WAYBACK MACHINE, COPYRIGHT INTERNET ARCHIVE.
-
-     ALL OTHER CONTENT MAY ALSO BE PROTECTED BY COPYRIGHT (17 U.S.C.
-     SECTION 108(a)(3)).
--->
-<!--
-playback timings (ms):
-  LoadShardBlock: 95.437 (3)
-  exclusion.robots.policy: 0.322
-  exclusion.robots: 0.333
-  RedisCDXSource: 0.779
-  esindex: 0.012
-  captures_list: 110.478
-  PetaboxLoader3.resolve: 86.974 (2)
-  load_resource: 3633.568
-  CDXLines.iter: 9.563 (3)
-  PetaboxLoader3.datanode: 3586.816 (4)
--->

@@ -1,0 +1,929 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="oneColeDiv">
+  <!-- Implement all the Actions for the Buttons -->
+
+
+  <script type="text/javascript" src="res/jquery.js"></script>
+  <script type="text/javascript" language="javascript">
+    var supportpath = "/support/";
+
+    $(document).ready(function() {
+      $('input[type=radio]').click(function(){
+        showAnswer(this);
+        javascript:_gaq.push(['_trackPageview', supportpath]);
+      });
+      $('input[type=checkbox]').click(function(){
+        activateButton(this);
+      });
+      $('form').submit(function(){return validateForm(this);});
+
+      $('.didthishelp .feedback').live('mouseup', function() {
+        var helpful = $(this).is('.yes') ? "problem_solved" : "problem_unsolved";
+        _gaq.push(['_trackEvent', 'support', helpful, supportpath]);
+        feedbackSubmitted($(this).parent());
+      });
+
+      $('.didthishelp').each(function() {
+        $(this).html('Did this help you with your problem? <span class="feedback yes">&#10003; Yes</span><span class="feedback no">&#9747; No</span>');
+      })
+    });
+
+    function feedbackSubmitted(e) {
+      $(e).fadeOut(200, function(e) {
+        $(this).html("Thank you for helping us improve our support.");
+        $(this).fadeIn(300);
+      })
+    }
+
+    function validateForm(selectElement) {
+      $(selectElement).children('input[type=text],textarea ,input[type=password]').each(function() {
+        if($(this).attr('value').length == 0) {
+          $(this).addClass("invalidfield");
+        } else {
+          $(this).removeClass("invalidfield");
+        }
+      });
+
+      if($(selectElement).children('input[type=password]').length > 0) {
+        if($(selectElement).children('input[name=newPassword]').attr('value') != $(selectElement).children('input[name=newPasswordRetype]').attr('value')) {
+          alert("New password and retype don't match.");
+          return false;
+        }
+      }
+
+      if($(selectElement).children('.invalidfield').length > 0) {
+        alert("Please provide all the necessary information.");
+        return false;
+      }
+
+      if($(selectElement).children('input[name=emailAddressRetype]').length != 0 && $(selectElement).children('input[name=emailAddress]').attr('value') != $(selectElement).children('input[name=emailAddressRetype]').attr('value')) {
+        alert("The submitted email addresses don't match.");
+        return false;
+      }
+
+      if ($(selectElement).children('input[name=emailAddress]').length > 0) {
+        return checkMail($(selectElement).children('input[name=emailAddress]')[0]);
+      }
+
+      if ($(selectElement).children('input[name=emailAddressRetype]').length > 0) {
+        return checkMail($(selectElement).children('input[name=emailAddressRetype]')[0]);
+      }
+
+      return true;
+    }
+
+    function activateButton(selectElement) {
+      if($(selectElement).siblings('input[type=checkbox]').andSelf().not(':checked').length == 0) {
+        $(selectElement).siblings('input[type=button]').attr('disabled', false);
+        $(selectElement).siblings('input[type=button]').removeClass('disabledButton');
+      } else {
+        $(selectElement).siblings('input[type=button]').attr('disabled', true);
+        $(selectElement).siblings('input[type=button]').addClass('disabledButton');
+        $(selectElement).siblings('div.hidden').slideUp();
+      }
+    }
+
+    function showAnswer(selectElement) {
+      var answerToShow = parseInt($(selectElement).attr('value'));
+      $(selectElement).siblings('div.answer:visible').slideUp();
+      $(selectElement).next('label').addClass('active').siblings('label.active').removeClass('active');
+      if(answerToShow) {
+        //$('html').animate({scrollTop:$('html').scrollTop() +  $(selectElement).siblings('div.answer:eq('+(answerToShow-1)+')').innerHeight()},'slow');
+        $(selectElement).siblings('div.answer:eq('+(answerToShow-1)+')').slideDown();
+      }
+    }
+
+    function showText(selectElement) {
+      _gaq.push(['_trackEvent', 'support', 'display_form', supportpath]);
+      //$('html').animate({scrollTop:$('html').scrollTop() +  $(selectElement).siblings('div.hidden').innerHeight()},'slow');
+      $(selectElement).siblings('div.hidden').slideDown();
+    }
+
+    function bazinga() {
+      alert('Bazinga! No mails allowed.');
+    }
+
+    function checkMail(email) {
+      var mail = email.value;
+      var reg = new RegExp('^[a-z0-9]+([_|\.|-]{1}[a-z0-9]+)*@[a-z0-9]+([_|\.|-][a-z0-9]+)*\.([a-z]{2,})$', 'i');
+
+      if(!reg.test(mail) || mail == "") {
+        alert("Your email address has an incorrect format!");
+        return false;
+      }
+    }
+  </script>
+  <style type="text/css">
+
+    body {
+      background:url(res/bg.gif) fixed;
+      font-size:16px;
+      color:#E0D0D0;
+      font-family:"Trebuchet MS",Arial,Helvetica,sans-serif;
+      padding-bottom:10px;
+    }
+
+    form {
+      margin-bottom: 5px;
+    }
+
+    label {
+      cursor: pointer;
+    }
+
+    label:hover {
+      font-weight: bold;
+    }
+
+    .invalidfield {
+      border: #f00 solid 1px;
+    }
+
+    .font {
+      font-family: Arial;
+      font-size: 15px;
+    }
+
+    a {
+      color: #ff9933;
+    }
+
+    div.answer {
+      display: none;
+      width: 500px;
+      margin: 10px auto auto;
+      padding-top: 10px;
+      text-align: left;
+      border-top: 2px solid black;
+    }
+
+    div#supportForm {
+      /*-moz-box-shadow: 10px 10px 5px #888;
+      -webkit-box-shadow: 10px 10px 5px #888;
+      box-shadow: 10px 10px 5px #888;
+      padding: 40px;
+      border: none;
+      width: 500px;
+      background: white;
+      margin: auto;
+      text-align: left;*/
+      -moz-box-shadow: 0px 5px 10px #000;
+      -webkit-box-shadow: 0px 5px 10px #000;
+      box-shadow: 0px 5px 10px #000;
+      border:5px solid #000;
+      -moz-border-radius: 15px;
+      border-radius: 15px;
+      padding: 15px;
+      width: 500px;
+      background: #3c3c3b;
+      margin: auto;
+      text-align: left;
+    }
+
+    div.hidden {
+      display:none;
+    }
+
+    span.req {
+      font-style: italic;
+      font-size: 12px;
+    }
+
+    input[type=submit], input[type=button] {
+      color: #E0D0D0;
+      font-size: 20px;
+      cursor: pointer;
+      display: block;
+      line-height: 30px;
+      min-height:30px;
+      margin: auto;
+      width: 400px;
+      text-align: center;
+      border-width: 0;
+      -moz-border-radius: 5px;
+      border-radius: 5px;
+      background-color: #d98226;
+      background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0, #BB7020),color-stop(1, #F8952B));
+      background-image: -moz-linear-gradient(center bottom,#BB7020 0%,#F8952B 100%);
+      -moz-box-shadow: 0px 2px 5px #000;
+      -webkit-box-shadow: 0px 2px 5px #000;
+      box-shadow: 0px 2px 5px #000;
+      font-weight: bold;
+    }
+
+    input.disabledButton:hover, input.disabledButton:link, input.disabledButton:visited, input.disabledButton:active, input.disabledButton {
+      background-color: #333;
+      background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0, #333),color-stop(1, #666));
+      background-image: -moz-linear-gradient(center bottom,#333 0%,#666 100%);
+      -moz-box-shadow: 0px 0px 2px #000;
+      -webkit-box-shadow: 0px 0px 2px #000;
+      color: #222;
+      cursor: default;
+    }
+
+    .didthishelp {
+      margin-top:20px;
+      font-size:12px;
+    }
+
+    .didthishelp .feedback {
+      margin-left:20px;
+      padding:3px 10px 3px 6px;
+      -webkit-border-radius: 3px;
+      -moz-border-radius: 3px;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    .didthishelp .feedback.no {
+      color: #fa5555;
+    }
+
+    .didthishelp .feedback.no:hover {
+      background-color: #fa5555;
+      color:#222;
+    }
+
+    .didthishelp .feedback.yes {
+      color: #71ff62;
+    }
+
+    .didthishelp .feedback.yes:hover {
+      background-color: #71ff62;
+      color:#222;
+    }
+  </style>
+
+  <!-- Content div-->
+  <div id="general">
+
+    <h1 style="text-align:center"><a href="" style="text-decoration: none"><font color="white">Support - Because we care for you</font></a></h1>
+    <br/>
+    <br/>
+
+    <!-- Level 0-->
+    <div id="supportForm">
+      <b>Please choose which category fits your needs the most:</b><br/>
+      <br/>
+      <input type="radio" name="general" id="general-1" value="1" onclick="javascript:supportpath='/support/account/';" style="text-align:center"><label for="general-1">Account</label><br/>
+      <input type="radio" name="general" id="general-2" value="2" onclick="javascript:supportpath='/support/payment/';" style="text-align:center"><label for="general-2">Payment</label><br/>
+      <input type="radio" name="general" id="general-3" value="3" onclick="javascript:supportpath='/support/technical/';" style="text-align:center"><label for="general-3">Technical</label><br/>
+      <input type="radio" name="general" id="general-4" value="4" onclick="javascript:supportpath='/support/feedback/';" style="text-align:center"><label for="general-4">Feedback</label><br/>
+      <input type="radio" name="general" id="general-5" value="5" onclick="javascript:supportpath='/support/about/';" style="text-align:center"><label for="general-5">About</label><br/>
+
+      <!-- Level 1-->
+      <div id="gAccount" class="answer">
+
+        <b>Everything related to your Account</b><br/>
+        <br/>
+        <input type="radio" name="gAccount" id="gAccount-1" value="1" onclick="javascript:supportpath='/support/account/username/';"><label for="gAccount-1">Username</label><br/>
+        <input type="radio" name="gAccount" id="gAccount-2" value="2" onclick="javascript:supportpath='/support/account/password/';"><label for="gAccount-2">Password</label><br/>
+        <input type="radio" name="gAccount" id="gAccount-3" value="3" onclick="javascript:supportpath='/support/account/login/';"><label for="gAccount-3">Login</label><br/>
+        <input type="radio" name="gAccount" id="gAccount-4" value="4" onclick="javascript:supportpath='/support/account/email/';"><label for="gAccount-4">Email</label><br/>
+        <input type="radio" name="gAccount" id="gAccount-5" value="5" onclick="javascript:supportpath='/support/account/premium/';"><label for="gAccount-5">Premium</label><br/>
+        <input type="radio" name="gAccount" id="gAccount-6" value="6" onclick="javascript:supportpath='/support/account/hacked/';"><label for="gAccount-6">Hacked</label><br/>
+
+        <!-- Level 2-->
+        <div id="aUserName" class="answer">
+
+          <b>Everything related to account usernames</b><br/>
+          <br/>
+          <input type="radio" name="aUserName" id="aUserName-1" value="1" onclick="javascript:supportpath='/support/account/username/forgot/';"><label for="aUserName-1">I forgot my username</label><br/>
+          <input type="radio" name="aUserName" id="aUserName-2" value="2" onclick="javascript:supportpath='/support/account/username/change/';"><label for="aUserName-2">I would like to change my username</label><br/>
+          <!-- Level 3-->
+          <div id="uForgot" class="answer">
+            <b>I forgot my username</b><br/>
+            <br/>
+
+            <form method="post" action="forgotpass">
+              <span class="req">* - required fields</span><br/>
+              <br/>
+              Enter your email address.*<br/>
+              <input name="email" type="text" size="30" value=""><br/>
+              <br/>
+              We will send you all the account names which were created with this email address.<br/>
+              <br/>
+              <input type="submit" value=" Send "><br/>
+            </form>
+          </div>
+
+          <div id="uChange" class="answer">
+            <b>I would like to change my username</b><br/>
+            <br/>
+            We apologize but we do not support this action at this time. In the future, promise!<br/>
+            <div class="didthishelp"></div>
+          </div>
+          <!-- /Level 3-->
+
+        </div>
+
+        <div id="aPassword" class="answer">
+
+          <b>Everything related to your account password</b><br/>
+          <br/>
+          <input type="radio" name="aPassword" id="aPassword-1" value="1" onclick="javascript:supportpath='/support/account/password/forgot/';"><label for="aPassword-1">I forgot my password</label><br/>
+          <input type="radio" name="aPassword" id="aPassword-2" value="2" onclick="javascript:supportpath='/support/account/password/change';"><label for="aPassword-2">I want to change my password</label><br/>
+
+          <!-- Level 3-->
+          <div id="pForgot" class="answer">
+            <b>I forgot my password</b><br/>
+            <br/>
+            Head over to the <a href="forgotpass">forgot password or username page</a>. <br/>
+          </div>
+
+          <div id="pChange" class="answer">
+            <b>I want to change my password</b><br/>
+            <br/>
+            You can change your password in your profile on <a href="">www.minecraft.net</a>. To
+            log in to your account visit the <a href="login">login page</a> or if you are
+            already logged in, you can go to the <a href="changepass"> change password page</a>
+            directly.
+          </div>
+          <!-- /Level 3-->
+        </div>
+
+        <div id="aLogin" class="answer">
+
+          <b>I can't log in to my account</b><br/>
+          <br/>
+          In case you are seeing the error message: <em>"Login throttled, too many attempts. Try again in a couple of minutes."</em>,
+          this is a security measure to keep hackers from guessing passwords. If this happens to you, just wait for some minutes
+          and then re-enter your account information (this might be caused by you sitting in school or at work).<br/>
+          <div class="didthishelp"></div>
+        </div>
+
+        <div id="aEmail" class="answer">
+
+          <b>Everything related to your registered email address</b><br/>
+          <br/>
+          <input type="radio" name="aEmail" id="aEmail-1" value="1" onclick="javascript:supportpath='/support/account/email/forgot/'"><label for="aEmail-1">I forgot the email address I signed up with for my account</label><br/>
+          <input type="radio" name="aEmail" id="aEmail-2" value="2" onclick="javascript:supportpath='/support/account/email/change/';"><label for="aEmail-2">I want to change the email address I am using for my account</label><br/>
+
+          <!-- Level 3-->
+          <div id="eForgot" class="answer">
+            <b>I forgot the email address I signed up with for my account</b><br/>
+            <br/>
+            You can log in to your account on <a href="login">www.minecraft.net/login</a>
+            and click on profile to see the length of the used email address as well as
+            the first letter of the address and of the provider name.<br/>
+            <br/>
+            Other than that we can't, as a security measure, take any actions in this matter.<br/>
+            <div class="didthishelp"></div>
+          </div>
+
+          <div id="eChange" class="answer">
+            <b>I want to change the email address I am using for my account</b><br/>
+            <br/>
+            We apologize but we do not currently support this action, for your protection.<br/>
+            <div class="didthishelp"></div>
+          </div>
+          <!-- /Level 3-->
+        </div>
+
+        <div id="aPremium" class="answer">
+
+          <b>Everything regarding premium accounts</b><br/>
+          <br/>
+          <input type="radio" name="aPremium" id="aPremium-1" value="1" onclick="javascript:supportpath='/support/account/premium/what/';"><label for="aPremium-1">What is a premium account?</label><br/>
+          <input type="radio" name="aPremium" id="aPremium-2" value="2" onclick="javascript:supportpath='/support/account/premium/buy/';"><label for="aPremium-2">I want to buy a premium account</label><br/>
+          <input type="radio" name="aPremium" id="aPremium-3" value="3" onclick="javascript:supportpath='/support/account/premium/notactive/';"><label for="aPremium-3">I bought a premium account, but my account is still regular</label><br/>
+
+          <!-- Level 3-->
+          <div id="pWhat" class="answer">
+            <b>What is a premium account?</b><br/>
+            <br/>
+            A premium account is what you get when you purchase the game on our <a href="prepurchase">purchase page</a>.
+            First and foremost you get access to the full game as well as every future version until the release. A lot of features
+            like the survival mode, crafting, mobs and the inventory are only playable in the premium version. Unlike the classic
+            version, you can now connect to Minecraft servers all around the world and enjoy the game with other players as well
+            as use custom skins to individualize your character.<br/>
+            <div class="didthishelp"></div>
+          </div>
+
+          <div id="pWant" class="answer">
+            <b>I want to buy a premium account</b><br/>
+            <br/>
+            Click the link and you will get to the <a href="prepurchase">purchase page</a>. <br/>
+            <div class="didthishelp"></div>
+          </div>
+
+          <div id="pMiss" class="answer">
+            <b>I bought a premium account, but my account is still regular</b><br/>
+            <br/>
+            <input type="checkbox" name="pCheckAllUsername" value="1">Have you requested all the usernames attached to your email?
+            If not, please go to the <a href="forgotpass">password recovery page</a>.
+            This way you will receive all the usernames linked to your email account to check for typos or mix-ups.<br/>
+            <input type="checkbox" name="pCheckUsername" value="2">Have you logged in with the exact account for which you purchased the premium account?<br/>
+            <input type="checkbox" name="pCheckTransaction" value="3">Have you checked with your bank/PayPal that the transaction was successful? This may take up to 5 working days.<br/>
+            <input type="checkbox" name="pCheckUsername" value="4">Have you checked that you didn't accidently buy a gift code instead of a premium account? You can find them on your profile page after you've logged in. If you did, just <a href="redeem">redeem the code here</a>.<br/>
+            <br/>
+            <input type="button" name="pProceed" class="disabledButton" style="margin-bottom: 5px" value="I need further support" onclick="showText(this);" disabled="true">
+
+            <div id="pMissSubmit" class="hidden answer">
+              <b>I have done all that but the problem is still not resolved</b><br/>
+              <br/>
+              <form method="post" action="support/postticket">
+                <input type="hidden" name="ticketSubject" value="Bought it, still not premium"/>
+                <input type="hidden" name="ticketTags" value="supportform notpremium"/>
+                <span class="req">* - required fields</span><br/>
+                <br/>
+                Please provide the mentioned information so we can identify your account and the transaction. <br/>
+                <br/>
+                User name*<br/>
+                <input type="text" name="userName" size="30" value=""> <br/>
+                <br/>
+                Transaction/Receipt ID*<br/>
+                <input type="text" name="transactionID" size="30" value=""> <br/>
+                <br/>
+                Credit card/PayPal account owner's name*<br/>
+                <input type="text" name="creditCardHolder" size="30" value=""> <br/>
+                <br/>
+                Email address*<br/>
+                <input name="emailAddress" type="text" size="30" value=""><br/>
+                <br/>
+                Date of purchase*<br/>
+                <input type="text" name="datePurchase" size="30" value=""> <br/>
+                <br/>
+                After we have identified your account, we will send you a notification to your email account.<br/>
+                <br/>
+                <input type="submit" value=" Send ">
+              </form>
+            </div>
+          </div>
+          <!-- Level 3-->
+        </div>
+
+        <div id="aHacked" class="answer">
+          <b>I think my account was hacked</b><br/>
+          <br/>
+          <input type="checkbox" name="aCheckAllUsername" value="1">Have you requested all the usernames attached to your email?
+          If not, please go to the <a href="forgotpass">password recovery page</a>.
+          This way you will receive all the usernames linked to your email account to check for typos or mix-ups.<br/>
+          <input type="checkbox" name="aCheckUsername" value="2">Have you logged in with the exact user name and password?<br/>
+          <br/>
+          <input type="button" class="disabledButton" name="aProceed" style="margin-bottom: 5px" value="My account was hacked" onclick="showText(this);" disabled="true">
+
+          <div id="aHackedProceed" class="hidden answer">
+            <b>I know my account was hacked</b><br/>
+            <br/>
+            Please provide the mentioned information so we can identify your account. <br/>
+            <br/>
+            <form action="support/postticket" method="post">
+              <input type="hidden" name="ticketSubject" value="Account Hacked"/>
+              <input type="hidden" name="ticketTags" value="supportform hacked"/>
+              <span class="req">* - required fields</span><br/>
+              <br/>
+              User name*<br/>
+              <input name="userName" type="text" size="30"><br/>
+              <br/>
+              Receipt ID*<br/>
+              <input name="transactionID" type="text" size="30"><br/>
+              <br/>
+              Credit card owner's name/PayPal account*<br/>
+              <input name="creditCardHolder" type="text" size="30"><br/>
+              <br/>
+              Email address to which we can link the account and send the new password to*<br/>
+              <input name="emailAddress" type="text" size="30"><br/>
+              <br/>
+              Email address once more*<br/>
+              <input name="emailAddressRetype" type="text" size="30" value=""><br/>
+              <br/>
+              After we have identified your account, we will send you a notification to your email account.<br/>
+              <br/>
+              <input type="submit" value=" Send ">
+            </form>
+          </div>
+        </div>
+        <!-- /Level 2-->
+
+      </div>
+
+      <div id="gPayment" class="answer">
+
+        <b>Everything related to payments</b><br/>
+        <br/>
+        <input type="radio" name="gPayment" id="gPayment-1" value="1" onclick="javascript:supportpath='/support/payment/transaction/';"><label for="gPayment-1">Transaction</label><br/>
+        <input type="radio" name="gPayment" id="gPayment-2" value="2" onclick="javascript:supportpath='/support/payment/giftcode/';"><label for="gPayment-2">Gift Code</label><br/>
+        <input type="radio" name="gPayment" id="gPayment-3" value="3" onclick="javascript:supportpath='/support/payment/refund/';"><label for="gPayment-3">Refund</label><br/>
+
+        <!-- Level 2-->
+        <div id="pTransaction" class="answer">
+
+          <b>Everything related to the actual transaction of the money</b><br/>
+          <br/>
+          <input type="radio" name="pTransaction" id="pTransaction-1" value="1" onclick="javascript:supportpath='/support/payment/transaction/whereisgame/';"><label for="pTransaction-1">My transaction was successful. But where is my game?</label><br/>
+          <input type="radio" name="pTransaction" id="pTransaction-2" value="2" onclick="javascript:supportpath='/support/payment/transaction/cancelled/';"><label for="pTransaction-2">My transaction request was cancelled</label><br/>
+          <input type="radio" name="pTransaction" id="pTransaction-3" value="3" onclick="javascript:supportpath='/support/payment/transaction/chargedmore/';"><label for="pTransaction-3">My account was charged for more than expected</label><br/>
+          <input type="radio" name="pTransaction" id="pTransaction-4" value="4" onclick="javascript:supportpath='/support/payment/transaction/chargedmultiple/';"><label for="pTransaction-4">My account was charged multiple times</label><br/>
+          <input type="radio" name="pTransaction" id="pTransaction-5" value="5" onclick="javascript:supportpath='/support/payment/transaction/rejected/';"><label for="pTransaction-5">My credit card gets rejected</label><br/>
+
+          <!-- Level 3-->
+          <div id="tNoGame" class="answer">
+            <b>My transaction was successful. But where is my game?</b><br/>
+            <br/>
+            The game is only sold as a digital copy, so you won't receive any sort of physical components like a CD or a box.<br/>
+            <br/>
+            Once the transaction was successfull, you will receive a confirmation email. Due to the big attention
+            Minecraft is getting at the moment the server at times needs a little time to send out the emails. In that
+            case you can try to log in to the game without having received a confirmation email.<br/>
+            In any case we recommend you not to retry purchasing the game over and over again, because eventually
+            the purchases will go through and even though Minecraft is superb, at some point you CAN end up having
+            more Minecraft than you want.<br/>
+            <div class="didthishelp"></div>
+          </div>
+
+          <div id="tNoProceed" class="answer">
+            <b>My transaction request was cancelled</b><br/>
+            <br/>
+            This is usually a case for the credit card company/PayPal. For the transaction to be successful, make sure
+            that there is enough money on the account and that all the information there is correct. The transaction
+            usually takes 1-4 working days. In case you are not paying in euro, US dollars or pounds sterling additional fees may be applied by your card provider/PayPal.<br/>
+            <div class="didthishelp"></div>
+          </div>
+
+          <div id="tWrongAmount" class="answer">
+            <b>My account was charged for more than expected</b><br/>
+            <br/>
+            The current price for Minecraft is &euro;14.95. The price may vary based on the currency you are paying in or
+            any transaction fees your transaction service requires.<br/>
+            <br/>
+            If you were still charged the wrong amount, please provide all the necessary information below.<br/>
+            <br/>
+            <form action="support/postticket" method="post">
+              <input type="hidden" name="ticketSubject" value="Overcharged"/>
+              <input type="hidden" name="ticketTags" value="supportform overcharged"/>
+
+              <span class="req">* - required fields</span><br/>
+              <br/>
+              User name*<br/>
+              <input name="userName" type="text" size="30"><br/>
+              <br/>
+              Receipt ID*<br/>
+              <input name="transactionID" type="text" size="30"><br/>
+              <br/>
+              Credit card owner's name/PayPal account*<br/>
+              <input name="creditCardHolder" type="text" size="30"><br/>
+              <br/>
+              Email address*<br/>
+              <input name="emailAddress" type="text" size="30"><br/>
+              <br/>
+              Email address once more*<br/>
+              <input name="emailAddressRetype" type="text" size="30" value=""><br/>
+              <br/>
+              After we have identified your transaction, we will send you a notification to your email account.<br/>
+              <br/>
+              <input type="submit" value=" Send ">
+            </form>
+          </div>
+
+          <div id="tMultiple" class="answer">
+            <b>My account was charged multiple times</b><br/>
+            <br/>
+            This usually happens when the payment process over at our provider has been a tad glitchy, or if you've gone haywire on the back-button of your browser.<br/>
+            <br/>
+            Please provide all the necessary information below.<br/>
+            <br/>
+            <form action="support/postticket" method="post">
+              <input type="hidden" name="ticketSubject" value="Charged multiple times"/>
+              <input type="hidden" name="ticketTags" value="supportform multicharged"/>
+              <span class="req">* - required fields</span><br/>
+              <br/>
+              User name*<br/>
+              <input name="userName" type="text" size="30"><br/>
+              <br/>
+              All Receipt ID*<br/>
+              <input name="transactionID" type="text" size="30"><br/>
+              <br/>
+              Credit card owner's name/PayPal account*<br/>
+              <input name="creditCardHolder" type="text" size="30"><br/>
+              <br/>
+              Email address*<br/>
+              <input name="emailAddress" type="text" size="30"><br/>
+              <br/>
+              Email address once more*<br/>
+              <input name="emailAddressRetype" type="text" size="30" value=""><br/>
+              <br/>
+              After we have identified your transaction(s), we will send you a notification to your email account.<br/>
+              <br/>
+              <input type="submit" value=" Send ">
+            </form>
+          </div>
+
+          <div id="tWrongCC" class="answer">
+            <b>My credit card gets rejected</b><br/>
+            <br/>
+            This happens when you are using a credit card which isn't supported by our system. Usually you get an
+            error message saying that the credit card "is ineligible for 3-D Secure payments". Until further credit
+            cards are supported, you have to switch to another credit card institute or use PayPal for purchasing
+            Minecraft.<br/>
+            <div class="didthishelp"></div>
+          </div>
+          <!-- Level 3-->
+        </div>
+
+        <div id="pGiftCode" class="answer">
+
+          <b>Everything related to gift codes</b><br/>
+          <br/>
+          <input type="radio" name="pGiftCode" id="pGiftCode-1" value="1" onclick="javascript:supportpath='/support/payment/giftcode/notaccepted';"><label for="pGiftCode-1">My gift code wasn't accepted</label><br/>
+          <input type="radio" name="pGiftCode" id="pGiftCode-2" value="2" onclick="javascript:supportpath='/support/payment/giftcode/noemail';"><label for="pGiftCode-2">I didn't receive the email with the gift code</label><br/>
+
+          <!-- Level 3-->
+          <div id="gMisfunction" class="answer">
+            <b>My gift code wasn't accepted</b><br/>
+            <br/>
+            Make sure that the gift code was entered correctly (i.e. the dashes need to be included).
+            You can look up all the gift codes bought with an account by logging in to that account and
+            going to the profile tab on <a href="login">www.minecraft.net</a>.<br/>
+            <br/>
+            <input type="button" name="pProceed" style="margin-bottom: 5px" value="I need further support" onclick="showText(this);">
+            <div id="gProceed" class="hidden answer">
+              <b>My purchased gift code doesn't work</b><br/>
+              <br/>
+              If you can eliminate the possibility of an incorrectly entered gift code, you can also contact us via the
+              form below.<br/>
+              <br/>
+              <form action="support/postticket" method="post">
+              <input type="hidden" name="ticketSubject" value="Gift code doesn't work"/>
+              <input type="hidden" name="ticketTags" value="supportform giftcode"/>
+                <span class="req">* - required fields</span><br/>
+                <br/>
+                User name*<br/>
+                <input name="userName" type="text" size="30"><br/>
+                <br/>
+                Receipt ID*<br/>
+                <input name="transactionID" type="text" size="30"><br/>
+                <br/>
+                Credit card owner's name/PayPal account*<br/>
+                <input name="creditCardHolder" type="text" size="30"><br/>
+                <br/>
+                Email address*<br/>
+                <input name="emailAddress" type="text" size="30"><br/>
+                <br/>
+                Email address once more*<br/>
+                <input name="emailAddressRetype" type="text" size="30" value=""><br/>
+                <br/>
+                After we have identified your purchase, we will send you a notification to your email account.<br/>
+                <br/>
+                <input type="submit" value=" Send ">
+              </form>
+            </div>
+          </div>
+
+          <div id="gNoMail" class="answer">
+            <b>I didn't receive the email with the gift code</b><br/>
+            <br/>
+            It might take up to two days for the confirmation mails to get to your email account. However you
+            can view your gift code immediately after the purchase in your profile on <a href="login">www.minecraft.net</a>.
+          </div>
+          <!-- Level 3-->
+        </div>
+
+        <div id="pRefund" class="answer">
+          <b>I want a refund</b><br/>
+          <br/>
+          We do not issue refunds for purchased games and/or services. If you can't successfully run
+          the game on your computer due to technical difficulties, most of the time this is due to
+          some minor technical issue, which can be solved. The quickest solution is to visit the
+          <a href="http://getsatisfaction.com/mojang/problems/common">help section</a> of our site,
+          our <a href="http://www.minecraftforum.net/viewforum.php?f=17">support forum</a>,
+          the <a href="http://www.minecraftwiki.net/wiki/Minecraft_Wiki">Minecraft wiki</a> or the friendly
+          people at the irc channel <a href="http://chat.mibbit.com/?server=irc.esper.net&amp;channel=%23minecrafthelp">#MinecraftHelp</a>, who in most cases might be able to help you right away.<br/>
+          <br/>
+          <input type="button" name="pProceed" style="margin-bottom: 5px" value="I need further support" onclick="showText(this);">
+
+          <div id="rProceed1" class="hidden answer">
+            <b>I can't run Minecraft on my machine</b><br/>
+            <br/>
+            In case you didn't find any help at the above mentioned sources, you can contact the customer support by filling
+            out the textfield below. Please describe your problem as detailed as possible and also include any error logs or
+            information about your system, so we can try to solve the issue as quickly as possible.*<br/>
+            <br/>
+            <form action="support/postticket" method="post">
+              <input type="hidden" name="ticketSubject" value="Can't run minecraft"/>
+              <input type="hidden" name="ticketTags" value="supportform cantrun"/>
+              <span class="req">* - required fields</span><br/>
+              <br/>
+              Email address*<br/>
+              <input name="emailAddress" type="text" size="30"><br/>
+              <br/>
+              Email address once more*<br/>
+              <input name="emailAddressRetype" type="text" size="30" value=""><br/>
+              <br/>
+              Description of the problem*<br/>
+              <textarea name="refundErrorDescription" cols="50" rows="10" class="font"></textarea><br/>
+              <br/>
+              <input type="submit" value=" Send ">
+            </form>
+            <br/>
+
+          </div>
+        </div>
+        <!-- Level 2-->
+
+      </div>
+
+      <div id="gTechnical" class="answer">
+
+        <b>Everything related to the technical site of the game</b><br/>
+        <br/>
+        <input type="radio" name="gTechnical" id="gTechnical-1" value="1" onclick="javascript:supportpath='/support/technical/installation/';"><label for="gTechnical-1">Installation</label><br/>
+        <input type="radio" name="gTechnical" id="gTechnical-2" value="2" onclick="javascript:supportpath='/support/technical/rungame/';"><label for="gTechnical-2">Running the Game</label><br/>
+        <input type="radio" name="gTechnical" id="gTechnical-3" value="3" onclick="javascript:supportpath='/support/technical/setupserver/';"><label for="gTechnical-3">Setting up a Server</label><br/>
+        <input type="radio" name="gTechnical" id="gTechnical-4" value="4" onclick="javascript:supportpath='/support/technical/other/';"><label for="gTechnical-4">Other</label><br/>
+
+        <!-- Level 2-->
+        <div id="tInstallation" class="answer">
+          <b>Installation</b><br/>
+          <br/>
+          You can find explanations on how to setup the game by clicking the link to <a href="download">www.minecraft.net</a>.<br/>
+          <br/>
+          In case you've encountered an error, we recommend you to take a look at the <a href="http://getsatisfaction.com/mojang/problems/common">help section</a>
+          of our site, our <a href="http://www.minecraftforum.net/viewforum.php?f=17">support forum</a>, you can
+          look for a solution on the <a href="http://www.minecraftwiki.net/wiki/Minecraft_Wiki">minecraft wiki</a> or ask the friendly
+          people at the irc channel <a href="http://chat.mibbit.com/?server=irc.esper.net&amp;channel=%23minecrafthelp">#MinecraftHelp</a>, who in most cases might be able to help you right away.<br/>
+          <div class="didthishelp"></div>
+        </div>
+
+        <div id="tRunningTheGame" class="answer">
+          <b>Running the Game</b><br/>
+          <br/>
+          A general advice on running Minecraft (or any other software) on your computer is to have all your hardware drivers
+          updated.<br/>
+          <br/>
+          In case you've encountered an error, we recommend you to take a look at the <a href="http://getsatisfaction.com/mojang/problems/common">help section</a>
+          of our site, our <a href="http://www.minecraftforum.net/viewforum.php?f=17">support forum</a>, you can
+          look for a solution on the <a href="http://www.minecraftwiki.net/wiki/Minecraft_Wiki">minecraft wiki</a> or ask the friendly
+          people at the irc channel <a href="http://chat.mibbit.com/?server=irc.esper.net&amp;channel=%23minecrafthelp">#MinecraftHelp</a>, who in most cases might be able to help you right away.<br/>
+          <br/>
+          Most of the errors have been discussed and solved there and it is generally the quickest way to get back into the game.<br/>
+          <div class="didthishelp"></div>
+        </div>
+
+        <div id="tServer" class="answer">
+          <b>Setting up a Server</b><br/>
+          <br/>
+          You can find a throughout description on setting up a server on our <a href="http://www.minecraftwiki.net/wiki/Setting_up_a_server">wiki server page</a>.<br/>
+          <div class="didthishelp"></div>
+        </div>
+
+        <div id="tOther" class="answer">
+          <b>It just went poof and then little smoke clouds came out of it</b><br/>
+          <br/>
+          Make sure that your system components are working properly, i.e. that all the drivers are up to date (including
+          the most recent version of Java being installed and set up).
+          <br/>
+          <div class="didthishelp"></div>
+          <!--
+          <br />
+          <input type="button" name="pProceed" style="margin-bottom: 5px" value="I didn't find any help in the above sources" onclick="showText(this);">
+          <div id="oProceed" class="hidden answer">
+              <b>I can't run Minecraft on my machine</b><br />
+              <br />
+              If your error matches none of the above mentioned terms and if you couldn't find any help in the provided links,
+              you can send us a detailed description of the events which led to the error and the error itself, as well as
+              your hardware setup and any other relevant information.<br />
+              <br />
+              <form action="/">
+                  Email address*<br />
+                  <input name="emailAddress" type="text" size="30"><br />
+                  <br />
+                  Email address once more*<br />
+                  <input name="emailAddressRetype" type="text" size="30" value=""><br />
+                  <br />
+                  Description of the error*<br />
+                  <textarea name="oDescription" cols="50" rows="10" class="font"></textarea><br />
+                  <br />
+                  <input type="submit" value=" Send ">
+              </form>
+              <br />
+              <span class="req">* - required fields</span>
+          </div> -->
+        </div>
+        <!-- /Level 2-->
+      </div>
+
+      <div id="gFeedback" class="answer">
+        <b>Feedback</b><br/>
+        <br/>
+        In case you want to share an idea for Minecraft with us or you have found a bug, you can go to
+        our <a href="http://getsatisfaction.com/mojang">feedback site</a> and tell us about it!
+      </div>
+
+      <div id="gAbout" class="answer">
+        <b>About the people who made all this</b><br/>
+        <br/>
+        <input type="radio" name="gAbout" id="gAbout-1" value="1" onclick="javascript:supportpath='/support/about/mojang/';"><label for="gAbout-1">Mojang AB</label><br/>
+        <input type="radio" name="gAbout" id="gAbout-2" value="2" onclick="javascript:supportpath='/support/about/minecraft/';"><label for="gAbout-2">Minecraft</label><br/>
+
+        <!-- Level 2-->
+        <div id="aMojang" class="answer">
+          <b>Mojang AB</b><br/>
+          <br/>
+          <input type="radio" name="aMojang" id="aMojang-1" value="1" onclick="javascript:supportpath='/support/about/mojang/company/';"><label for="aMojang-1">Company</label><br/>
+          <input type="radio" name="aMojang" id="aMojang-2" value="2" onclick="javascript:supportpath='/support/about/mojang/employees/';"><label for="aMojang-2">Employees</label><br/>
+
+          <!-- Level 3-->
+          <div id="mCompany" class="answer">
+            <b>Mojang - The Company</b><br/>
+            <br/>
+            It's basically just modern slavery.
+          </div>
+
+          <div id="mEmployees" class="answer">
+            <b>Mojang - The Employees</b><br/>
+            <br/>
+            <input type="radio" name="mEmployees" id="mEmployees-1" value="1" onclick="javascript:supportpath='/support/about/mojang/employees/notch/';"><label for="mEmployees-1">Markus 'Notch' Persson</label><br/>
+            <input type="radio" name="mEmployees" id="mEmployees-2" value="2" onclick="javascript:supportpath='/support/about/mojang/employees/carl/';"><label for="mEmployees-2">Carl Manneh</label><br/>
+            <input type="radio" name="mEmployees" id="mEmployees-3" value="3" onclick="javascript:supportpath='/support/about/mojang/employees/jakob/';"><label for="mEmployees-3">Jakob Porser</label><br/>
+            <input type="radio" name="mEmployees" id="mEmployees-4" value="4" onclick="javascript:supportpath='/support/about/mojang/employees/jens/';"><label for="mEmployees-4">Jens Bergensten</label><br/>
+            <input type="radio" name="mEmployees" id="mEmployees-5" value="5" onclick="javascript:supportpath='/support/about/mojang/employees/kaplan/';"><label for="mEmployees-5">Daniel Kaplan</label><br/>
+            <input type="radio" name="mEmployees" id="mEmployees-6" value="6" onclick="javascript:supportpath='/support/about/mojang/employees/junkboy/';"><label for="mEmployees-6">Junkboy</label><br/>
+            <input type="radio" name="mEmployees" id="mEmployees-7" value="7" onclick="javascript:supportpath='/support/about/mojang/employees/tobias/';"><label for="mEmployees-7">Tobias Mollstam</label><br/>
+            <input type="radio" name="mEmployees" id="mEmployees-8" value="8" onclick="javascript:supportpath='/support/about/mojang/employees/frisk/';"><label for="mEmployees-8">Daniel Frisk</label><br/>
+            <input type="radio" name="mEmployees" id="mEmployees-9" value="9" onclick="javascript:supportpath='/support/about/mojang/employees/aron/';"><label for="mEmployees-9">Aron Nieminen</label><br/>
+
+            <!-- Level 4-->
+            <div id="eMarkusPersson" class="answer">
+              <b>Markus 'Notch' Persson</b><br/>
+              <br/>
+              1. Enjoy games<br/>
+              2. Pick up programming<br/>
+              3. ????<br/>
+              4. Profit
+            </div>
+
+            <div id="eCarlManneh" class="answer">
+              <b>Carl Manneh</b><br/>
+              <br/>
+              His last name sounds like "money" and he is Mojang's business guy. Coincidence?
+            </div>
+
+            <div id="eJakobPorser" class="answer">
+              <b>Jakob Porser</b><br/>
+              <br/>
+              His pants defy gravity and suspenders alike.
+            </div>
+
+            <div id="eJensBergensten" class="answer">
+              <b>Jens Bergensten</b><br/>
+              <br/>
+              Fun Fact #328: The facial hair right below his lower lip is brighter then the rest.
+            </div>
+
+            <div id="eDanielKaplan" class="answer">
+              <b>Daniel Kaplan</b><br/>
+              <br/>
+              On his Skype picture he looks like a pirate.
+            </div>
+
+            <div id="eMarkusToivonen" class="answer">
+              <b>Markus 'Junkboy' Toivonen</b><br/>
+              <br/>
+              Some say he doesn't even exist.
+            </div>
+
+            <div id="eTobiasMollstam" class="answer">
+              <b>Tobias Mollstam</b><br/>
+              <br/>
+              One day he decided to eat failure and shit success. True story.
+            </div>
+
+            <div id="eDanielFrisk" class="answer">
+              <b>Daniel Frisk</b><br/>
+              <br/>
+              He never works on Fridays.
+            </div>
+
+            <div id="eAronNieminen" class="answer">
+              <b>Aron Nieminen</b><br/>
+              <br/>
+              His hair looks like a blue, woolen cap.
+            </div>
+            <!-- /Level 4-->
+
+          </div>
+          <!-- /Level 3-->
+        </div>
+
+        <div id="aMinecraft" class="answer">
+          <b>Minecraft - The dirty truth</b><br/>
+          <br/>
+          Minecraft is the brainchild of Markus Persson. Rumors have it that he programmed it during a power
+          outage in the summer of 1812 while he was carrying infants out of a burning church which was build
+          on the back of a giant opossum. Also he is 11'6" tall and glows in the dark.
+        </div>
+        <!-- /Level 2-->
+
+      </div>
+      <!-- /Level 1-->
+
+    </div>
+    <!-- /Level 0-->
+
+  </div>
+  <!-- /Content div-->
+</div>
+{% endblock %}

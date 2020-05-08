@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="oneColeDiv">
+  <h1>Profile</h1>
+  <p>Player name: {{session.user}}</p>
+  <p>E-mail: {{session.email}}</p>
+  <h2>Change Your Skin</h2>
+  <p>Start by <a href="char.png">downloading the reference skin</a>.</p>
+  <img src="/MinecraftSkins/{{session.user}}.png">
+  <p>Edit in your favorite image editing tool and save it as a png image. Make sure you keep the same image dimensions as the original.</p>
+  <p>When you're happy with the changes, upload the new image here:</p>
+  <form>
+      <button>Choose File</button>
+      <label>no file selected</label>
+      <button>Upload Image</button>
+  </form>
+  <h1>Gift Codes</h1>
+  <p>
+      Gift codes can be used to give the game away to other people. <br/> 
+      To give them away to another player, give them one of the unused codes and ask them to visit <br/>
+      <a href="redeem">http://www.minecraft.net/redeem.jsp</a>
+    </p>
+    <br/>
+    <br/>
+    <a href="buy_gift_codes">Buy more codes.</a>
+</div>
+
+{% endblock %}

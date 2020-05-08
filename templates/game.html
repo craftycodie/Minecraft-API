@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="oneColeDiv">
+    <center><h1 style="text-align: center;">Minecraft Beta</h1></center>
+
+    <!--<p><font color="#ff0000">You need to purchase the game to play Minecraft</font></p> -->
+
+    <br/><br/>
+    {% if not session %}
+    <center>
+        <div class="infoBox" style="height:40px; width:320px; padding:12px;">
+            <span style="font-size:16px;">
+                Please <a href="login">log in</a> or <a href="register">register</a> to purchase.</span>
+        </div></center>
+    {% else %}
+    <div style="margin-left:-100px;">
+      <applet code="net.minecraft.Launcher" archive="/MinecraftDownload/launcher/MinecraftLauncher.jar" codebase="/game/" width="854" height="480" title="Java">
+        <param name="separate_jvm" value="true">   
+        <param name="java_arguments" value="-Xmx1024M -Xms1024M -Dsun.java2d.nodraw=true -Dsun.awt.noerasebnackground=true -Dsun.java2d.d3d=false -Dsun.java2d.opengl=false -Dsun.java2d.pmoffscreen=false">
+        <param name="userName" value="{{session.user}}"/>
+        <param name="latestVersion" value="{{latestVersion}}"/>
+        <param name="downloadTicket" value="{{session.downloadTicket}}"/>
+        <param name="sessionId" value="{{session.id}}"/>
+      </applet>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

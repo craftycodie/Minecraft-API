@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="oneColeDiv">
+  <form name="input" action="register" method="post">
+    
+    <h1>Register a new account</h1><br/>
+    
+    <table>
+      <tr>
+        <td>Username:</td>
+        <td><input type="text" name="username" value=""/></td>
+      </tr>
+      <tr>
+        <td>Password:</td>
+        <td><input type="password" name="password1"/></td>
+      </tr>
+      <tr>
+        <td>Password again:</td>
+        <td><input type="password" name="password2"/></td>
+      </tr>
+      <tr>
+        <td>Email:</td>
+        <td><input type="text" name="email" value=""/></td>
+      </tr>
+      <tr>
+        <td colspan="2"><p>Fill this out to prove you're human:<br><script type="text/javascript" src="https://www.google.com/recaptcha/api/challenge?k=6LdbCwcAAAAAAFOcg3exLwCOC9jox6OlFtf9-PuO"></script>
+<noscript>
+	<iframe src="https://www.google.com/recaptcha/api/noscript?k=6LdbCwcAAAAAAFOcg3exLwCOC9jox6OlFtf9-PuO" height="300" width="500" frameborder="0"></iframe><br>
+	<textarea name="recaptcha_challenge_field" rows="3" cols="40"></textarea>
+	<input type="hidden" name="recaptcha_response_field" value="manual_challenge">
+</noscript></td>
+      </tr>
+      <tr>
+
+        
+        <td colspan="2"><p>And finally click here: <input type="submit" value="Register"/> (This could take a while, the server is slow)</td>
+            
+      </tr>
+    </table>
+  </form>
+
+</div>
+{% endblock %}

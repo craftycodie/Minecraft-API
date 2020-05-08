@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="oneColeDiv">
+<br/><br/><br/>
+
+
+{% if not session %}
+<center><font color="#ff0000">You won't be able to save unless you log in.</font></center>
+{% endif %}
+
+	<div style="margin-left:-100px;">
+  <applet code="org.lwjgl.util.applet.AppletLoader" archive="/MinecraftDownload/classic/lwjgl_util_applet.jar, /MinecraftDownload/classic/lzma.jar" codebase="http://mc.codie.gg/" width="854" height="480">
+  
+    <param name="al_title" value="Minecraft">
+    <param name="al_main" value="com.mojang.minecraft.MinecraftApplet">
+    <param name="al_logo" value="/MinecraftDownload/classic/logo_small.png">
+    <param name="al_progressbar" value="/MinecraftDownload/classic/appletprogress.gif">
+
+    <param name="al_jars" value="/MinecraftDownload/classic/lwjgl_applet.jar.pack.lzma, /MinecraftDownload/classic/lwjgl.jar.pack.lzma, /MinecraftDownload/classic/jinput.jar.pack.lzma, /MinecraftDownload/classic/lwjgl_util.jar.pack.lzma, /MinecraftDownload/classic/minecraft.jar">
+    <param name="al_windows" value="/MinecraftDownload/classic/windows_natives.jar.lzma">
+    <param name="al_linux" value="/MinecraftDownload/classic/linux_natives.jar.lzma">
+    <param name="al_mac" value="/MinecraftDownload/classic/macosx_natives.jar.lzma">
+    <param name="al_solaris" value="/MinecraftDownload/classic/solaris_natives.jar.lzma">
+
+   	<param name="al_version" value="7.21">
+
+    <param name="separate_jvm" value="true">    
+	<param name="java_arguments" value="-Dsun.java2d.noddraw=true -Dsun.awt.noerasebackground=true -Dsun.java2d.d3d=false -Dsun.java2d.opengl=false -Dsun.java2d.pmoffscreen=false -Xmx800M">
+    
+	<param name="boxmessage" value="Minecraft started">
+	<param name="boxbgcolor" value="#000000">
+	<param name="image" value="">
+
+    <param name="al_bgcolor" value="000000">
+    <param name="al_fgcolor" value="ffffff">
+    <param name="al_errorcolor" value="ff0000">
+    <param name="al_prepend_host" value="true">
+    <!-- <param name="al_debug" value="true"> -->
+    
+    
+    
+  </applet><br>
+</div>
+<center><font size="-1">This game requires <a href="http://www.java.com/">Java</a>. Press escape to release the mouse.</font></center>
+<center><font size="+1">Press B!</font></center>
+<br>
+<h2>Controls:</h2>
+WASD to move<br>
+Space to jump<br>
+R to respawn at the spawn point.<br>
+Enter to set a new spawn point.<br>
+B to open the inventory<br>
+F to toggle fog distance<br>
+Escape to release mouse and open game menu<br>
+1-9 or scrollwheel to change building block type<br>
+Left mouse button to add a block<br>
+Right mouse button to remove a block<br>
+Middle mouse button to copy block type<br>
+<h2>In multiplayer:</h2>
+Tab to list players<br>
+T to chat<br><br><br>
+
+</div>
+{% endblock %}

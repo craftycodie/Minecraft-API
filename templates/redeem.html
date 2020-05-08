@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="oneColeDiv">
+
+<form name="input" action="redeem.jsp" method="post">
+<h2>Redeem a gift coupon!</h2>
+
+{% if not session %}
+<p>Please login to your account first.</p>
+{% endif %}
+
+</form>
+</div>
+{% endblock %}
