@@ -2,7 +2,7 @@
 
 {% block content %}
 
-{% if jwt %}
+{% if sessionId %}
 <script>
 function addDays(date, days) {
   var result = new Date(date);
@@ -10,7 +10,7 @@ function addDays(date, days) {
   return result;
 }
 
-document.cookie = "jwt={{jwt}}; path=/"
+document.cookie = "sessionId={{sessionId}}; path=/"
 window.location.href = '/';
 </script>
 {% endif %}

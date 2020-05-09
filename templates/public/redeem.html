@@ -10,9 +10,9 @@
 <p style="color: red">{{error}}</p>
 {% endif %}
 
-{% if session and session.owns_minecraft %}
+{% if session and user.premium %}
 <p>You already own minecraft!</p>
-{% elif session %}
+{% elif user %}
 <p>Yay! You have a gift code for Minecraft? Good for you.<br/>
 Just enter the code into the field below <b>exactly</b> as it is, and you'll be up and punching trees in no time.</p>
 <h2>Enter your code below.</h2>

@@ -24,7 +24,7 @@
         top.location = self.location;
     </script>
     <script type="text/javascript" src="res/jquery.js"></script>
-    {% if jwtInvalid %}
+    {% if sessionIdInvalid %}
     <script>
       document.cookie = ""
     </script>
@@ -64,8 +64,8 @@
               <td>
 
                 <div id="loginpanel">
-                    {% if session %}
-                        Logged in as {{session.user}} | <a href="javascript:;"  onclick="document.cookie='jwt= ; expires = Thu, 01 Jan 1970 00:00:00 GMT';window.location.href = '/';" class="loginpanel">Log out</a>
+                    {% if user %}
+                        Logged in as {{user.user}} | <a href="javascript:;"  onclick="document.cookie='sessionId= ; expires = Thu, 01 Jan 1970 00:00:00 GMT';window.location.href = '/';" class="loginpanel">Log out</a>
                     {% else %}
                         <a href="/login" class="loginpanel">Log in</a> | <a href="/register" class="loginpanel">Register</a>
                     {% endif %}
