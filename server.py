@@ -21,7 +21,7 @@ ALLOWED_EXTENSIONS = ['png']
 
 mongo = PyMongo(app)
 
-latestVersion = "1.0.0"
+latestVersion = "1.0.1"
 
 @app.route('/game/getversion', methods = ["POST"])
 def getversion():
@@ -41,8 +41,8 @@ def getversion():
     else:
         try:
             user = users.find_one({"user": username})
-            matched = bcrypt.hashpw(password.encode('utf-8'), user['password'].encode('utf-8')) == user['password']
-            if matched:
+            matched = bcrypt.checkpw(password.encode('utf-8'), user['password'].encode('utf-8'))
+            if not matched:
                 return make_response("Bad login", 400)
             if user:
                 session = jwt.encode({
@@ -226,8 +226,8 @@ def login():
     else:
         try:
             user = users.find_one({"user": request.form['username']})
-            matched = bcrypt.hashpw(request.form['password'].encode('utf-8'), user['password'].encode('utf-8')) == user['password']
-            if matched:
+            matched = bcrypt.checkpw(request.form['password'].encode('utf-8'), user['password'].encode('utf-8'))
+            if not matched:
                 return render_template("public/login.html", error="Incorrect password.")
             if user:
                 session = jwt.encode({
