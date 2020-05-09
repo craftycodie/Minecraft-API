@@ -37,6 +37,8 @@ You will also need to provide game files inside the public folder (ie minecraft.
 - Research session IDs.
 - Research version & download token in getversion.
   - Currently the download token returns "deprecated". I'm not sure if it did in 2011.
+- Implement Password Reset.
+- Move skins to the database.
   
 ## Credits
 - All of the web client resources (HTML/CSS/JS etc) were pulled (and then modified) from the Wayback Machine.
