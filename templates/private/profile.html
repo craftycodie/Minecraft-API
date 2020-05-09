@@ -14,7 +14,7 @@
   {% if error %}
     <p style="color: red">{{error}}</p>
   {% endif %}
-  <form action="/profile" method="post" enctype="multipart/form-data">
+  <form action="/profile/" method="post" enctype="multipart/form-data">
       <input type="file" id="file" name="file">
       <button>Upload Image</button>
   </form>
@@ -26,7 +26,7 @@
     </p>
     <br/>
     <br/>
-    <a href="buy_gift_codes">Buy more codes.</a>
+    <a href="buy_gift_codes.jsp">Buy more codes.</a>
 </div>
 
 {% endblock %}

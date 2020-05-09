@@ -98,7 +98,7 @@ body {
 	border: none;
 	background-color: #222;
 	color: #e0d0d0;
-	background-image: url('bg.gif');
+	background-image: url('/res/bg.gif');
 	/* background-image: url('bg-dev.gif'); */
 	font-weight: normal;
 	font-family: Arial, Helvetica, sans-serif;
@@ -420,11 +420,11 @@ a.loginpanel:visited { /*color:white;		*/
 }
 
 .payment-method-special-mbwallet {
-  background-image: url(/web/20110714083921im_/http://www.minecraft.net/img/payment/moneybookers-wallet.png);
+  background-image: url(/res/moneybookers-wallet.png);
 }
 
 .payment-method-special-paypal {
-  background-image: url(/web/20110714083921im_/http://www.minecraft.net/img/payment/paypal.png);
+  background-image: url(/res/paypal.png);
 }
 /*
      FILE ARCHIVED ON 08:39:21 Jul 14, 2011 AND RETRIEVED FROM THE

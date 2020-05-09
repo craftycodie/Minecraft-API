@@ -14,7 +14,7 @@
   <head>
 
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <link rel="stylesheet" type="text/css" href="res/style2.css">
+    <link rel="stylesheet" type="text/css" href="/res/style2.css">
     <link rel="shortcut icon" href="/favicon.png"/>
 
 
@@ -23,7 +23,7 @@
       if (top.location != self.location)
         top.location = self.location;
     </script>
-    <script type="text/javascript" src="res/jquery.js"></script>
+    <script type="text/javascript" src="/res/jquery.js"></script>
     {% if sessionIdInvalid %}
     <script>
       document.cookie = ""
@@ -43,18 +43,18 @@
                 <div id="prepurchasesplash" style="height: 88px;">
 
                   
-                  <a href="/prepurchase" border="0"><img src="res/logo_pps.png" width="243" height="78" border="0" alt="">
+                  <a href="/prepurchase.jsp" border="0"><img src="/res/logo_pps.png" width="243" height="78" border="0" alt="">
                   </a>
                   
 
                 </div></td>
               <td>
                 <div id="links">
-                  <a href="/" id="menu_" class="menuItem">Home</a>&nbsp; &nbsp; <a href="/about" id="menu_about" class="menuItem">About</a>
-                  &nbsp; &nbsp; <a href="/community" id="menu_community" class="menuItem">Community</a>
-                  &nbsp;&nbsp; <a href="/merch" id="menu_merch" class="menuItem">Merch</a>
-                  &nbsp;&nbsp; <a href="/profile" id="menu_profile" class="menuItem">Profile</a>
-                  &nbsp;&nbsp; <a href="/help" id="menu_help" class="menuItem">Help</a>
+                  <a href="/" id="menu_" class="menuItem">Home</a>&nbsp; &nbsp; <a href="/about.jsp" id="menu_about" class="menuItem">About</a>
+                  &nbsp; &nbsp; <a href="/community.jsp" id="menu_community" class="menuItem">Community</a>
+                  &nbsp;&nbsp; <a href="/merch.jsp" id="menu_merch" class="menuItem">Merch</a>
+                  &nbsp;&nbsp; <a href="/profile/" id="menu_profile" class="menuItem">Profile</a>
+                  &nbsp;&nbsp; <a href="/help.jsp" id="menu_help" class="menuItem">Help</a>
                   &nbsp; &nbsp;
 
                   
@@ -65,16 +65,16 @@
 
                 <div id="loginpanel">
                     {% if user %}
-                        Logged in as {{user.user}} | <a href="javascript:;"  onclick="document.cookie='sessionId= ; expires = Thu, 01 Jan 1970 00:00:00 GMT';window.location.href = '/';" class="loginpanel">Log out</a>
+                        Logged in as {{user.user}} | <a href="/logout.jsp" class="loginpanel">Log out</a>
                     {% else %}
-                        <a href="/login" class="loginpanel">Log in</a> | <a href="/register" class="loginpanel">Register</a>
+                        <a href="/login.jsp" class="loginpanel">Log in</a> | <a href="/register.jsp" class="loginpanel">Register</a>
                     {% endif %}
                   
                 </div></td>
             </tr>
           </table>
         </div>
-        <a href="/buy_gift_codes">Gift codes now available</a>
+        <a href="/buy_gift_codes.jsp">Gift codes now available</a>
       </div>
 
       <div id="toppanel_bg" style="z-index: 1;"></div>
@@ -87,7 +87,7 @@
           var siteurl = "/";
         
           var menu_items = ["","about","community","help","profile"];
-          var pathnames = ["","about","community","help","profile/"];
+          var pathnames = ["","/about.jsp","/community.jsp","/help.jsp","/profile/"];
           for(i=0;i<menu_items.length;i++){
 
             try{
@@ -116,7 +116,7 @@
 </div> <!-- page end-->
 
 </div> <!-- pagecenter end-->
-<div class="footer" id="footer">Copyright 2009-2011 Mojang AB. <a href="/copyright">Terms and conditions</a>. <a href="/credits">Credits</a>. <a href="/support">Support / FAQ</a>. </div>
+<div class="footer" id="footer">Copyright 2009-2011 Mojang AB. <a href="/copyright.jsp">Terms and conditions</a>. <a href="/credits.jsp">Credits</a>. <a href="/support/">Support / FAQ</a>. </div>
 
 <script type="text/javascript">
 var IE7 = false;
