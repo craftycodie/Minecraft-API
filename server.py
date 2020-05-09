@@ -2,7 +2,6 @@ from config import port, databaseUrl, dbname, secretkey
 from flask import Flask, Response, request, send_from_directory, abort, send_file, render_template, redirect, url_for, make_response
 import json
 import os
-import jwt
 import bcrypt
 import re
 from flask_pymongo import PyMongo
@@ -21,43 +20,44 @@ ALLOWED_EXTENSIONS = ['png']
 
 mongo = PyMongo(app)
 
-latestVersion = "1.0.2"
+latestVersion = "1589016021"
 
 @app.route('/game/getversion', methods = ["POST"])
 def getversion():
     username = request.form['user']
     password = request.form['password']
+    # version = request.form['version']
 
     downloadToken = "deprecated"
 
     users = mongo.db.users
 
     if username == "":
-        return make_response("Bad login", 400)
+        return Response("Bad login")
     elif password == "":
-        return make_response("Bad login", 400)
+        return Response("Bad login")
     elif not users.find_one({"user": username}):
-        return make_response("Bad login", 400)
+        return Response("Bad login")
     else:
         try:
             user = users.find_one({"user": username})
             matched = bcrypt.checkpw(password.encode('utf-8'), user['password'].encode('utf-8'))
             if not matched:
-                return make_response("Bad login", 400)
+                return Response("Bad login")
+            if not user['premium']:
+                return Response("User not premium.")
             if user:
-                session = jwt.encode({
-                    "id": str(user['_id']),
-                    "user": user['user'],
-                    "email": user['email'],
-                    "owns_minecraft": user['owns_minecraft']
-                }, secretkey, algorithm='HS256').decode('utf-8')
-                downloadToken = "deprecated"
-                response = Response(':'.join([latestVersion, downloadToken, username, session]))
+                sessionId = ObjectId()
+                users.update_one({"_id": user["_id"]}, { "$set": { "sessionId": sessionId } })
+                response = Response(" \n" + (':'.join([latestVersion, downloadToken, username, str(sessionId)])))
                 return response
             else:
-                return make_response("Something went wrong, please try again!", 400)
+                return Response("Something went wrong, please try again!")
         except:
-            return make_response("Something went wrong, please try again!", 400)
+            return Response("Something went wrong, please try again!")
+
+    # If the launcher is updated
+    # res  "Old version"
 
     return make_response("Something went wrong, please try again!", 400)
 
@@ -69,8 +69,16 @@ def joinserver():
 
     serverjoins = mongo.db.serverjoins
 
+    user = None
+
     try:
-        jwt.decode(sessionId.encode('utf-8'), secretkey, algorithm='HS256')
+        users = mongo.db.users
+        user = users.find_one({"sessionId": ObjectId(sessionId), "user": username})
+
+        if not user:
+            return make_response("Invalid Session", 200)
+        if not user['premium']:
+            return make_response("User not premium.", 200)
 
         serverjoins.delete_many({"user": username})
 
@@ -82,19 +90,22 @@ def joinserver():
         response = Response("ok")
         return response
     except:
-        return make_response("Invalid Session", 401)
+        return make_response("Something went wrong.", 200)
 
-    return make_response("Invalid Session", 401)
+    return make_response("Something went wrong.", 200)
 
 @app.route('/login/session')
 def checksession():
     username = request.args.get('name')
-    session = request.args.get('session')
+    sessionId = request.args.get('session')
 
+    user = None
+    
     try:
-        session = jwt.decode(session.encode('utf-8'), secretkey, algorithm='HS256')
+        users = mongo.db.users
+        user = users.find_one({"sessionId": ObjectId(sessionId), "user": username})
 
-        if session['owns_minecraft']:
+        if user and user['premium']:
             response = Response("ok")
             return response
         else:
@@ -139,23 +150,31 @@ def allowed_file(filename):
 
 @app.route('/profile', methods=['POST'])
 def uploadSkin():
-    if 'jwt' in request.cookies:
-        session = jwt.decode(request.cookies['jwt'].encode('utf-8'), secretkey, algorithm='HS256')
-    else:
+    user = None
+
+    if 'sessionId' in request.cookies and request.cookies['sessionId'] != "":
+        try:
+            users = mongo.db.users
+            user = users.find_one({"sessionId": ObjectId(request.cookies['sessionId'])})
+        except:
+            pass
+    else: 
         return redirect('login')
 
     # check if the post request has the file part
     if 'file' not in request.files:
-        return render_template("private/profile.html", error="Something went wrong.", session=session)
+        return render_template("private/profile.html", error="Something went wrong.", user=user)
     file = request.files['file']
     # if user does not select file, browser also
     # submit an empty part without filename
     if file.filename == '':
-        return render_template("private/profile.html", error="No file selected.", session=session)
+        return render_template("private/profile.html", error="No file selected.", user=user)
     if file and allowed_file(file.filename):
-        filename = session['user'] + ".png"
+        filename = user['user'] + ".png"
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        return render_template("private/profile.html", error="No file selected.", session=session)
+        return render_template("private/profile.html", user=user)
+
+    return render_template("private/profile.html", error="Invalid file.", user=user)
 
 @app.route('/MinecraftDownload/minecraft.jar')
 def downloadgame():
@@ -189,27 +208,23 @@ def register():
     elif users.find_one({"email": request.form['email']}):
         return render_template("public/register.html", error="E-Mail already exists.")
     else:
-        # try:
+        try:
             hashpass = bcrypt.hashpw(request.form['password1'].encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+            sessionId = ObjectId()
             inserted = users.insert_one({
                 "user": request.form['username'],
                 "email": request.form['email'],
                 "password": hashpass,
-                "owns_minecraft": True, # TODO: Mojang Auth, actually check this.
+                "premium": True, # TODO: Mojang Auth, actually check this.
+                "sessionId": sessionId,
             })
             user = users.find_one({"_id": ObjectId(inserted.inserted_id)})
             if user:
-                session = jwt.encode({
-                    "id": str(user['_id']),
-                    "user": user['user'],
-                    "email": user['email'],
-                    "owns_minecraft": user['owns_minecraft']
-                }, secretkey, algorithm='HS256').decode('utf-8')
-                return render_template("public/register.html", jwt=session)
+                return render_template("public/register.html", sessionId=str(sessionId))
             else:
                 return render_template("public/register.html", error="Something went wrong, please try again!")
-        # except:
-        #     return render_template("public/register.html", error="Something went wrong, please try again!")
+        except:
+            return render_template("public/register.html", error="Something went wrong, please try again!")
 
     return render_template("public/register.html", error="Something went wrong, please try again!")
 
@@ -230,19 +245,26 @@ def login():
             if not matched:
                 return render_template("public/login.html", error="Incorrect password.")
             if user:
-                session = jwt.encode({
-                    "id": str(user['_id']),
-                    "user": user['user'],
-                    "email": user['email'],
-                    "owns_minecraft": user['owns_minecraft']
-                }, secretkey, algorithm='HS256').decode('utf-8')
-                return render_template("public/login.html", jwt=session)
+                sessionId = ObjectId()
+                users.update_one({"_id": user["_id"]}, { "$set": { "sessionId": sessionId } })
+                return render_template("public/login.html", sessionId=str(sessionId))
             else:
                 return render_template("public/login.html", error="Something went wrong, please try again!")
         except:
             return render_template("public/login.html", error="Something went wrong, please try again!")
 
     return render_template("public/login.html", error="Something went wrong, please try again!")
+
+@app.route('/logout')
+def logout():
+    try:
+        if 'sessionId' in request.cookies and request.cookies['sessionId'] != "":
+            users = mongo.db.users
+            users.update_one({"sessionId": ObjectId(request.cookies['sessionId'])}, { "$set": { "sessionId": "" } })
+    except:
+        pass
+
+    return render_template("public/index.html", sessionIdInvalid=True)
 
 
 @app.route('/')
@@ -253,21 +275,28 @@ def index():
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve(path):
-    if 'jwt' in request.cookies:
-        session = jwt.decode(request.cookies['jwt'].encode('utf-8'), secretkey, algorithm='HS256')
-    else:
-        session = None
+    user = None
+    sessionIdInvalid = False
+
+    if 'sessionId' in request.cookies and request.cookies['sessionId'] != "":
+        try:
+            users = mongo.db.users
+            user = users.find_one({"sessionId": ObjectId(request.cookies['sessionId'])})
+            if not user:
+                sessionIdInvalid = True
+        except:
+            pass
 
     if path == "":
         return abort(404)
 
     if os.path.exists("templates/private/" + path + ".html"):
-        if session:
-            return render_template("private/" + path + ".html", session=session, latestVersion=latestVersion)
+        if user:
+            return render_template("private/" + path + ".html", user=user, latestVersion=latestVersion)
         else:
             return redirect('login')
     if os.path.exists("templates/public/" + path + ".html"):
-        return render_template("public/" + path + ".html", session=session, latestVersion=latestVersion)
+        return render_template("public/" + path + ".html", user=user, latestVersion=latestVersion)
     if os.path.exists(app.static_folder + '/' + path):
         return send_from_directory(app.static_folder, path)
 
