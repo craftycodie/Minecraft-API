@@ -6,7 +6,21 @@
 <form name="input" action="redeem.jsp" method="post">
 <h2>Redeem a gift coupon!</h2>
 
-{% if not session %}
+{% if error %}
+<p style="color: red">{{error}}</p>
+{% endif %}
+
+{% if session and session.owns_minecraft %}
+<p>You already own minecraft!</p>
+{% elif session %}
+<p>Yay! You have a gift code for Minecraft? Good for you.<br/>
+Just enter the code into the field below <b>exactly</b> as it is, and you'll be up and punching trees in no time.</p>
+<h2>Enter your code below.</h2>
+<form method="POST" action="redeem">
+    <input name="code" id="code"/>
+    <button type="submit" name="redeem" id="redeem">Redeem</button>
+</form>
+{% else %}
 <p>Please login to your account first.</p>
 {% endif %}
 
