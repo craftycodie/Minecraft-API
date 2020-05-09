@@ -20,9 +20,13 @@ ALLOWED_EXTENSIONS = ['png']
 
 mongo = PyMongo(app)
 
-latestVersion = "1589016021"
+latestVersion = "1589019440"
 
-@app.route('/game/getversion', methods = ["POST"])
+@app.route('/game/getversion', methods = ["POST"]) # Legacy
+def getversion_old():
+    return Response("Old version")
+
+@app.route('/game/getversion.jsp', methods = ["POST"])
 def getversion():
     username = request.form['user']
     password = request.form['password']
@@ -59,9 +63,10 @@ def getversion():
     # If the launcher is updated
     # res  "Old version"
 
-    return make_response("Something went wrong, please try again!", 400)
+    return Response("Something went wrong, please try again!")
 
-@app.route('/game/joinserver')
+@app.route('/game/joinserver') # Legacy
+@app.route('/game/joinserver.jsp')
 def joinserver():
     username = request.args.get('user')
     sessionId = request.args.get('sessionId')
@@ -76,9 +81,9 @@ def joinserver():
         user = users.find_one({"sessionId": ObjectId(sessionId), "user": username})
 
         if not user:
-            return make_response("Invalid Session", 200)
+            return Response("Invalid Session")
         if not user['premium']:
-            return make_response("User not premium.", 200)
+            return Response("User not premium.")
 
         serverjoins.delete_many({"user": username})
 
@@ -90,11 +95,11 @@ def joinserver():
         response = Response("ok")
         return response
     except:
-        return make_response("Something went wrong.", 200)
+        return Response("Something went wrong.")
 
-    return make_response("Something went wrong.", 200)
+    return Response("Something went wrong.")
 
-@app.route('/login/session')
+@app.route('/login/session.jsp')
 def checksession():
     username = request.args.get('name')
     sessionId = request.args.get('session')
@@ -115,7 +120,8 @@ def checksession():
 
     return make_response("Invalid Session", 400)
 
-@app.route('/game/checkserver')
+@app.route('/game/checkserver') # Legacy
+@app.route('/game/checkserver.jsp')
 def checkserver():
     username = request.args.get('user')
     serverId = request.args.get('serverId')
@@ -132,9 +138,9 @@ def checkserver():
         response = Response("YES")
         return response
     except:
-        return make_response("Invalid Session", 401)
+        return Response("Invalid Session", 401)
 
-    return make_response("Invalid Session", 401)
+    return Response("Invalid Session", 401)
 
 
 @app.route('/MinecraftSkins/<username>.png')
@@ -148,7 +154,7 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@app.route('/profile', methods=['POST'])
+@app.route('/profile/', methods=['POST'])
 def uploadSkin():
     user = None
 
@@ -159,7 +165,7 @@ def uploadSkin():
         except:
             pass
     else: 
-        return redirect('login')
+        return redirect('/login.jsp')
 
     # check if the post request has the file part
     if 'file' not in request.files:
@@ -189,7 +195,7 @@ def resourcesTree():
     return send_file("public/MinecraftResources/download.xml")
 
 
-@app.route('/register', methods = ["POST"])
+@app.route('/register.jsp', methods = ["POST"])
 def register():
     users = mongo.db.users
 
@@ -228,8 +234,8 @@ def register():
 
     return render_template("public/register.html", error="Something went wrong, please try again!")
 
-@app.route('/login', methods = ["POST"])
-def login():
+@app.route('/login.jsp', methods = ["POST"])
+def loginpost():
     users = mongo.db.users
 
     if request.form['username'] == "":
@@ -255,7 +261,22 @@ def login():
 
     return render_template("public/login.html", error="Something went wrong, please try again!")
 
-@app.route('/logout')
+@app.route('/login.jsp')
+def login():
+    user = None
+
+    if 'sessionId' in request.cookies and request.cookies['sessionId'] != "":
+        try:
+            users = mongo.db.users
+            user = users.find_one({"sessionId": ObjectId(request.cookies['sessionId'])})
+            if not user:
+                return serve('login')
+            return redirect('/profile/')
+        except:
+            return redirect('/login/')
+    return serve('login')
+
+@app.route('/logout.jsp')
 def logout():
     try:
         if 'sessionId' in request.cookies and request.cookies['sessionId'] != "":
@@ -264,19 +285,28 @@ def logout():
     except:
         pass
 
-    return render_template("public/index.html", sessionIdInvalid=True)
+    return redirect("/")
 
 
 @app.route('/')
 def index():
-    return serve("index")
+    return serve("index.jsp")
 
+@app.route('/profile/')
+def profile():
+    return serve("profile")
+
+@app.route('/support/')
+def support():
+    return serve("profile")
 
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve(path):
     user = None
     sessionIdInvalid = False
+
+    path = path.replace(".jsp", "")
 
     if 'sessionId' in request.cookies and request.cookies['sessionId'] != "":
         try:
@@ -294,10 +324,10 @@ def serve(path):
         if user:
             return render_template("private/" + path + ".html", user=user, latestVersion=latestVersion)
         else:
-            return redirect('login')
-    if os.path.exists("templates/public/" + path + ".html"):
+            return redirect('/login.jsp')
+    elif os.path.exists("templates/public/" + path + ".html"):
         return render_template("public/" + path + ".html", user=user, latestVersion=latestVersion)
-    if os.path.exists(app.static_folder + '/' + path):
+    elif os.path.exists(app.static_folder + '/' + path):
         return send_from_directory(app.static_folder, path)
 
     return abort(404)

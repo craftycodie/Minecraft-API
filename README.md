@@ -12,9 +12,7 @@ These are features which are no longer available through official servers.
 - Skins
 
 ## API - Differences
-- Endpoints currently don't use the .jsp extension.
-  - Java Server Pages has not been used.
-  - I may move everything back to that extension so that old game clients can use this API.
+- None known.
   
 ## How To Use
 If you wish to use this API, I recommend that you do so with older versions of Minecraft, as it was tested with Beta 1.7.3 and the alpha launcher.
@@ -31,10 +29,6 @@ You will also need to provide game files inside the public folder (ie minecraft.
   - This page was fully remade by hand so it's a little off.
 - Error messages could be closer to original.
   - I had nothing to compare to, should see if there are any videos of the old site with errors.
-- Move endpoints to .jsp.
-- ~~Research session IDs.~~
-- Research ~~version &~~ download token in getversion.
-  - Currently the download token returns "deprecated". I'm not sure if it did in 2011.
 - Implement Password Reset.
 - Move skins to the database.
   
