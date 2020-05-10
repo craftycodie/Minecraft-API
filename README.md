@@ -21,6 +21,64 @@ To host the site, create a config.py file based on the provided config_example.p
 To use the website with a game you will have to decompile the launcher, client and server, and changed the endpoints from minecraft.net / AWS.
 You will also need to provide game files inside the public folder (ie minecraft.jar goes in public/MinecraftDownload/).
 
+## Serving Assets
+The api is written to serve files that used to be (and sometimes still are) hosted on AWS.
+The recommmended file tree is as follows:
+
+public/
+```
+│   minecraft-server.zip                  classic server files
+│
+├───download
+│       Minecraft.exe                     launcher exe (windows)
+│       Minecraft.jar                     launcher jar (linux / any)
+│       Minecraft.zip                     launcher app (zip, mac)
+│       Minecraft_Server.jar              server jar
+│
+├───MinecraftDownload                     from http://s3.amazonaws.com/MinecraftDownload/
+│   │   jinput.jar
+│   │   jinput.jar.pack.lzma
+│   │   linux_natives.jar
+│   │   linux_natives.jar.lzma
+│   │   lwjgl.jar
+│   │   lwjgl.jar.pack.lzma
+│   │   lwjgl_applet.jar
+│   │   lwjgl_applet.jar.pack.lzma
+│   │   lwjgl_util.jar
+│   │   lwjgl_util.jar.pack.lzma
+│   │   lwjgl_util_applet.jar
+│   │   lzma.jar
+│   │   macosx_natives.jar
+│   │   macosx_natives.jar.lzma
+│   │   minecraft.jar
+│   │   solaris_natives.jar
+│   │   solaris_natives.jar.lzma
+│   │   windows_natives.jar
+│   │   windows_natives.jar.lzma
+│   │
+│   ├───classic                           Classic version applet (browser) files.
+│   │       jinput.jar.pack.lzma
+│   │       linux_natives.jar.lzma
+│   │       logo_small.png
+│   │       lwjgl.jar.pack.lzma
+│   │       lwjgl_applet.jar.pack.lzma
+│   │       lwjgl_util.jar.pack.lzma
+│   │       lwjgl_util_applet.jar
+│   │       lzma.jar
+│   │       macosx_natives.jar.lzma
+│   │       minecraft.jar
+│   │       solaris_natives.jar.lzma
+│   │       windows_natives.jar.lzma
+│   │
+│   └───launcher
+│           MinecraftLauncher.jar         Used for the in browser game.
+│
+├───MinecraftResources                    from http://s3.amazonaws.com/MinecraftResources/
+│   │   download.xml                      This is the index document tree from that url ^
+│
+├───MinecraftSkins                        Skins for each user, ie /MinecraftSkins/Notch.png
+```
+
 ## TODO:
 - Buy pages could be closer to the original site.
   - Buying won't be implemented (obviously) but those pages currently assume the user is not logged in and or does not own minecraft.
