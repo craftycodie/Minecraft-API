@@ -106,6 +106,59 @@ Endpoints have been reimplemented based on what data the client/server/launchers
   ○ 400 Bad Request
 ```
 
+## Playing In Browser (Applet)
+Currently the project has minimal support for playing older versions of Minecraft in browser.
+The classic applet doesn't seem to work yet.
+This process is currently quite complicated and may not work, expect better support for this in future.
+If you are unsure of any of these steps, do not proceed.
+
+1. Place all necessary files into the public/ folder.
+
+You will need public/MinecraftDownload/MinecraftLauncher.jar and everything in public/MinecraftDownload for old game versions.
+You can pull these from https://s3.amazonaws/MinecraftDownload/, or just find the relevant files in a current minecraft install.
+See [Serving Assets](https://github.com/codieradical/Minecraft-API#serving-assets).
+For classic, everything in public/MinecraftDownload/classic/ shouls suffice.
+If you're playing on anything but windows you'll need to grab the latest natives, you can find these in an existing current version minecraft install or in an lwjgl 2.x release.
+
+2. Self sign every jar.
+
+To run the applet, you'e probably going to need to sign every jar file.
+There are plenty of guides on how to do this, [here's one](https://stackoverflow.com/questions/17187520/signing-jar-file).
+Note: In testing I used a modified launcher which did not use natives jars, lmzas or packs, these probably do need signing too, but the lmza and pack files likely also need signing. If this causes any trouble, just manually install the game the old fashioned way (.minecraft/bin) making sure to use the signed jars.
+
+3. Grab an old browser & configure Java.
+
+Modern browsers don't support Java anymore so you'll need an old one. I used Chrome 41.
+You may also need to add some exceptions, and the signature you used to sign, in the Java control panel.
+
+4. Prepare the API.
+
+You're not going to need a full database and auth just to play in browser, so you won't need to fill in any of that stuff in config.py.
+So assuming you don't have a database setup, you'll need to do the following:
+Go to server.py. In the serve function, before the line 
+  
+          `return render_template("public/" + path + ".html", user=user, latestVersion=latestVersion)`
+        
+add the line
+     
+          `user = {"user" : "<username>", "downloadTicket": "deprecated", "sessionId": "<anything>" }`
+          
+5. Redirect Requests (if necessary)
+
+If you want the applet to install the game to .minecraft/bin (if it's not already there, and signed), youll need to route requests to minecraft.net and s3.amazonaws to this API. On windows you can use the hosts file for this, on other operating systems... you probably know how to do this if you're not on windows :P
+
+If you already have the game files installed, it is recommended to make a backup.
+You'll also want to make a version file (that's the name, no extension) containing
+
+```
+
+<version timestamp (see server.py for this)>
+```
+
+Once you've done all of that, you should be good to go!
+Good luck! Contact me on Discord if you get stuck! Codie#0642
+
+
 ## TODO:
 - "hybrid" mojang auth branch
 - "applet" in browser game branch
