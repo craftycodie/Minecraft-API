@@ -124,6 +124,8 @@ Classic endpoints (not yet implemented).
   ○ 200 OK "ok" and unknown format save data.
   ○ 200 OK <error message>
   ○ Any error code.
+• POST /heartbeat.jsp
+  ○ Unknown, used by servers, maybe for the server list.
 ```
 
 ## Playing In Browser (Applet)
@@ -142,7 +144,7 @@ If you're playing on anything but windows you'll need to grab the latest natives
 
 2. Self sign every jar.
 
-To run the applet, you'e probably going to need to sign every jar file.
+To run the applet, you're probably going to need to sign every jar file.
 There are plenty of guides on how to do this, [here's one](https://stackoverflow.com/questions/17187520/signing-jar-file).
 Note: In testing I used a modified launcher which did not use natives jars, lmzas or packs, these probably do need signing too, but the lmza and pack files likely also need signing. If this causes any trouble, just manually install the game the old fashioned way (.minecraft/bin) making sure to use the signed jars.
 
