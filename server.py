@@ -300,6 +300,26 @@ def profile():
 def support():
     return serve("profile")
 
+@app.route('/play.jsp')
+def classic():
+    user = None
+    sessionIdInvalid = False
+    serverIP = request.args.get('server')
+    serverPort = request.args.get('port')
+
+    path = path.replace(".jsp", "")
+
+    if 'sessionId' in request.cookies and request.cookies['sessionId'] != "":
+        try:
+            users = mongo.db.users
+            user = users.find_one({"sessionId": ObjectId(request.cookies['sessionId'])})
+            if not user:
+                sessionIdInvalid = True
+        except:
+            pass
+
+    return render_template("public/" + path + ".html", user=user, serverIP=serverIP, serverPort=serverPort, sessionIdInvalid=sessionIdInvalid)
+
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve(path):
