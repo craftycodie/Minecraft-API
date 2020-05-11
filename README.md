@@ -12,7 +12,7 @@ These are features which are no longer available through official servers.
 - Skins
 
 ## API - Differences
-- None known.
+- Missing classic endpoints.
   
 ## How To Use
 If you wish to use this API, I recommend that you do so with older versions of Minecraft, as it was tested with Beta 1.7.3 and the alpha launcher.
@@ -104,6 +104,26 @@ Endpoints have been reimplemented based on what data the client/server/launchers
   ○ ?name=<username>&session=<sessionId>
   ○ 200 OK
   ○ 400 Bad Request
+
+
+Classic endpoints (not yet implemented).
+• GET /listmaps.jsp
+  ○ List saved classic maps.
+  ○ ?user=<?>
+  ○ 200 OK <unknwon response, ';' seperated.>
+  ○ Any error code.
+• POST /level/save.html
+  ○ Save a classic map.
+  ○ Post contains map data, unknown format.
+  ○ 200 OK "ok"
+  ○ 200 OK <error message>
+  ○ Any error code.
+• GET /level/load.html
+  ○ Check if a player has permission to join the server.
+  ○ ?id=<int>&user=<?>
+  ○ 200 OK "ok" and unknown format save data.
+  ○ 200 OK <error message>
+  ○ Any error code.
 ```
 
 ## Playing In Browser (Applet)

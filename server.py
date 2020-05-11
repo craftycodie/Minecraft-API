@@ -142,7 +142,7 @@ def checkserver():
 
     return Response("Invalid Session", 401)
 
-
+@app.route('/skin/<username>.png') # classic
 @app.route('/MinecraftSkins/<username>.png')
 def skin(username):
     if username != "" and os.path.exists("public/MinecraftSkins/" + username + ".png"):
@@ -188,6 +188,7 @@ def downloadgame():
     downloadTicket = request.args.get('ticket')
     return send_file("public/MinecraftDownload/minecraft.jar")
 
+@app.route('/resources/') # classic
 @app.route('/MinecraftResources/')
 def resourcesTree():
     username = request.args.get('user')
@@ -327,6 +328,7 @@ def serve(path):
     sessionIdInvalid = False
 
     path = path.replace(".jsp", "")
+    path = path.replace("/resources/", "/MinecraftResources/")
 
     if 'sessionId' in request.cookies and request.cookies['sessionId'] != "":
         try:
