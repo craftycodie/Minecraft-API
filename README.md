@@ -107,6 +107,8 @@ Endpoints have been reimplemented based on what data the client/server/launchers
 ```
 
 ## TODO:
+- "hybrid" mojang auth branch
+- "applet" in browser game branch
 - Buy pages could be closer to the original site.
   - Buying won't be implemented (obviously) but those pages currently assume the user is not logged in and or does not own minecraft.
   - Buying could be implemented without payment (ie press the buy button, the API now thinks you own minecraft).
