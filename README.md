@@ -79,6 +79,33 @@ public/
 ├───MinecraftSkins                        Skins for each user, ie /MinecraftSkins/Notch.png
 ```
 
+## API Endpoints
+Endpoints have been reimplemented based on what data the client/server/launchers send, where they send it, and what they expect in response. There may be undocumented responses.
+```
+• POST /game/getversion.jsp
+  ○ Login & check for updates.
+  ○ ?user=<username/email>&password=<password>&version=<unix timestamp>
+  ○ 200 OK "<latestVersion unix timestamp>:<downloadToken>:<username>:<sessionId>
+  ○ 200 OK "Bad login"
+  ○ 200 OK "Old version"
+  ○ 200 OK "User not premium."
+• GET /game/joinserver.jsp
+  ○ Request authentication to join a server.
+  ○ ?user=<username>&sessionId=<session>&serverId=<serverId>
+  ○ 200 OK "ok"
+  ○ 200 OK <error message>
+• GET /game/checkserver.jsp
+  ○ Check if a player has permission to join the server.
+  ○ ?user=<username>&serverId=<serverId>
+  ○ 200 OK "YES"
+  ○ 200 OK <error message>
+• GET /login/session.jsp
+  ○ Check if a player owns the game (/ is logged in elsewhere?).
+  ○ ?name=<username>&session=<sessionId>
+  ○ 200 OK
+  ○ 400 Bad Request
+```
+
 ## TODO:
 - Buy pages could be closer to the original site.
   - Buying won't be implemented (obviously) but those pages currently assume the user is not logged in and or does not own minecraft.
