@@ -306,6 +306,13 @@ def logout():
 def index():
     return serve("index.jsp")
 
+# unknown endpoint, found in infdev, may be in more.
+@app.route('/game/')
+def unknown1():
+    name = request.args.get('n')
+    i = request.args.get('i')
+    return Response("1")
+
 @app.route('/profile/')
 def profile():
     return serve("profile")
@@ -532,6 +539,22 @@ def addclassicserver():
         return Response("Something went wrong.", 400)
 
     return Response("Something went wrong.")
+
+#not sure when this was used, but it definately existed!
+@app.route('/haspaid.jsp')
+def haspaid():
+    username = request.args.get('user')
+
+    try:
+        users = mongo.db.users
+        user = users.find_one({"user" : username})
+    except:
+        return Response("false")
+    
+    if not user or not user['premium']:
+        return Response("false")
+
+    return Response("true")
 
 @app.route('/', defaults={'path': 'index'})
 @app.route('/<path:path>')
