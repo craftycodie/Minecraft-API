@@ -1,8 +1,5 @@
 # Minecraft API Recreation
-A recreation of the Minecraft Beta 1.7.3 Backend.
-
-The aim of this project is to recreate the Minecraft website and API as it appeared in 2011.
-The site implements it's original endpoints as closely as possible.
+This project aims to provide a server capable of running any pre-release version of Minecraft, fully featured.
 
 ## Restored Features
 These are features which are no longer available through official servers.
