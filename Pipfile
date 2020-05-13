@@ -11,6 +11,7 @@ jwt = "*"
 bcrypt = "*"
 flask-pymongo = "*"
 pyjwt = "*"
+gzip = "*"
 
 [requires]
 python_version = "3.7"

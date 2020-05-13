@@ -106,26 +106,33 @@ Endpoints have been reimplemented based on what data the client/server/launchers
   ○ 400 Bad Request
 
 
-Classic endpoints (not yet implemented).
+Classic Endpoints
 • GET /listmaps.jsp
   ○ List saved classic maps.
-  ○ ?user=<?>
-  ○ 200 OK <unknwon response, ';' seperated.>
+  ○ ?user=<username>
+  ○ 200 OK <mapnames>
+    - ; separated list of strings. '-' represents empty slots. 5 maps in total.
   ○ Any error code.
 • POST /level/save.html
   ○ Save a classic map.
-  ○ Post contains map data, unknown format.
-  ○ 200 OK "ok"
-  ○ 200 OK <error message>
+  ○ Post contains:
+    1. username
+    2. sessionId
+    3. map name
+    4. map id (0 - 4)
+    5. map length
+    6. map data
+  ○ 200 OK "ok".
   ○ Any error code.
 • GET /level/load.html
   ○ Check if a player has permission to join the server.
-  ○ ?id=<int>&user=<?>
-  ○ 200 OK "ok" and unknown format save data.
+  ○ ?id=<0-4>&user=<username>
+  ○ 200 OK "ok" and map data, classic v2 format (gzip/dat).
   ○ 200 OK <error message>
   ○ Any error code.
 • POST /heartbeat.jsp
-  ○ Unknown, used by servers, maybe for the server list.
+  ○ Classic server list.
+  ○ ?port=<port>&users=<current user count>&max=<max user count>&name=<name>&public=<true/false>&version=<protocol version (7)>&salt=<A random, 16-character base-62 salt>
 ```
 
 ## Playing In Browser (Applet)
@@ -182,8 +189,6 @@ Good luck! Contact me on Discord if you get stuck! Codie#0642
 
 
 ## TODO:
-- "hybrid" mojang auth branch
-- "applet" in browser game branch
 - Buy pages could be closer to the original site.
   - Buying won't be implemented (obviously) but those pages currently assume the user is not logged in and or does not own minecraft.
   - Buying could be implemented without payment (ie press the buy button, the API now thinks you own minecraft).
@@ -192,7 +197,6 @@ Good luck! Contact me on Discord if you get stuck! Codie#0642
 - Error messages could be closer to original.
   - I had nothing to compare to, should see if there are any videos of the old site with errors.
 - Implement Password Reset.
-- Move skins to the database.
   
 ## Credits
 - All of the web client resources (HTML/CSS/JS etc) were pulled (and then modified) from the Wayback Machine.
