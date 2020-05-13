@@ -171,10 +171,6 @@ Go to server.py. In the serve function, before the line
 add the line
      
           `user = {"user" : "<username>", "downloadTicket": "deprecated", "sessionId": "<anything>" }`
-          
-5. Redirect Requests (if necessary)
-
-If you want the applet to install the game to .minecraft/bin (if it's not already there, and signed), youll need to route requests to minecraft.net and s3.amazonaws to this API. On windows you can use the hosts file for this, on other operating systems... you probably know how to do this if you're not on windows :P
 
 If you already have the game files installed, it is recommended to make a backup.
 You'll also want to make a version file (that's the name, no extension) containing
