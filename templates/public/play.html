@@ -37,8 +37,8 @@
     <param name="al_errorcolor" value="ff0000">
     <param name="al_prepend_host" value="true">
     <!-- <param name="al_debug" value="true"> -->
-    {% if serverIp %}
-      <param name="server" value="{{server}}"/>
+    {% if serverIP %}
+      <param name="server" value="{{serverIP}}"/>
     {% endif %}
     {% if serverPort %}
     <param name="port" value="{{port}}"/>
@@ -47,6 +47,9 @@
       <param name="haspaid" value="{{user.premium}}"/>
       <param name="username" value="{{user.user}}"/>
       <param name="sessionId" value="{{user.sessionId}}"/>
+    {% endif %}
+    {% if mppass %}
+    <param name="mppass" value="{{mppass}}"/>
     {% endif %}
     
     

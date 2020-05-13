@@ -8,6 +8,10 @@ from flask_pymongo import PyMongo
 from flask import Response 
 from bson import json_util
 from bson.objectid import ObjectId
+from utils.modified_utf8 import utf8m_to_utf8s, utf8s_to_utf8m
+import gzip
+from datetime import datetime
+import hashlib
 
 app = Flask(__name__,
             static_folder='public/',
@@ -19,6 +23,9 @@ app.config['UPLOAD_FOLDER'] = "public/MinecraftSkins"
 ALLOWED_EXTENSIONS = ['png']
 
 mongo = PyMongo(app)
+
+mongo.db.classicservers.create_index( "createdAt", expireAfterSeconds = 60)
+mongo.db.serverjoins.create_index( "createdAt", expireAfterSeconds = 600 )
 
 latestVersion = "1589019440"
 
@@ -65,7 +72,6 @@ def getversion():
 
     return Response("Something went wrong, please try again!")
 
-@app.route('/game/joinserver') # Legacy
 @app.route('/game/joinserver.jsp')
 def joinserver():
     username = request.args.get('user')
@@ -88,6 +94,7 @@ def joinserver():
         serverjoins.delete_many({"user": username})
 
         serverjoins.insert_one({
+            "createdAt": datetime.now(),
             "user": username,
             "serverId": serverId,
         })
@@ -120,7 +127,6 @@ def checksession():
 
     return make_response("Invalid Session", 400)
 
-@app.route('/game/checkserver') # Legacy
 @app.route('/game/checkserver.jsp')
 def checkserver():
     username = request.args.get('user')
@@ -147,6 +153,13 @@ def checkserver():
 def skin(username):
     if username != "" and os.path.exists("public/MinecraftSkins/" + username + ".png"):
         return send_file("public/MinecraftSkins/" + username + ".png", mimetype="image/png")
+    else:
+        return abort(404)
+
+@app.route('/MinecraftCloaks/<username>.png')
+def cloak(username):
+    if username != "" and os.path.exists("public/MinecraftSkins/" + username + ".png"):
+        return send_file("public/MinecraftCloaks/" + username + ".png", mimetype="image/png")
     else:
         return abort(404)
 
@@ -305,10 +318,10 @@ def support():
 def classic():
     user = None
     sessionIdInvalid = False
-    serverIP = request.args.get('server')
-    serverPort = request.args.get('port')
-
-    path = path.replace(".jsp", "")
+    server = request.args.get('server')
+    serverIP = None
+    serverPort = None
+    mppass = None
 
     if 'sessionId' in request.cookies and request.cookies['sessionId'] != "":
         try:
@@ -319,9 +332,208 @@ def classic():
         except:
             pass
 
-    return render_template("public/" + path + ".html", user=user, serverIP=serverIP, serverPort=serverPort, sessionIdInvalid=sessionIdInvalid)
+    server = mongo.db.classicservers.find_one({"_id": ObjectId(server)})
+    if server:
+        serverIP = server['ip']
+        serverPort = server['port']
+        if user:
+            mppass = str(hashlib.md5((server['salt'] + user['user']).encode('utf-8')).hexdigest())
 
-@app.route('/', defaults={'path': ''})
+    return render_template("public/play.html", 
+        user=user,
+        serverIP=serverIP, 
+        serverPort=serverPort,
+        mppass=mppass,
+        sessionIdInvalid=sessionIdInvalid
+    )
+
+@app.route('/servers.jsp')
+def classicservers():
+    user = None
+    sessionIdInvalid = False
+
+    if 'sessionId' in request.cookies and request.cookies['sessionId'] != "":
+        try:
+            users = mongo.db.users
+            user = users.find_one({"sessionId": ObjectId(request.cookies['sessionId'])})
+            if not user:
+                sessionIdInvalid = True
+        except:
+            pass
+
+    servers = list(mongo.db.classicservers.find())
+
+    serverCount = mongo.db.classicservers.count_documents({})
+    usersCount = 0
+    privateCount = 0
+    for server in servers:
+        usersCount = usersCount + int(server['users'])
+        if server['public'] == "false":
+            privateCount = privateCount + 1
+        
+    timeString = datetime.utcnow().strftime("%H:%M") + " (UTC) " + datetime.utcnow().strftime("%B %d")
+
+
+    return render_template("public/servers.html", 
+        user=user,
+        servers=servers,
+        sessionIdInvalid=sessionIdInvalid,
+        serverCount=serverCount,
+        usersCount=usersCount,
+        privateCount=privateCount,
+        timeString=timeString,
+    )
+
+
+#classic
+@app.route('/listmaps.jsp')
+def listmaps():
+    username = request.args['user']
+    maps = None
+
+    try:
+        users = mongo.db.users
+        user = users.find_one({"user" : username})
+    except:
+        return Response("User not found.", 404)
+
+    if (user == None):
+        return Response("User not found.", 404)
+
+    if 'maps' in user:
+        maps = user['maps']
+    else:
+        return Response("-;-;-;-;-")
+
+    return Response(';'.join([
+        maps['0']['name'] if '0' in maps else '-',
+        maps['1']['name'] if '1' in maps else '-',
+        maps['2']['name'] if '2' in maps else '-',
+        maps['3']['name'] if '3' in maps else '-',
+        maps['4']['name'] if '4' in maps else '-',
+    ]))
+
+#classic
+@app.route('/level/save.html', methods=['POST'])
+def savemap():
+    #request.stream.read()
+    username = None
+    sessionId = None
+    mapId = None
+    mapLength = None
+    mapName = None
+
+    nullcount = 0
+    lastNull = 0
+
+    user = None
+
+    # try:
+    requestData = request.stream.read()
+
+    username_length = int.from_bytes(requestData[1 : 2], byteorder='big')
+    username = requestData[2 : 2 + username_length]
+    sessionId_length = int.from_bytes(requestData[2 + username_length + 1 : 2 + username_length + 2], byteorder='big')
+    sessionId = requestData[2 + username_length + 2 : 2 + username_length + 2 + sessionId_length]
+    mapName_length = int.from_bytes(requestData[2 + username_length + 2 + sessionId_length + 1 : 2 + username_length + 2 + sessionId_length + 2], byteorder='big')
+    mapName = requestData[2 + username_length + 2 + sessionId_length + 2 : 2 + username_length + 2 + sessionId_length + 2 + mapName_length]
+    mapId = requestData[2 + username_length + 2 + sessionId_length + 2 + mapName_length]
+    mapLength = int.from_bytes(requestData[2 + username_length + 2 + sessionId_length + 2 + mapName_length + 1 : 2 + username_length + 2 + sessionId_length + 2 + mapName_length + 1 + 4], byteorder='big')
+    mapData = requestData[2 + username_length + 2 + sessionId_length + 2 + mapName_length + 1 + 4 : len(requestData)]
+
+    print(mapLength)
+
+    username = str(utf8m_to_utf8s(username), 'utf-8')
+    sessionId = str(utf8m_to_utf8s(sessionId), 'utf-8')
+    mapName = str(utf8m_to_utf8s(mapName), 'utf-8')
+
+    try:
+        users = mongo.db.users
+        user = users.find_one({"user" : username, "sessionId": ObjectId(sessionId)})
+    except:
+        return Response("Invalid Session", 401)
+
+    if (user == None):
+        return Response("Invalid Session", 401)
+
+    try:
+        users.update_one({"_id": user["_id"]}, { "$set": { ("maps." + str(mapId)): {
+            "name": mapName,
+            "length": mapLength,
+            "data": mapData
+        } } })
+    except:
+        return Response("Failed to save data.", 400)
+    
+    return Response(mapData)
+
+#classic
+@app.route('/level/load.html')
+def loadmap():
+    username = request.args['user']
+    mapId = request.args['id']
+    maps = None
+
+    try:
+        users = mongo.db.users
+        user = users.find_one({"user" : username})
+    except:
+        return Response("User not found.", 404)
+
+    if (user == None):
+        return Response("User not found.", 404)
+
+    if 'maps' in user:
+        maps = user['maps']
+    else:
+        return Response("Map not found.", 404)
+
+    if mapId in maps:
+        return Response(bytes([0x00, 0x02, 0x6F, 0x6B]) + maps[mapId]['data'], mimetype='application/x-mine')
+
+#classic
+@app.route('/heartbeat.jsp', methods=["POST"])
+def addclassicserver():
+    ip = request.remote_addr
+    port = request.form.get('port')
+    users = request.form.get('users')
+    maxUsers = request.form.get('max')
+    name = request.form.get('name')
+    public = request.form.get('public')
+    version = request.form.get('version')
+    salt = request.form.get('salt')
+
+    classicservers = mongo.db.classicservers
+
+    user = None
+
+    try:
+        # Delete existing server record
+        classicservers.delete_many({"port": port, "ip": ip})
+
+        _id = classicservers.insert_one({
+            "createdAt": datetime.now(),
+            "ip": ip,
+            "port": port,
+            "users": users,
+            "maxUsers": maxUsers,
+            "name": name,
+            "public": public,
+            "version": version,
+            "salt": salt,
+        })
+        
+        if (port != "25565"):
+            return Response("http://www.minecraft.net/play.jsp?server=" + str(_id.inserted_id) + "&port=" + port)
+        else:
+            return Response("http://www.minecraft.net/play.jsp?server=" + str(_id.inserted_id))
+
+    except:
+        return Response("Something went wrong.", 400)
+
+    return Response("Something went wrong.")
+
+@app.route('/', defaults={'path': 'index'})
 @app.route('/<path:path>')
 def serve(path):
     user = None
