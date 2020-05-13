@@ -4,8 +4,7 @@ This project aims to provide a server capable of running any pre-release version
 ## Restored Features
 These are features which are no longer available through official servers.
 - Launcher Authentication and Updates
-- Basic Server Authentication
-  - Beta 1.7.3 servers are all running in offline mode right now!
+- Server Authentication
 - Skins
 
 ## API - Differences
@@ -15,8 +14,8 @@ None known.
 If you wish to use this API, I recommend that you do so with older versions of Minecraft, as it was tested with Beta 1.7.3 and the alpha launcher.
 To host the site, create a config.py file based on the provided config_example.py and run server.py.
 
-To use the website with a game you will have to decompile the launcher, client and server, and changed the endpoints from minecraft.net / AWS.
-You will also need to provide game files inside the public folder (ie minecraft.jar goes in public/MinecraftDownload/).
+To use the website with a game you will have to point requests to minecraft.net and s3.amazonaws.com to your local machine, or wheever you're hosting this. You can use a proxy, the hosts file, modify game bytecode or just recompile the game entirely.
+You will also need to provide game files inside the public folder (ie minecraft.jar goes in public/MinecraftDownload/) if you wish to use old updaters.
 
 ## Serving Assets
 The api is written to serve files that used to be (and sometimes still are) hosted on AWS.
