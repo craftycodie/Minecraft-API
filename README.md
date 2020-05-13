@@ -12,7 +12,7 @@ These are features which are no longer available through official servers.
 - Skins
 
 ## API - Differences
-- Missing classic endpoints.
+None known.
   
 ## How To Use
 If you wish to use this API, I recommend that you do so with older versions of Minecraft, as it was tested with Beta 1.7.3 and the alpha launcher.
