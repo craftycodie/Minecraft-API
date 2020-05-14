@@ -192,8 +192,6 @@ Good luck! Contact me on Discord if you get stuck! Codie#0642
 - Buy pages could be closer to the original site.
   - Buying won't be implemented (obviously) but those pages currently assume the user is not logged in and or does not own minecraft.
   - Buying could be implemented without payment (ie press the buy button, the API now thinks you own minecraft).
-- Profile page needs some style tweaks.
-  - This page was fully remade by hand so it's a little off.
 - Error messages could be closer to original.
   - I had nothing to compare to, should see if there are any videos of the old site with errors.
 - Implement Password Reset.

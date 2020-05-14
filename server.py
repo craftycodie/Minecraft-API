@@ -158,7 +158,7 @@ def skin(username):
 
 @app.route('/MinecraftCloaks/<username>.png')
 def cloak(username):
-    if username != "" and os.path.exists("public/MinecraftSkins/" + username + ".png"):
+    if username != "" and os.path.exists("public/MinecraftCloaks/" + username + ".png"):
         return send_file("public/MinecraftCloaks/" + username + ".png", mimetype="image/png")
     else:
         return abort(404)
