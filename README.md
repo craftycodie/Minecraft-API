@@ -2,7 +2,7 @@
 This project aims to provide a server capable of running any pre-release version of Minecraft, fully featured.
 
 ## NEW - MineOnline
-(MineOnline)[https://github.com/codieradical/MineOnline] is a launcher which uses this API to run any pre-release version of minecraft.
+[MineOnline](https://github.com/codieradical/MineOnline) is a launcher which uses this API to run any pre-release version of minecraft.
 
 ## Restored Features
 These are features which are no longer available through official servers.
