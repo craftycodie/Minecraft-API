@@ -431,24 +431,27 @@ def savemap():
 
     user = None
 
-    # try:
-    requestData = request.stream.read()
+    try:
+        requestData = request.stream.read()
 
-    username_length = int.from_bytes(requestData[1 : 2], byteorder='big')
-    username = requestData[2 : 2 + username_length]
-    sessionId_length = int.from_bytes(requestData[2 + username_length + 1 : 2 + username_length + 2], byteorder='big')
-    sessionId = requestData[2 + username_length + 2 : 2 + username_length + 2 + sessionId_length]
-    mapName_length = int.from_bytes(requestData[2 + username_length + 2 + sessionId_length + 1 : 2 + username_length + 2 + sessionId_length + 2], byteorder='big')
-    mapName = requestData[2 + username_length + 2 + sessionId_length + 2 : 2 + username_length + 2 + sessionId_length + 2 + mapName_length]
-    mapId = requestData[2 + username_length + 2 + sessionId_length + 2 + mapName_length]
-    mapLength = int.from_bytes(requestData[2 + username_length + 2 + sessionId_length + 2 + mapName_length + 1 : 2 + username_length + 2 + sessionId_length + 2 + mapName_length + 1 + 4], byteorder='big')
-    mapData = requestData[2 + username_length + 2 + sessionId_length + 2 + mapName_length + 1 + 4 : len(requestData)]
+        username_length = int.from_bytes(requestData[1 : 2], byteorder='big')
+        username = requestData[2 : 2 + username_length]
+        sessionId_length = int.from_bytes(requestData[2 + username_length + 1 : 2 + username_length + 2], byteorder='big')
+        sessionId = requestData[2 + username_length + 2 : 2 + username_length + 2 + sessionId_length]
+        mapName_length = int.from_bytes(requestData[2 + username_length + 2 + sessionId_length + 1 : 2 + username_length + 2 + sessionId_length + 2], byteorder='big')
+        mapName = requestData[2 + username_length + 2 + sessionId_length + 2 : 2 + username_length + 2 + sessionId_length + 2 + mapName_length]
+        mapId = requestData[2 + username_length + 2 + sessionId_length + 2 + mapName_length]
+        mapLength = int.from_bytes(requestData[2 + username_length + 2 + sessionId_length + 2 + mapName_length + 1 : 2 + username_length + 2 + sessionId_length + 2 + mapName_length + 1 + 4], byteorder='big')
+        mapData = requestData[2 + username_length + 2 + sessionId_length + 2 + mapName_length + 1 + 4 : len(requestData)]
 
-    print(mapLength)
+        print(mapLength)
 
-    username = str(utf8m_to_utf8s(username), 'utf-8')
-    sessionId = str(utf8m_to_utf8s(sessionId), 'utf-8')
-    mapName = str(utf8m_to_utf8s(mapName), 'utf-8')
+        username = str(utf8m_to_utf8s(username), 'utf-8')
+        sessionId = str(utf8m_to_utf8s(sessionId), 'utf-8')
+        mapName = str(utf8m_to_utf8s(mapName), 'utf-8')
+
+    except:
+        return Response("Something went wrong!", 500)
 
     try:
         users = mongo.db.users
@@ -532,9 +535,9 @@ def addclassicserver():
             return Response("http://www.minecraft.net/play.jsp?server=" + str(_id.inserted_id))
 
     except:
-        return Response("Something went wrong.", 400)
+        return Response("Something went wrong.", 500)
 
-    return Response("Something went wrong.")
+    return Response("Something went wrong.", 500)
 
 #not sure when this was used, but it definately existed!
 @app.route('/haspaid.jsp')
@@ -551,6 +554,50 @@ def haspaid():
         return Response("false")
 
     return Response("true")
+
+#classic, mineonline
+@app.route('/mineonline/mppass.jsp')
+def getmmpass():
+    sessionId = request.args['sessionId']
+    serverIP = request.args['serverIP']
+    serverPort = request.args['serverPort']
+
+    try:
+        users = mongo.db.users
+        user = users.find_one({"sessionId": ObjectId(sessionId)})
+    except:
+        return Response("User not found.", 404)
+
+    if (user == None):
+        return Response("User not found.", 404)
+
+    try:
+        server = mongo.db.classicservers.find_one({"ip": serverIP, "port": serverPort})
+    except:
+        return Response("Server not found.", 404)
+
+    if server:
+        mppass = str(hashlib.md5((server['salt'] + user['user']).encode('utf-8')).hexdigest())
+        return Response(mppass)
+    else:
+        return Response("Server not found.", 404)
+
+    return Response("Something went wrong!", 500)
+
+#classic, mineonline
+@app.route('/mineonline/getserver.jsp')
+def getserver():
+    serverId = request.args['server']
+
+    server = mongo.db.classicservers.find_one({"_id": ObjectId(serverId)})
+    if server:
+        serverIP = server['ip']
+        serverPort = server['port']
+        return Response(serverIP + ":" + serverPort)
+    else:
+        return Response("Server not found.", 404)
+
+    return Response("Something went wrong!", 500)
 
 @app.route('/', defaults={'path': 'index'})
 @app.route('/<path:path>')

@@ -11,7 +11,7 @@ These are features which are no longer available through official servers.
 - Skins
 
 ## API - Differences
-None known.
+- When running the development server, V1 map files are too large to save, causing a hang.
   
 ## How To Use
 If you wish to use this API, I recommend that you do so with older versions of Minecraft, as it was tested with Beta 1.7.3 and the alpha launcher.
@@ -21,8 +21,8 @@ To use the website with a game you will have to point requests to minecraft.net 
 You will also need to provide game files inside the public folder (ie minecraft.jar goes in public/MinecraftDownload/) if you wish to use old updaters.
 
 ## Serving Assets
-The api is written to serve files that used to be (and sometimes still are) hosted on AWS.
-The recommmended file tree is as follows:
+The API is written to serve files that used to be (and sometimes still are) hosted on AWS.
+The recommended file tree is as follows:
 
 public/
 ```
@@ -136,6 +136,20 @@ Classic Endpoints
   ○ Check if a player is premium.
   ○ ? user=<username>
   ○ 200 OK "true" or "false"
+
+MineOnline Endpoints
+• Used by https://github.com/codieradical/MineOnline
+• GET /mineonline/getserver.jsp
+  ○ Get a server IP and Port from it's ID.
+  ○ ?server=<serverId>
+  ○ 200 OK "<ip>:<port>"
+  ○ 404 Not Found
+• GET /mineonline/mppass.jsp
+  ○ Get an auth token for a pre-alpha server.
+  ○ ?sessionId=<sessionId>&serverIP=<serverIP>&serverPort=<serverPort>
+  ○ 200 OK "<mppass>"
+  ○ 404 Not Found
+
 ```
 
 ## Playing In Browser (Applet)
