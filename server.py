@@ -29,10 +29,6 @@ mongo.db.serverjoins.create_index( "createdAt", expireAfterSeconds = 600 )
 
 latestVersion = "1589019440"
 
-@app.route('/game/getversion', methods = ["POST"]) # Legacy
-def getversion_old():
-    return Response("Old version")
-
 @app.route('/game/getversion.jsp', methods = ["POST"])
 def getversion():
     username = request.form['user']

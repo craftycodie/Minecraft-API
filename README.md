@@ -1,25 +1,24 @@
-# Minecraft 2011 API
-A recreation of the Minecraft Beta 1.7.3 Backend.
+# Minecraft API Recreation
+This project aims to provide a server capable of running any pre-release version of Minecraft, fully featured.
 
-The aim of this project is to recreate the Minecraft website and API as it appeared in 2011.
-The site implements it's original endpoints as closely as possible.
+## NEW - MineOnline
+[MineOnline](https://github.com/codieradical/MineOnline) is a launcher which uses this API to run any pre-release version of minecraft.
 
 ## Restored Features
 These are features which are no longer available through official servers.
 - Launcher Authentication and Updates
-- Basic Server Authentication
-  - Beta 1.7.3 servers are all running in offline mode right now!
+- Server Authentication
 - Skins
 
 ## API - Differences
-- Missing classic endpoints.
+None known.
   
 ## How To Use
 If you wish to use this API, I recommend that you do so with older versions of Minecraft, as it was tested with Beta 1.7.3 and the alpha launcher.
 To host the site, create a config.py file based on the provided config_example.py and run server.py.
 
-To use the website with a game you will have to decompile the launcher, client and server, and changed the endpoints from minecraft.net / AWS.
-You will also need to provide game files inside the public folder (ie minecraft.jar goes in public/MinecraftDownload/).
+To use the website with a game you will have to point requests to minecraft.net and s3.amazonaws.com to your local machine, or wheever you're hosting this. You can use a proxy, the hosts file, modify game bytecode or just recompile the game entirely.
+You will also need to provide game files inside the public folder (ie minecraft.jar goes in public/MinecraftDownload/) if you wish to use old updaters.
 
 ## Serving Assets
 The api is written to serve files that used to be (and sometimes still are) hosted on AWS.
@@ -133,6 +132,10 @@ Classic Endpoints
 • POST /heartbeat.jsp
   ○ Classic server list.
   ○ ?port=<port>&users=<current user count>&max=<max user count>&name=<name>&public=<true/false>&version=<protocol version (7)>&salt=<A random, 16-character base-62 salt>
+• GET /haspaid.jsp
+  ○ Check if a player is premium.
+  ○ ? user=<username>
+  ○ 200 OK "true" or "false"
 ```
 
 ## Playing In Browser (Applet)
@@ -171,10 +174,6 @@ Go to server.py. In the serve function, before the line
 add the line
      
           `user = {"user" : "<username>", "downloadTicket": "deprecated", "sessionId": "<anything>" }`
-          
-5. Redirect Requests (if necessary)
-
-If you want the applet to install the game to .minecraft/bin (if it's not already there, and signed), youll need to route requests to minecraft.net and s3.amazonaws to this API. On windows you can use the hosts file for this, on other operating systems... you probably know how to do this if you're not on windows :P
 
 If you already have the game files installed, it is recommended to make a backup.
 You'll also want to make a version file (that's the name, no extension) containing
