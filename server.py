@@ -417,9 +417,9 @@ def listmaps():
     ]))
 
 #classic
+#TODO: GZIP V1 maps.
 @app.route('/level/save.html', methods=['POST'])
 def savemap():
-    #request.stream.read()
     username = None
     sessionId = None
     mapId = None
@@ -443,8 +443,6 @@ def savemap():
         mapId = requestData[2 + username_length + 2 + sessionId_length + 2 + mapName_length]
         mapLength = int.from_bytes(requestData[2 + username_length + 2 + sessionId_length + 2 + mapName_length + 1 : 2 + username_length + 2 + sessionId_length + 2 + mapName_length + 1 + 4], byteorder='big')
         mapData = requestData[2 + username_length + 2 + sessionId_length + 2 + mapName_length + 1 + 4 : len(requestData)]
-
-        print(mapLength)
 
         username = str(utf8m_to_utf8s(username), 'utf-8')
         sessionId = str(utf8m_to_utf8s(sessionId), 'utf-8')
@@ -470,8 +468,8 @@ def savemap():
         } } })
     except:
         return Response("Failed to save data.", 400)
-    
-    return Response(mapData)
+
+    return Response("ok")
 
 #classic
 @app.route('/level/load.html')
