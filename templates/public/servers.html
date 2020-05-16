@@ -10,23 +10,25 @@
 {% endif %}
 
 <h2>Public servers</h2>
-List was updated {{timeString}}.
-<p><br>
+<p>
+List was updated {{timeString}}.<br/><br/>
+To join a server, copy the link and paste it into the MineOnline Launcher, into the Open Join URL box.
+</p>
+<br>
 
 {% if serverCount < 1 %}
 	<p>There are currently no servers online.</p>
 {% else %}
 	{% for server in servers %}
 		{% if user %}
-			<a href="/play.jsp?server={{server['_id']}}"><b>{{server['name']}}</b> {{server['users']}}/{{server['maxUsers']}}</a>
+			<a onclick="event.preventDefault();" href="/play.jsp?server={{server['_id']}}"><b>{{server['name']}}</b> {{server['users']}}/{{server['maxUsers']}}</a>
 		{% else %}
 			<b>{{server['name']}}</b> {{server['users']}}/{{server['maxUsers']}}
 		{% endif %}
 		<br/>
 	{% endfor %}
+	<br/><br/>There are {{usersCount}} players playing on {{serverCount}} servers ({{privateCount}} of them private).
 {% endif %}
-		    
-<p><br>
-There are {{usersCount}} players playing on {{serverCount}} servers ({{privateCount}} of them private).<br>
+<br/>
 </div>
 {% endblock %}

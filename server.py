@@ -645,19 +645,20 @@ def loadmap():
         return Response("Map not found.", 404)
 
     if mapId in maps:
-        return Response(bytes([0x00, 0x02, 0x6F, 0x6B]) + maps[mapId]['data'], mimetype='application/x-mine')
+        response = Response(bytes([0x00, 0x02, 0x6F, 0x6B]) + maps[mapId]['data'], mimetype='application/x-mine')
+        return response
 
 #classic
 @app.route('/heartbeat.jsp', methods=["POST"])
-def addclassicserver():
+def addclassicserver(): 
+    port = request.values['port']
+    users = request.values['users']
+    maxUsers = request.values['max']
+    name = request.values['name']
+    public = request.values['public']
+    version = request.values['version']
+    salt = request.values['salt']
     ip = request.remote_addr
-    port = request.form.get('port')
-    users = request.form.get('users')
-    maxUsers = request.form.get('max')
-    name = request.form.get('name')
-    public = request.form.get('public')
-    version = request.form.get('version')
-    salt = request.form.get('salt')
 
     classicservers = mongo.db.classicservers
 
