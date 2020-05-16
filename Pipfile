@@ -13,6 +13,7 @@ pyjwt = "*"
 gunicorn = "*"
 markdown = "*"
 flask-mail = "*"
+pillow = "*"
 
 [requires]
 python_version = "3.7"

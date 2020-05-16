@@ -13,6 +13,8 @@ from markdown import markdown
 import codecs
 from flask_mail import Mail, Message
 from threading import Thread
+from PIL import Image, PngImagePlugin
+from io import BytesIO, StringIO
 
 # import config if present
 try: import config
@@ -24,7 +26,6 @@ app = Flask(__name__,
 
 app.config['MONGO_DBNAME'] = os.getenv("MONGO_DBNAME")
 app.config['MONGO_URI'] = os.getenv("MONGO_URI")
-app.config['UPLOAD_FOLDER'] = "public/MinecraftSkins"
 ALLOWED_EXTENSIONS = ['png']
 secretkey = os.getenv("SECRET_KEY")
 port = os.getenv("PORT", 80)
@@ -170,17 +171,41 @@ def checkserver():
 @app.route('/skin/<username>.png') # classic
 @app.route('/MinecraftSkins/<username>.png')
 def skin(username):
-    if username != "" and os.path.exists("public/MinecraftSkins/" + username + ".png"):
-        return send_file("public/MinecraftSkins/" + username + ".png", mimetype="image/png")
-    else:
+    try:
+        user = mongo.db.users.find_one({ "user": username })
+    except:
         return abort(404)
+
+    if not user or not 'skin' in user or not user['skin']:
+        return abort(404)
+
+    response = Response(user['skin'], mimetype="image/png")
+    
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    response.headers['Cache-Control'] = 'public, max-age=0'
+
+    return response
 
 @app.route('/MinecraftCloaks/<username>.png')
 def cloak(username):
-    if username != "" and os.path.exists("public/MinecraftCloaks/" + username + ".png"):
-        return send_file("public/MinecraftCloaks/" + username + ".png", mimetype="image/png")
-    else:
+    try:
+        user = mongo.db.users.find_one({ "user": username })
+    except:
         return abort(404)
+
+    if not user or not 'cloak' in user or not user['cloak']:
+        return abort(404)
+
+    response = Response(user['cloak'], mimetype="image/png")
+    
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    response.headers['Cache-Control'] = 'public, max-age=0'
+
+    return response
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -202,17 +227,37 @@ def uploadSkin():
     # check if the post request has the file part
     if 'file' not in request.files:
         return render_template("private/profile.html", error="Something went wrong.", user=user)
-    file = request.files['file']
-    # if user does not select file, browser also
-    # submit an empty part without filename
-    if file.filename == '':
-        return render_template("private/profile.html", error="No file selected.", user=user)
-    if file and allowed_file(file.filename):
-        filename = user['user'] + ".png"
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        return render_template("private/profile.html", user=user)
+    skinFile = request.files['file']
+    cloakFile = request.files['cloak']
 
-    return render_template("private/profile.html", error="Invalid file.", user=user)
+    if skinFile.filename == '' and cloakFile.filename == '':
+        return render_template("private/profile.html", error="No file selected.", user=user)
+
+    if skinFile and allowed_file(skinFile.filename):
+        if skinFile.stream.tell() > 8096:
+            return render_template("private/profile.html", error="Skin too large.", user=user)
+        skinBytes = BytesIO()
+        skinFile.save(skinBytes)
+        skinBytes.flush()
+        skinBytes.seek(0)
+        skin = Image.open(skinBytes)
+        croppedSkin = BytesIO()
+        skin = skin.crop((0, 0, 64, 32))
+        skin.save(croppedSkin, "PNG")
+        skinBytes.flush()
+        croppedSkin.seek(0)
+        users.update_one({ "_id": user["_id"] }, { "$set": { "skin": croppedSkin.read() } })
+
+    if cloakFile and allowed_file(cloakFile.filename):
+        if cloakFile.stream.tell() > 4096:
+            return render_template("private/profile.html", error="Cloak too large.", user=user)
+        cloakBytes = BytesIO()
+        cloakFile.save(cloakBytes)
+        cloakBytes.flush()
+        cloakBytes.seek(0)
+        users.update_one({ "_id": user["_id"] }, { "$set": { "cloak": cloakBytes.read() } }) 
+
+    return render_template("private/profile.html", user=user)
 
 @app.route('/MinecraftDownload/minecraft.jar')
 def downloadgame():
@@ -270,45 +315,45 @@ def changepasspost():
     if 'token' in request.form:
         token = request.form['token']
 
-    # try:
-    if token:
-        try:
-            print(token)
-            user = users.find_one({"passwordReset._id": ObjectId(token)})
-        except:
-            return render_template("public/changepass.html", error="Invalid password reset.", token=token)
-        if not user:
-            return render_template("public/changepass.html", error="Invalid password reset.", token=token)
-        if (datetime.utcnow() - user['passwordReset']['createdAt']).total_seconds() > 24 * 60 * 60:
-            return render_template("public/changepass.html", error="Password reset expired. Please reset your password again.", token=token)
-    elif 'sessionId' in request.cookies and request.cookies['sessionId'] != "":
-        users = mongo.db.users
-        user = users.find_one({"sessionId": ObjectId(request.cookies['sessionId'])})
-        if not user:
+    try:
+        if token:
+            try:
+                print(token)
+                user = users.find_one({"passwordReset._id": ObjectId(token)})
+            except:
+                return render_template("public/changepass.html", error="Invalid password reset.", token=token)
+            if not user:
+                return render_template("public/changepass.html", error="Invalid password reset.", token=token)
+            if (datetime.utcnow() - user['passwordReset']['createdAt']).total_seconds() > 24 * 60 * 60:
+                return render_template("public/changepass.html", error="Password reset expired. Please reset your password again.", token=token)
+        elif 'sessionId' in request.cookies and request.cookies['sessionId'] != "":
+            users = mongo.db.users
+            user = users.find_one({"sessionId": ObjectId(request.cookies['sessionId'])})
+            if not user:
+                return redirect('/login.jsp')
+            
+            matched = bcrypt.checkpw(request.form['currentPassword'].encode('utf-8'), user['password'].encode('utf-8'))
+            if not matched:
+                return render_template("public/changepass.html", error="Incorrect password.", token=token)
+        else:
             return redirect('/login.jsp')
-        
-        matched = bcrypt.checkpw(request.form['currentPassword'].encode('utf-8'), user['password'].encode('utf-8'))
-        if not matched:
-            return render_template("public/changepass.html", error="Incorrect password.", token=token)
-    else:
-        return redirect('/login.jsp')
 
-    if request.form['password1'] == "" or request.form['password2'] == "":
-        return render_template("public/changepass.html", error="Please enter a password.", token=token)
-    elif request.form['password1'] != request.form['password2']:
-        return render_template("public/changepass.html", error="Passwords don't match.", token=token)
+        if request.form['password1'] == "" or request.form['password2'] == "":
+            return render_template("public/changepass.html", error="Please enter a password.", token=token)
+        elif request.form['password1'] != request.form['password2']:
+            return render_template("public/changepass.html", error="Passwords don't match.", token=token)
 
-    sessionId = ObjectId()
-    users.update_one({  "_id": user['_id'] }, { "$set": {
-        "password": bcrypt.hashpw(request.form['password1'].encode('utf-8'), bcrypt.gensalt()).decode('utf-8'),
-        "forgotPassword": {},
-        "sessionId": sessionId
-    }})
+        sessionId = ObjectId()
+        users.update_one({  "_id": user['_id'] }, { "$set": {
+            "password": bcrypt.hashpw(request.form['password1'].encode('utf-8'), bcrypt.gensalt()).decode('utf-8'),
+            "forgotPassword": {},
+            "sessionId": sessionId
+        }})
 
-    return render_template("public/login.html", sessionId=str(sessionId))
+        return render_template("public/login.html", sessionId=str(sessionId))
 
-    # except:
-    #     return render_template("public/changepass.html", error="An error occured while resetting your password.", token=request.form['token'])
+    except:
+        return render_template("public/changepass.html", error="An error occured while resetting your password.", token=request.form['token'])
 
 
 @app.route('/register.jsp', methods = ["POST"])
@@ -689,6 +734,24 @@ def getmmpass():
     return Response("Something went wrong!", 500)
 
 #classic, mineonline
+@app.route('/mineonline/removecloak.jsp')
+def removeCloak():
+    sessionId = request.args['sessionId']
+
+    if sessionId:
+        try:
+            users = mongo.db.users
+            user = users.find_one({"sessionId": ObjectId(sessionId)})
+            if not user:
+                return Response("Invalid session.", 400)
+            users.update_one({ "_id": user["_id"] }, { "$set": { "cloak": "" } })
+            return Response("ok", 200)
+        except:
+            return Response("Something went wrong!", 500)
+
+    return Response("You must be logged in to do this.", 401)
+
+#classic, mineonline
 @app.route('/mineonline/getserver.jsp')
 def getserver():
     serverId = request.args['server']
@@ -702,6 +765,7 @@ def getserver():
         return Response("Server not found.", 404)
 
     return Response("Something went wrong!", 500)
+
 
 @app.route('/', defaults={'path': 'index'})
 @app.route('/<path:path>')
