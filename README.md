@@ -105,9 +105,10 @@ Endpoints have been reimplemented based on what data the client/server/launchers
   ○ ?name=<username>&session=<sessionId>
   ○ 200 OK
   ○ 400 Bad Request
-
+```
 
 Classic Endpoints
+```
 • GET /listmaps.jsp
   ○ List saved classic maps.
   ○ ?user=<username>
@@ -138,8 +139,10 @@ Classic Endpoints
   ○ Check if a player is premium.
   ○ ? user=<username>
   ○ 200 OK "true" or "false"
+```
 
 MineOnline Endpoints
+```
 • Used by https://github.com/codieradical/MineOnline
 • GET /mineonline/getserver.jsp
   ○ Get a server IP and Port from it's ID.
@@ -151,7 +154,10 @@ MineOnline Endpoints
   ○ ?sessionId=<sessionId>&serverIP=<serverIP>&serverPort=<serverPort>
   ○ 200 OK "<mppass>"
   ○ 404 Not Found
-
+• GET /mineonline/removecloak.jsp
+  ○ Removes your cape.
+  ○ ?sessionId=<sessionId>
+  ○ 200 OK "ok"
 ```
 
 ## Playing In Browser (Applet)
@@ -195,9 +201,80 @@ If you already have the game files installed, it is recommended to make a backup
 You'll also want to make a version file (that's the name, no extension) containing
 
 ```
-
 <version timestamp (see server.py for this)>
 ```
 
 Once you've done all of that, you should be good to go!
 Good luck! Contact me on Discord if you get stuck! Codie#0642
+
+## The Database
+
+The Mongo Database contains three Collections.
+
+- Serverjoins
+
+These are created for server authentication when a logged in player attempts to join a server.
+If the server is in online-mode, it will only allow joins if a serverjoin exists, then the serverjoin is deleted.
+
+- Classicservers
+
+These are classic servers displayed on the server list.
+Documents are created on server heartbeat, and expire after about a minute and a half unless another heartbeat request is received.
+These are used to get server information such as salt, ip and port from the server ID, which makes it necessary for classic server authentication.
+
+- Users
+
+```
+{
+    "_id": {
+        "$oid": "[redacted]"
+    },
+    "user": "codie",
+    "email": "[redacted]",
+    "password": "[redacted]",
+    "premium": true,
+    "sessionId": {
+        "$oid": "[redacted]"
+    },
+    "createdAt": {
+        "$date": "2020-05-16T13:14:33.790Z"
+    },
+    "maps": {
+        "0": {
+            "name": "Classic Test World",
+            "length": 198865,
+            "data": "<Binary Data>"
+        },
+        "4": {
+            "name": "test2",
+            "length": 222887,
+            "data": "<Binary Data>"
+        },
+        "1": {
+            "name": "Website Save!",
+            "length": 198880,
+            "data": "<Binary Data>"
+        },
+        "2": {
+            "name": "Water",
+            "length": 26560,
+            "data": "<Binary Data>"
+        },
+        "3": {
+            "name": "InDev Test World",
+            "length": 130575,
+            "data": "<Binary Data>"
+        }
+    },
+    "passwordReset": {
+        "_id": {
+            "$oid": "[redacted]"
+        },
+        "createdAt": {
+            "$date": "2020-05-16T10:11:09.170Z"
+        }
+    },
+    "skin": "<Binary Data>",
+    "cloak": "<Binary Data>"
+}
+```

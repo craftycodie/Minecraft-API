@@ -384,6 +384,7 @@ def register():
                 "password": hashpass,
                 "premium": True, # TODO: Mojang Auth, actually check this.
                 "sessionId": sessionId,
+                "createdAt": datetime.utcnow(),
             })
             user = users.find_one({"_id": ObjectId(inserted.inserted_id)})
             if user:
