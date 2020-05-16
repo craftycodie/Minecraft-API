@@ -204,6 +204,3 @@ Good luck! Contact me on Discord if you get stuck! Codie#0642
 ## TODO:
 - Implement Password Reset.
 - Tidy pages.
-  
-## Credits
-- All of the web client resources (HTML/CSS/JS etc) were pulled (and then modified) from the Wayback Machine.
