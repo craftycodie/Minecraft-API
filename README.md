@@ -8,7 +8,7 @@ This project aims to provide a server capable of running any pre-release version
 These are features which are no longer available through official servers.
 - Launcher Authentication and Updates
 - Server Authentication
-- Skins
+- Skins and Cloaks
 - Classic Server List
 - Online World Saves
 

@@ -346,7 +346,7 @@ def changepasspost():
         sessionId = ObjectId()
         users.update_one({  "_id": user['_id'] }, { "$set": {
             "password": bcrypt.hashpw(request.form['password1'].encode('utf-8'), bcrypt.gensalt()).decode('utf-8'),
-            "forgotPassword": {},
+            "passwordReset": {},
             "sessionId": sessionId
         }})
 
