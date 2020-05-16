@@ -1,4 +1,4 @@
-from config import port, databaseUrl, dbname, secretkey
+import config
 from flask import Flask, Response, request, send_from_directory, abort, send_file, render_template, redirect, url_for, make_response
 import json
 import os
@@ -9,7 +9,6 @@ from flask import Response
 from bson import json_util
 from bson.objectid import ObjectId
 from utils.modified_utf8 import utf8m_to_utf8s, utf8s_to_utf8m
-import gzip
 from datetime import datetime
 import hashlib
 
@@ -17,10 +16,12 @@ app = Flask(__name__,
             static_folder='public/',
             template_folder='templates')
 
-app.config['MONGO_DBNAME'] = dbname
-app.config['MONGO_URI'] = databaseUrl
+app.config['MONGO_DBNAME'] = os.getenv("MONGO_DBNAME")
+app.config['MONGO_URI'] = os.getenv("MONGO_URI")
 app.config['UPLOAD_FOLDER'] = "public/MinecraftSkins"
 ALLOWED_EXTENSIONS = ['png']
+secretkey = os.getenv("SECRET_KEY")
+port = os.getenv("PORT", 80)
 
 mongo = PyMongo(app)
 

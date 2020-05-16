@@ -1,6 +1,5 @@
 import os
 
-port=os.getenv("PORT", 80)
-databaseUrl=""
-dbname=""
-secretkey=""
+os.environ["MONGO_URI"] = ""
+os.environ["MONG_DBNAME"] = ""
+os.environ["SECRET_KEY"] = ""
