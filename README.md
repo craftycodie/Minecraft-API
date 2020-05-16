@@ -9,6 +9,8 @@ These are features which are no longer available through official servers.
 - Launcher Authentication and Updates
 - Server Authentication
 - Skins
+- Classic Server List
+- Online World Saves
 
 ## API - Differences
 - When running the development server, V1 map files are too large to save, causing a hang.
