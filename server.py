@@ -1,15 +1,18 @@
-from flask import Flask, Response, request, send_from_directory, abort, send_file, render_template, redirect, url_for, make_response
+from flask import Flask, Response, request, send_from_directory, abort, send_file, render_template, redirect, url_for, make_response, Markup
 import json
 import os
 import bcrypt
 import re
 from flask_pymongo import PyMongo
-from flask import Response 
 from bson import json_util
 from bson.objectid import ObjectId
 from utils.modified_utf8 import utf8m_to_utf8s, utf8s_to_utf8m
 from datetime import datetime
 import hashlib
+from markdown import markdown
+import codecs
+from flask_mail import Mail, Message
+from threading import Thread
 
 # import config if present
 try: import config
@@ -26,12 +29,29 @@ ALLOWED_EXTENSIONS = ['png']
 secretkey = os.getenv("SECRET_KEY")
 port = os.getenv("PORT", 80)
 
-mongo = PyMongo(app)
+app.config.update(dict(
+    DEBUG = True,
+    MAIL_SERVER = 'smtp.gmail.com',
+    MAIL_PORT = 465,
+    MAIL_USE_TLS = False,
+    MAIL_USE_SSL = True,
+    MAIL_USERNAME = os.getenv("EMAIL_USER"),
+    MAIL_PASSWORD = os.getenv("EMAIL_PASSWORD"),
+))
 
+mail = Mail(app)
+
+mongo = PyMongo(app)
 mongo.db.classicservers.create_index( "createdAt", expireAfterSeconds = 60)
 mongo.db.serverjoins.create_index( "createdAt", expireAfterSeconds = 600 )
+mongo.db.users.create_index("user", unique = True )
+mongo.db.users.create_index("email", unique = True )
 
 latestVersion = "1589019440"
+
+readme_file = codecs.open("README.md", mode="r", encoding="utf-8")
+readme_html = Markup(markdown(readme_file.read()))
+readme_file.close()
 
 @app.route('/game/getversion.jsp', methods = ["POST"])
 def getversion():
@@ -94,7 +114,7 @@ def joinserver():
         serverjoins.delete_many({"user": username})
 
         serverjoins.insert_one({
-            "createdAt": datetime.now(),
+            "createdAt": datetime.utcnow(),
             "user": username,
             "serverId": serverId,
         })
@@ -208,6 +228,89 @@ def resourcesTree():
     return send_file("public/MinecraftResources/download.xml")
 
 
+@app.route('/forgotpass.jsp', methods = ["POST"])
+def forgotpass():
+    username = request.form['username']
+    email = request.form['email']
+
+    url = request.host_url + 'changepass.jsp'
+    users = mongo.db.users
+
+    if not username and not email:
+        return render_template("public/forgotpass.html", error="Please provide your username or email.")
+
+    user = None
+    if username:
+        user = users.find_one({ "user": username })
+    elif not user and email:
+        user = users.find_one({ "email": email })
+    if not user:
+        return render_template("public/forgotpass.html", error="User not found.")
+
+    resetToken = ObjectId()
+
+    users.update_one({"_id": user["_id"]}, { "$set": { "passwordReset": {
+        "_id": resetToken,
+        "createdAt": datetime.utcnow()
+    } } })
+
+    send_email(
+        subject='MineOnline - Reset Your Password',
+        sender='mineonline@codie.gg',
+        recipients=[user['email']],
+        text_body="Password reset requested.\r\nVisit " + url + "?token=" + str(resetToken) + " to change your password."
+    )
+    
+    return render_template("public/forgotpass.html", success="Instructions to reset your password have been sent to your email adress.\r\nMake sure to check the spam folder.")
+
+@app.route('/changepass.jsp', methods = ["POST"])
+def changepasspost():
+    users = mongo.db.users
+    token = None
+    if 'token' in request.form:
+        token = request.form['token']
+
+    # try:
+    if token:
+        try:
+            print(token)
+            user = users.find_one({"passwordReset._id": ObjectId(token)})
+        except:
+            return render_template("public/changepass.html", error="Invalid password reset.", token=token)
+        if not user:
+            return render_template("public/changepass.html", error="Invalid password reset.", token=token)
+        if (datetime.utcnow() - user['passwordReset']['createdAt']).total_seconds() > 24 * 60 * 60:
+            return render_template("public/changepass.html", error="Password reset expired. Please reset your password again.", token=token)
+    elif 'sessionId' in request.cookies and request.cookies['sessionId'] != "":
+        users = mongo.db.users
+        user = users.find_one({"sessionId": ObjectId(request.cookies['sessionId'])})
+        if not user:
+            return redirect('/login.jsp')
+        
+        matched = bcrypt.checkpw(request.form['currentPassword'].encode('utf-8'), user['password'].encode('utf-8'))
+        if not matched:
+            return render_template("public/changepass.html", error="Incorrect password.", token=token)
+    else:
+        return redirect('/login.jsp')
+
+    if request.form['password1'] == "" or request.form['password2'] == "":
+        return render_template("public/changepass.html", error="Please enter a password.", token=token)
+    elif request.form['password1'] != request.form['password2']:
+        return render_template("public/changepass.html", error="Passwords don't match.", token=token)
+
+    sessionId = ObjectId()
+    users.update_one({  "_id": user['_id'] }, { "$set": {
+        "password": bcrypt.hashpw(request.form['password1'].encode('utf-8'), bcrypt.gensalt()).decode('utf-8'),
+        "forgotPassword": {},
+        "sessionId": sessionId
+    }})
+
+    return render_template("public/login.html", sessionId=str(sessionId))
+
+    # except:
+    #     return render_template("public/changepass.html", error="An error occured while resetting your password.", token=request.form['token'])
+
+
 @app.route('/register.jsp', methods = ["POST"])
 def register():
     users = mongo.db.users
@@ -286,7 +389,7 @@ def login():
                 return serve('login')
             return redirect('/profile/')
         except:
-            return redirect('/login/')
+            return redirect('/login.jsp')
     return serve('login')
 
 @app.route('/logout.jsp')
@@ -470,7 +573,7 @@ def savemap():
             "data": mapData
         } } })
     except:
-        return Response("Failed to save data.", 400)
+        return Response("Failed to save data.", 500)
 
     return Response("ok")
 
@@ -519,7 +622,7 @@ def addclassicserver():
         classicservers.delete_many({"port": port, "ip": ip})
 
         _id = classicservers.insert_one({
-            "createdAt": datetime.now(),
+            "createdAt": datetime.utcnow(),
             "ip": ip,
             "port": port,
             "users": users,
@@ -623,16 +726,31 @@ def serve(path):
 
     if os.path.exists("templates/private/" + path + ".html"):
         if user:
-            return render_template("private/" + path + ".html", user=user, latestVersion=latestVersion)
+            return render_template("private/" + path + ".html", user=user)
         else:
             return redirect('/login.jsp')
     elif os.path.exists("templates/public/" + path + ".html"):
-        return render_template("public/" + path + ".html", user=user, latestVersion=latestVersion)
+        return render_template("public/" + path + ".html", user=user, latestVersion=latestVersion, readme_html=readme_html, args=request.args)
     elif os.path.exists(app.static_folder + '/' + path):
         return send_from_directory(app.static_folder, path)
 
     return abort(404)
 
+
+
+
+def send_async_email(app, msg):
+    with app.app_context():
+        try:
+            mail.send(msg)
+        except ConnectionRefusedError:
+            raise EnvironmentError("[MAIL SERVER] not working")
+
+
+def send_email(subject, sender, recipients, text_body):
+    msg = Message(subject, sender=sender, recipients=recipients)
+    msg.body = text_body
+    Thread(target=send_async_email, args=(app, msg)).start() 
 
 
 

@@ -6,9 +6,10 @@
   <h1>Profile</h1>
   <p>Player name: {{user.user}}</p>
   <p>E-mail: {{user.email}}</p>
+  <a href="/changepass.jsp">Click here to change your password.</a>
   <h2>Change Your Skin</h2>
-  <p>Start by <a href="char.png">downloading the reference skin</a>.</p>
-  <img src="/MinecraftSkins/{{user.user}}.png" onerror="if (this.src != 'char.png') this.src = 'char.png';" style="float:left" />
+  <p>Start by <a href="/char.png">downloading the reference skin</a>.</p>
+  <img src="/MinecraftSkins/{{user.user}}.png" onerror="if (this.src != '/char.png') this.src = '/char.png';" style="float:left" />
   <p>Edit in your favorite image editing tool and save it as a png image. Make sure you keep the same image dimensions as the original.</p>
   <p>When you're happy with the changes, upload the new image here:</p>
   {% if error %}

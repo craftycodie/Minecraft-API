@@ -201,8 +201,3 @@ You'll also want to make a version file (that's the name, no extension) containi
 
 Once you've done all of that, you should be good to go!
 Good luck! Contact me on Discord if you get stuck! Codie#0642
-
-
-## TODO:
-- Implement Password Reset.
-- Tidy pages.
