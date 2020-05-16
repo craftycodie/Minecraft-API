@@ -1,4 +1,3 @@
-import config
 from flask import Flask, Response, request, send_from_directory, abort, send_file, render_template, redirect, url_for, make_response
 import json
 import os
@@ -11,6 +10,10 @@ from bson.objectid import ObjectId
 from utils.modified_utf8 import utf8m_to_utf8s, utf8s_to_utf8m
 from datetime import datetime
 import hashlib
+
+# import config if present
+try: import config
+except: pass
 
 app = Flask(__name__,
             static_folder='public/',
