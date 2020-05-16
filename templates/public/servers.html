@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="oneColeDiv">
+
+
+<br/>
+{% if not user %}
+<center><font color="#ff0000">You need to log in to join multiplayer games.</font></center>
+{% endif %}
+
+<h2>Public servers</h2>
+If you want to host your own, here's <a href="minecraft-server.zip">the server software</a>!<br>
+
+List was updated {{timeString}}.
+<p><br>
+
+{% if serverCount < 1 %}
+	<p>There are currently no servers online.</p>
+{% else %}
+	{% for server in servers %}
+		{% if user %}
+			<a href="/play.jsp?server={{server['_id']}}"><b>{{server['name']}}</b> {{server['users']}}/{{server['maxUsers']}}</a>
+		{% else %}
+			<b>{{server['name']}}</b> {{server['users']}}/{{server['maxUsers']}}
+		{% endif %}
+		<br/>
+	{% endfor %}
+{% endif %}
+		    
+<p><br>
+There are {{usersCount}} players playing on {{serverCount}} servers ({{privateCount}} of them private).<br>
+</div>
+{% endblock %}
