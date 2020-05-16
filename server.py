@@ -114,14 +114,13 @@ def checksession():
         user = users.find_one({"sessionId": ObjectId(sessionId), "user": username})
 
         if user and user['premium']:
-            response = Response("ok")
-            return response
+            return Response("ok")
         else:
-            return make_response("Invalid Session", 400)
+            return Response("Invalid Session", 400)
     except:
-        return make_response("Invalid Session", 400)
+        return Response("Invalid Session", 400)
 
-    return make_response("Invalid Session", 400)
+    return Response("Invalid Session", 400)
 
 @app.route('/game/checkserver.jsp')
 def checkserver():
@@ -133,7 +132,7 @@ def checkserver():
     try:
         found = serverjoins.find_one({"user": username, "serverId": serverId})
         if not found:
-            return make_response("Invalid Session", 401)
+            return Response("Invalid Session", 401)
 
         serverjoins.delete_one({"_id": found['_id']})
 
