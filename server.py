@@ -99,6 +99,9 @@ def joinserver():
     sessionId = request.args.get('sessionId')
     serverId = request.args.get('serverId')
 
+    if not 'sessionId' in request.args or sessionId == None:
+        return Response("Invalid Session: you are not logged in.")
+
     serverjoins = mongo.db.serverjoins
 
     user = None
