@@ -658,11 +658,17 @@ def addclassicserver():
     public = request.values['public']
     version = request.values['version']
     salt = request.values['salt']
-    ip = request.remote_addr
+    if 'ip' in request.values:
+        ip = request.values['ip'] # new to mineonline to allow classic servers on different IPs
+    else:
+        ip = request.remote_addr
 
     classicservers = mongo.db.classicservers
 
     user = None
+
+    if(port == None):
+        port = "25565"
 
     try:
         # Delete existing server record
