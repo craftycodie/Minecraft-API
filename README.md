@@ -137,6 +137,7 @@ Classic Endpoints
 • POST /heartbeat.jsp
   ○ Classic server list.
   ○ ?port=<port>&users=<current user count>&max=<max user count>&name=<name>&public=<true/false>&version=<protocol version (7)>&salt=<A random, 16-character base-62 salt>
+  ○ The endpoint can also take an IP parameter if you are running a modified server capable of binding to a specific IP address.
 • GET /haspaid.jsp
   ○ Check if a player is premium.
   ○ ? user=<username>
