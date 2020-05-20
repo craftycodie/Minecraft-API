@@ -7,3 +7,7 @@ code {
     display: block;
     white-space: break-spaces;
 }
+
+.bulletImg {
+    height: 2em;
+}
