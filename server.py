@@ -677,7 +677,14 @@ def addclassicserver():
         # Delete existing server record
         classicservers.delete_many({"port": port, "ip": ip})
 
-        _id = classicservers.insert_one({
+        _id = ObjectId()
+
+        currentlisting = classicservers.find_one({"port": port, "ip": ip})
+        if currentlisting:
+            _id = currentlisting['_id']
+
+        classicservers.insert_one({
+            "_id": _id,
             "createdAt": datetime.utcnow(),
             "ip": ip,
             "port": port,
