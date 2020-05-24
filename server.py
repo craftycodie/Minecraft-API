@@ -1,4 +1,4 @@
-from flask import Flask, Response, request, send_from_directory, abort, send_file, render_template, redirect, url_for, make_response, Markup
+from flask import Flask, Response, request, send_from_directory, abort, send_file, render_template, redirect, url_for, make_response, Markup, jsonify
 import json
 import os
 import bcrypt
@@ -869,6 +869,32 @@ def savecloak():
         return Response("Failed to upload skin.", 500)
 
     return Response("ok")
+
+@app.route('/mineonline/account.jsp')
+def account():
+    username = request.args.get('name')
+    sessionId = request.args.get('session')
+
+    user = None
+    
+    try:
+        users = mongo.db.users
+        user = users.find_one({"sessionId": ObjectId(sessionId), "user": username})
+
+        if user:
+            return Response(json.dumps({
+                "user": user['user'],
+                "email": user['email'],
+                "createdAt": str(user['createdAt']),
+                "premium": user['premium']
+            }))
+        else:
+            return Response("Invalid Session", 400)
+    except:
+        return Response("Invalid Session", 400)
+
+    return Response("Invalid Session", 400)
+
 
 @app.route('/', defaults={'path': 'index'})
 @app.route('/<path:path>')
