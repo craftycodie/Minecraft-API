@@ -619,7 +619,8 @@ def savemap():
         users.update_one({"_id": user["_id"]}, { "$set": { ("maps." + str(mapId)): {
             "name": mapName,
             "length": mapLength,
-            "data": mapData
+            "data": mapData,
+            "createdAt": datetime.utcnow(),
         } } })
     except:
         return Response("Failed to save data.", 500)
@@ -769,21 +770,105 @@ def removeCloak():
 
     return Response("You must be logged in to do this.", 401)
 
-#classic, mineonline
-@app.route('/mineonline/getserver.jsp')
-def getserver():
-    serverId = request.args['server']
+#mineonline
+@app.route('/mineonline/skin.jsp', methods=['POST'])
+def saveskin():
+    username = None
+    sessionId = None
 
-    server = mongo.db.classicservers.find_one({"_id": ObjectId(serverId)})
-    if server:
-        serverIP = server['ip']
-        serverPort = server['port']
-        return Response(serverIP + ":" + serverPort)
-    else:
-        return Response("Server not found.", 404)
+    user = None
 
-    return Response("Something went wrong!", 500)
+    try:
+        requestData = request.stream.read()
 
+        username_length = int.from_bytes(requestData[1 : 2], byteorder='big')
+        username = requestData[2 : 2 + username_length]
+        sessionId_length = int.from_bytes(requestData[2 + username_length + 1 : 2 + username_length + 2], byteorder='big')
+        sessionId = requestData[2 + username_length + 2 : 2 + username_length + 2 + sessionId_length]
+        skinLength = int.from_bytes(requestData[2 + username_length + 2 + sessionId_length + 2: 2 + username_length + 2 + sessionId_length + 2 + 4], byteorder='big')
+        skinData = requestData[2 + username_length + 2 + sessionId_length + 4 : len(requestData)]
+
+        username = str(utf8m_to_utf8s(username), 'utf-8')
+        sessionId = str(utf8m_to_utf8s(sessionId), 'utf-8')
+
+    except:
+        return Response("Something went wrong!", 500)
+
+    try:
+        users = mongo.db.users
+        user = users.find_one({"user" : username, "sessionId": ObjectId(sessionId)})
+    except:
+        return Response("Invalid Session", 401)
+
+    if (user == None):
+        return Response("Invalid Session", 401)
+
+    try:
+        skinBytes = BytesIO()
+        skinBytes.write(skinData)
+        skinBytes.flush()
+        skinBytes.seek(0)
+        skin = Image.open(skinBytes)
+        croppedSkin = BytesIO()
+        skin = skin.crop((0, 0, 64, 32))
+        skin.save(croppedSkin, "PNG")
+        skinBytes.flush()
+        croppedSkin.seek(0)
+        users.update_one({ "_id": user["_id"] }, { "$set": { "skin": croppedSkin.read() } })
+    except:
+        return Response("Failed to upload skin.", 500)
+
+    return Response("ok")
+
+#mineonline
+@app.route('/mineonline/cloak.jsp', methods=['POST'])
+def savecloak():
+    username = None
+    sessionId = None
+
+    user = None
+
+    try:
+        requestData = request.stream.read()
+
+        username_length = int.from_bytes(requestData[1 : 2], byteorder='big')
+        username = requestData[2 : 2 + username_length]
+        sessionId_length = int.from_bytes(requestData[2 + username_length + 1 : 2 + username_length + 2], byteorder='big')
+        sessionId = requestData[2 + username_length + 2 : 2 + username_length + 2 + sessionId_length]
+        cloakLength = int.from_bytes(requestData[2 + username_length + 2 + sessionId_length + 2: 2 + username_length + 2 + sessionId_length + 2 + 4], byteorder='big')
+        cloakData = requestData[2 + username_length + 2 + sessionId_length + 4 : len(requestData)]
+
+        username = str(utf8m_to_utf8s(username), 'utf-8')
+        sessionId = str(utf8m_to_utf8s(sessionId), 'utf-8')
+
+    except:
+        return Response("Something went wrong!", 500)
+
+    try:
+        users = mongo.db.users
+        user = users.find_one({"user" : username, "sessionId": ObjectId(sessionId)})
+    except:
+        return Response("Invalid Session", 401)
+
+    if (user == None):
+        return Response("Invalid Session", 401)
+
+    try:
+        cloakBytes = BytesIO()
+        cloakBytes.write(cloakData)
+        cloakBytes.flush()
+        cloakBytes.seek(0)
+        cloak = Image.open(cloakBytes)
+        croppedCloak = BytesIO()
+        cloak = cloak.crop((0, 0, 64, 32))
+        cloak.save(croppedCloak, "PNG")
+        cloakBytes.flush()
+        croppedCloak.seek(0)
+        users.update_one({ "_id": user["_id"] }, { "$set": { "cloak": croppedCloak.read() } })
+    except:
+        return Response("Failed to upload skin.", 500)
+
+    return Response("ok")
 
 @app.route('/', defaults={'path': 'index'})
 @app.route('/<path:path>')
