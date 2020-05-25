@@ -12,19 +12,22 @@
 <h2>Public servers</h2>
 <p>
 List was updated {{timeString}}.<br/><br/>
-To join a server, copy the link and paste it into the MineOnline Launcher, into the Open Join URL box.
+Login to view the IP address and port.
 </p>
 <br>
 
 {% if serverCount < 1 %}
 	<p>There are currently no servers online.</p>
 {% else %}
+	<hr/>
 	{% for server in servers %}
 		{% if user %}
-			<a onclick="event.preventDefault();" href="/play.jsp?server={{server['_id']}}"><b>{{server['name']}}</b> {{server['users']}}/{{server['maxUsers']}}</a>
+			<u><b>{{server['name']}}</b> {{server['users']}}/{{server['maxUsers']}}</u><br/><br/>
+			<span>IP: <b>{{server['ip']}}</b><br/>Port: <b>{{server['port']}}</b></span>
 		{% else %}
 			<b>{{server['name']}}</b> {{server['users']}}/{{server['maxUsers']}}
 		{% endif %}
+		<hr/>
 		<br/>
 	{% endfor %}
 	<br/><br/>There are {{usersCount}} players playing on {{serverCount}} servers ({{privateCount}} of them private).
