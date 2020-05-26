@@ -269,6 +269,9 @@ def downloadgame():
     return send_file("public/MinecraftDownload/minecraft.jar")
 
 @app.route('/resources/') # classic
+def resourcesArray():
+    return send_file("public/resources/index.txt")
+
 @app.route('/MinecraftResources/')
 def resourcesTree():
     username = request.args.get('user')
