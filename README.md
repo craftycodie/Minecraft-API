@@ -15,7 +15,7 @@ These are features which are no longer available through official servers.
 - Online World Saves
 
 ## API - Differences
-- When running the development server, V1 map files are too large to save, causing a hang.
+None known.
   
 ## How To Use
 If you wish to use this API, I recommend that you do so with older versions of Minecraft, as it was tested with Beta 1.7.3 and the alpha launcher.
@@ -78,14 +78,16 @@ public/
 │
 ├───MinecraftResources                    from http://s3.amazonaws.com/MinecraftResources/
 │   │   download.xml                      This is the index document tree from that url ^
-├───resources
-│   │   index.txt
+├───resources                             Sound files for older minecraft versions.
+│   │   index.txt                         A list of each sound file. Has extra data.
 │
 ├───MinecraftSkins                        Skins for each user, ie /MinecraftSkins/Notch.png
 ```
 
 ## API Endpoints
 Endpoints have been reimplemented based on what data the client/server/launchers send, where they send it, and what they expect in response. There may be undocumented responses.
+
+
 ```
 • POST /game/getversion.jsp
   ○ Login & check for updates.
@@ -109,10 +111,6 @@ Endpoints have been reimplemented based on what data the client/server/launchers
   ○ ?name=<username>&session=<sessionId>
   ○ 200 OK
   ○ 400 Bad Request
-```
-
-Classic Endpoints
-```
 • GET /listmaps.jsp
   ○ List saved classic maps.
   ○ ?user=<username>
@@ -149,11 +147,6 @@ Classic Endpoints
 MineOnline Endpoints
 ```
 • Used by https://github.com/codieradical/MineOnline
-• GET /mineonline/getserver.jsp
-  ○ Get a server IP and Port from it's ID.
-  ○ ?server=<serverId>
-  ○ 200 OK "<ip>:<port>"
-  ○ 404 Not Found
 • GET /mineonline/mppass.jsp
   ○ Get an auth token for a pre-alpha server.
   ○ ?sessionId=<sessionId>&serverIP=<serverIP>&serverPort=<serverPort>
@@ -162,6 +155,18 @@ MineOnline Endpoints
 • GET /mineonline/removecloak.jsp
   ○ Removes your cape.
   ○ ?sessionId=<sessionId>
+  ○ 200 OK "ok"
+• GET /mineonline/account.jsp
+  ○ Gets your account details.
+  ○ ?name=<username>&session=<sessionID>
+  ○ 200 OK Account JSON
+• POST /mineonline/skin.jsp
+  ○ Alternate endpoint for skin upload.
+  ○ Body includes short username, session, skin data.
+  ○ 200 OK "ok"
+• POST /mineonline/cloak.jsp
+  ○ Alternate endpoint for skin upload.
+  ○ Body includes short username, session, skin data.
   ○ 200 OK "ok"
 ```
 
