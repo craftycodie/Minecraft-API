@@ -78,6 +78,8 @@ public/
 │
 ├───MinecraftResources                    from http://s3.amazonaws.com/MinecraftResources/
 │   │   download.xml                      This is the index document tree from that url ^
+├───resources
+│   │   index.txt
 │
 ├───MinecraftSkins                        Skins for each user, ie /MinecraftSkins/Notch.png
 ```
