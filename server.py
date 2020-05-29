@@ -43,7 +43,7 @@ app.config.update(dict(
 mail = Mail(app)
 
 mongo = PyMongo(app)
-mongo.db.classicservers.create_index( "createdAt", expireAfterSeconds = 60)
+mongo.db.classicservers.create_index( "createdAt", expireAfterSeconds = 90)
 mongo.db.serverjoins.create_index( "createdAt", expireAfterSeconds = 600 )
 mongo.db.users.create_index("user", unique = True )
 mongo.db.users.create_index("email", unique = True )
@@ -661,12 +661,15 @@ def loadmap():
 #classic
 @app.route('/heartbeat.jsp', methods=["POST"])
 def addclassicserver(): 
+    # If there's no salt, just use the standard list endpoint.
+    if 'salt' not in request.values:
+        return Response("http://www.minecraft.net/servers.jsp")
+
     port = request.values['port']
     users = request.values['users']
     maxUsers = request.values['max']
     name = request.values['name']
     public = request.values['public']
-    version = request.values['version']
     salt = request.values['salt']
     if 'ip' in request.values:
         ip = request.values['ip'] # new to mineonline to allow classic servers on different IPs
@@ -681,33 +684,44 @@ def addclassicserver():
         port = "25565"
 
     try:
-        # Delete existing server record
-        classicservers.delete_many({"port": port, "ip": ip})
-
-        _id = ObjectId()
-
-        currentlisting = classicservers.find_one({"port": port, "ip": ip})
-        if currentlisting:
+        # Find an existing versioned server
+        currentlisting = classicservers.find_one({"port": port, "ip": ip, "md5": {'$nin': [None, '']}})
+        # Delete the rest
+        if(currentlisting):
             _id = currentlisting['_id']
+            classicservers.delete_many({"port": port, "ip": ip, "_id": {"$ne": _id}})
+            classicservers.update_one({"_id": _id}, { "$set": {
+                "createdAt": datetime.utcnow(),
+                "ip": ip,
+                "port": port,
+                "users": users,
+                "maxUsers": maxUsers,
+                "name": name,
+                "public": public,
+                "salt": salt,
+            }})
 
-        classicservers.insert_one({
-            "_id": _id,
-            "createdAt": datetime.utcnow(),
-            "ip": ip,
-            "port": port,
-            "users": users,
-            "maxUsers": maxUsers,
-            "name": name,
-            "public": public,
-            "version": version,
-            "salt": salt,
-            "versionName": "Classic"
-        })
+        else:
+            # Delete existing server record
+            classicservers.delete_many({"port": port, "ip": ip})
+            _id = ObjectId()
+
+            classicservers.insert_one({
+                "_id": _id,
+                "createdAt": datetime.utcnow(),
+                "ip": ip,
+                "port": port,
+                "users": users,
+                "maxUsers": maxUsers,
+                "name": name,
+                "public": public,
+                "salt": salt,
+            })
         
         if (port != "25565"):
-            return Response("http://www.minecraft.net/play.jsp?server=" + str(_id.inserted_id) + "&port=" + port)
+            return Response("http://www.minecraft.net/servers.jsp")
         else:
-            return Response("http://www.minecraft.net/play.jsp?server=" + str(_id.inserted_id))
+            return Response("http://www.minecraft.net/servers.jsp")
 
     except:
         return Response("Something went wrong.", 500)
@@ -981,27 +995,41 @@ def addserver():
         pass
 
     try:
-        # Delete existing server record
-        classicservers.delete_many({"port": port, "ip": ip})
-
-        _id = ObjectId()
-
-        currentlisting = classicservers.find_one({"port": port, "ip": ip})
-        if currentlisting:
+        # Find an existing salted server
+        currentlisting = classicservers.find_one({"port": port, "ip": ip, "salt": {'$nin': [None, '']}})
+        # Delete the rest
+        if(currentlisting):
             _id = currentlisting['_id']
+            classicservers.delete_many({"port": port, "ip": ip, "_id": {"$ne": _id}})
+            classicservers.update_one({"_id": _id}, { "$set": {
+                "createdAt": datetime.utcnow(),
+                "ip": ip,
+                "port": port,
+                "users": users,
+                "maxUsers": maxUsers,
+                "name": name,
+                "onlinemode": onlinemode,
+                "versionName": versionName,
+                "md5": md5,
+            }})
 
-        classicservers.insert_one({
-            "_id": _id,
-            "createdAt": datetime.utcnow(),
-            "ip": ip,
-            "port": port,
-            "users": users,
-            "maxUsers": maxUsers,
-            "name": name,
-            "onlinemode": onlinemode,
-            "versionName": versionName,
-            "md5": md5,
-        })
+        else:
+            # Delete existing server record
+            classicservers.delete_many({"port": port, "ip": ip})
+            _id = ObjectId()
+
+            classicservers.insert_one({
+                "_id": _id,
+                "createdAt": datetime.utcnow(),
+                "ip": ip,
+                "port": port,
+                "users": users,
+                "maxUsers": maxUsers,
+                "name": name,
+                "onlinemode": onlinemode,
+                "versionName": versionName,
+                "md5": md5,
+            })
         
         return Response("ok")
 

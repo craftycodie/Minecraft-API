@@ -32,7 +32,7 @@ Login to view the IP address and port.
 				<br/>
 				Port: <b>{{server['port']}}</b></span>
 		{% else %}
-			<b>{{server['name']}}</b> - {{server['versionName']}}
+			<b>{{server['name']}}</b> - {{server['versionName'] or "Unknown Version"}}
 		{% endif %}
 		<hr/>
 	{% endfor %}
