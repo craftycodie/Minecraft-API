@@ -54,6 +54,9 @@ readme_file = codecs.open("README.md", mode="r", encoding="utf-8")
 readme_html = Markup(markdown(readme_file.read()))
 readme_file.close()
 
+with open("public/versions.json", "r") as read_file:
+    versions = json.load(read_file)
+
 @app.route('/game/getversion.jsp', methods = ["POST"])
 def getversion():
     username = request.form['user']
@@ -529,7 +532,7 @@ def classicservers():
     privateCount = 0
     for server in servers:
         usersCount = usersCount + int(server['users'])
-        if server['public'] == "false":
+        if 'public' in server and  server['public'] == "false":
             privateCount = privateCount + 1
         
     timeString = datetime.utcnow().strftime("%H:%M") + " (UTC) " + datetime.utcnow().strftime("%B %d")
@@ -698,6 +701,7 @@ def addclassicserver():
             "public": public,
             "version": version,
             "salt": salt,
+            "versionName": "Classic"
         })
         
         if (port != "25565"):
@@ -948,7 +952,63 @@ def send_email(subject, sender, recipients, text_body):
     msg.body = text_body
     Thread(target=send_async_email, args=(app, msg)).start() 
 
+@app.route('/mineonline/listserver.jsp', methods=["POST"])
+def addserver(): 
+    port = request.values['port']
+    users = request.values['users']
+    maxUsers = request.values['max']
+    name = request.values['name']
+    onlinemode = request.values['onlinemode']
+    md5 = request.values['md5']
 
+    versionName = "unknown version"
+
+    if 'ip' in request.values and request.values['ip'] != '':
+        ip = request.values['ip'] # new to mineonline to allow classic servers on different IPs
+    else:
+        ip = request.remote_addr
+
+    classicservers = mongo.db.classicservers
+
+    user = None
+
+    if(port == None):
+        port = "25565"
+
+    for version in versions:
+        if(version["md5"] == md5 and version["type"] == "server"):
+            versionName = version["name"]
+        pass
+
+    try:
+        # Delete existing server record
+        classicservers.delete_many({"port": port, "ip": ip})
+
+        _id = ObjectId()
+
+        currentlisting = classicservers.find_one({"port": port, "ip": ip})
+        if currentlisting:
+            _id = currentlisting['_id']
+
+        classicservers.insert_one({
+            "_id": _id,
+            "createdAt": datetime.utcnow(),
+            "ip": ip,
+            "port": port,
+            "users": users,
+            "maxUsers": maxUsers,
+            "name": name,
+            "onlinemode": onlinemode,
+            "versionName": versionName,
+            "md5": md5,
+        })
+        
+        return Response("ok")
+
+    except:
+        return Response("Something went wrong.", 500)
+
+    return Response("Something went wrong.", 500)
 
 
 if __name__ == '__main__':
