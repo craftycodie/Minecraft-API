@@ -22,19 +22,15 @@ Login to view the IP address and port.
 	<hr/>
 	{% for server in servers %}
 		{% if 'md5' in server %}
-			{% if user %}
-				<u><b>{{server['name']}}</b> - {{server['versionName'] or "Unknown Version"}} - {{server['users']}}/{{server['maxUsers']}}</u><br/><br/>
+			<u><b>{{server['name']}}</b> - {{server['versionName'] or "Unknown Version"}} - {{server['users']}}/{{server['maxUsers']}}</u><br/><br/>
 
-				<!-- <span>Players: <b>{{server['users']}}/{{server['maxUsers']}}</b></span><br/> -->
-				<span>IP: <b>{{server['ip']}}</b>
-					{% if server['onlinemode'] == "false" %} 
-					<span><font color="#ff0000">Offline Mode</font></span>
-					{% endif %}
-					<br/>
-					Port: <b>{{server['port']}}</b></span>
-			{% else %}
-				<b>{{server['name']}}</b> - {{server['users']}}/{{server['maxUsers']}} - {{server['versionName'] or "Unknown Version"}}
-			{% endif %}
+			<!-- <span>Players: <b>{{server['users']}}/{{server['maxUsers']}}</b></span><br/> -->
+			<span>IP: <b>{{server['ip']}}</b>
+				{% if server['onlinemode'] == "false" %} 
+				<span><font color="#ff0000">Offline Mode</font></span>
+				{% endif %}
+				<br/>
+				Port: <b>{{server['port']}}</b></span>
 			<hr/>
 		{% endif %}
 	{% endfor %}
