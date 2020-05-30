@@ -129,7 +129,7 @@ def joinserver():
         response = Response("ok")
         return response
     except:
-        return Response("Something went wrong.")
+        return Response("Invalid Session")
 
     return Response("Something went wrong.")
 
