@@ -969,7 +969,6 @@ def send_email(subject, sender, recipients, text_body):
 @app.route('/mineonline/listserver.jsp', methods=["POST"])
 def addserver(): 
     port = request.values['port']
-    users = request.values['users']
     maxUsers = request.values['max']
     name = request.values['name']
     onlinemode = request.values['onlinemode']
@@ -991,7 +990,10 @@ def addserver():
 
     for version in versions:
         if(version["md5"] == md5 and version["type"] == "server"):
-            versionName = version["name"]
+            if('clientName' in version):
+                versionName = version["clientName"]
+            else:
+                versionName = version["name"]
         pass
 
     try:
@@ -1001,6 +1003,9 @@ def addserver():
         if(currentlisting):
             _id = currentlisting['_id']
             classicservers.delete_many({"port": port, "ip": ip, "_id": {"$ne": _id}})
+
+            users = request.values['users'] if 'users' in request.values else currentlisting['users']
+
             classicservers.update_one({"_id": _id}, { "$set": {
                 "createdAt": datetime.utcnow(),
                 "ip": ip,
@@ -1017,6 +1022,8 @@ def addserver():
             # Delete existing server record
             classicservers.delete_many({"port": port, "ip": ip})
             _id = ObjectId()
+
+            users = request.values['users'] if 'users' in request.values else 0
 
             classicservers.insert_one({
                 "_id": _id,

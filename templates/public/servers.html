@@ -22,7 +22,7 @@ Login to view the IP address and port.
 	<hr/>
 	{% for server in servers %}
 		{% if user %}
-			<u><b>{{server['name']}}</b> - {{server['versionName']}}</u><br/><br/>
+			<u><b>{{server['name']}}</b> - {{server['versionName'] or "Unknown Version"}} - {{server['users']}}/{{server['maxUsers']}}</u><br/><br/>
 
 			<!-- <span>Players: <b>{{server['users']}}/{{server['maxUsers']}}</b></span><br/> -->
 			<span>IP: <b>{{server['ip']}}</b>
@@ -32,7 +32,7 @@ Login to view the IP address and port.
 				<br/>
 				Port: <b>{{server['port']}}</b></span>
 		{% else %}
-			<b>{{server['name']}}</b> - {{server['versionName'] or "Unknown Version"}}
+			<b>{{server['name']}}</b> - {{server['users']}}/{{server['maxUsers']}} - {{server['versionName'] or "Unknown Version"}}
 		{% endif %}
 		<hr/>
 	{% endfor %}
