@@ -9,5 +9,7 @@ code {
 }
 
 .bulletImg {
+    filter: invert(1) brightness(0.93);
     height: 2em;
+    background-color: white;
 }
