@@ -21,20 +21,22 @@ Login to view the IP address and port.
 {% else %}
 	<hr/>
 	{% for server in servers %}
-		{% if user %}
-			<u><b>{{server['name']}}</b> - {{server['versionName'] or "Unknown Version"}} - {{server['users']}}/{{server['maxUsers']}}</u><br/><br/>
+		{% if 'md5' in server %}
+			{% if user %}
+				<u><b>{{server['name']}}</b> - {{server['versionName'] or "Unknown Version"}} - {{server['users']}}/{{server['maxUsers']}}</u><br/><br/>
 
-			<!-- <span>Players: <b>{{server['users']}}/{{server['maxUsers']}}</b></span><br/> -->
-			<span>IP: <b>{{server['ip']}}</b>
-				{% if server['onlinemode'] == "false" %} 
-				<span><font color="#ff0000">Offline Mode</font></span>
-				{% endif %}
-				<br/>
-				Port: <b>{{server['port']}}</b></span>
-		{% else %}
-			<b>{{server['name']}}</b> - {{server['users']}}/{{server['maxUsers']}} - {{server['versionName'] or "Unknown Version"}}
+				<!-- <span>Players: <b>{{server['users']}}/{{server['maxUsers']}}</b></span><br/> -->
+				<span>IP: <b>{{server['ip']}}</b>
+					{% if server['onlinemode'] == "false" %} 
+					<span><font color="#ff0000">Offline Mode</font></span>
+					{% endif %}
+					<br/>
+					Port: <b>{{server['port']}}</b></span>
+			{% else %}
+				<b>{{server['name']}}</b> - {{server['users']}}/{{server['maxUsers']}} - {{server['versionName'] or "Unknown Version"}}
+			{% endif %}
+			<hr/>
 		{% endif %}
-		<hr/>
 	{% endfor %}
 	<br/><br/>There are {{usersCount}} players playing on {{serverCount}} servers ({{privateCount}} of them private).
 {% endif %}
