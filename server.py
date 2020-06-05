@@ -466,9 +466,9 @@ def index():
 # unknown endpoint, found in infdev, may be in more.
 @app.route('/game/')
 def unknown1():
-    name = request.args.get('n')
-    i = request.args.get('i')
-    return Response("1")
+    username = request.args.get('n')
+    sessionId = request.args.get('i')
+    return Response("42069")
 
 @app.route('/profile/')
 def profile():
@@ -609,6 +609,8 @@ def savemap():
         sessionId = str(utf8m_to_utf8s(sessionId), 'utf-8')
         mapName = str(utf8m_to_utf8s(mapName), 'utf-8')
 
+        version = 2 if mapData[0:2] == bytes([0x1F, 0x8B]) else 1
+
     except:
         return Response("Something went wrong!", 500)
 
@@ -627,6 +629,7 @@ def savemap():
             "length": mapLength,
             "data": mapData,
             "createdAt": datetime.utcnow(),
+            "version" : version
         } } })
     except:
         return Response("Failed to save data.", 500)
@@ -973,6 +976,7 @@ def addserver():
     name = request.values['name']
     onlinemode = request.values['onlinemode']
     md5 = request.values['md5']
+    private = request.values['private']
 
     versionName = "unknown version"
 
@@ -1016,6 +1020,7 @@ def addserver():
                 "onlinemode": onlinemode,
                 "versionName": versionName,
                 "md5": md5,
+                "private": private,
             }})
 
         else:
@@ -1036,6 +1041,7 @@ def addserver():
                 "onlinemode": onlinemode,
                 "versionName": versionName,
                 "md5": md5,
+                "private": private,
             })
         
         return Response("ok")
