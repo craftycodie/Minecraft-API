@@ -976,7 +976,7 @@ def addserver():
     name = request.values['name']
     onlinemode = request.values['onlinemode']
     md5 = request.values['md5']
-    private = request.values['private']
+    public = request.values['public']
 
     versionName = "unknown version"
 
@@ -1020,7 +1020,7 @@ def addserver():
                 "onlinemode": onlinemode,
                 "versionName": versionName,
                 "md5": md5,
-                "private": private,
+                "public": public,
             }})
 
         else:
@@ -1041,7 +1041,7 @@ def addserver():
                 "onlinemode": onlinemode,
                 "versionName": versionName,
                 "md5": md5,
-                "private": private,
+                "public": public,
             })
         
         return Response("ok")
@@ -1050,6 +1050,39 @@ def addserver():
         return Response("Something went wrong.", 500)
 
     return Response("Something went wrong.", 500)
+
+@app.route('/mineonline/listservers.jsp')
+def listservers():
+    username = request.args.get('user')
+    sessionId = request.args.get('sessionId')
+
+    try:
+        users = mongo.db.users
+        user = users.find_one({"user" : username, "sessionId": ObjectId(sessionId)})
+    except:
+        return Response("Invalid Session", 401)
+
+    if (user == None):
+        return Response("Invalid Session", 401)
+
+    servers = list(mongo.db.classicservers.find())
+
+    def mapServer(x): return {
+        "createdAt": str(x["createdAt"]),
+        "ip": x["ip"],
+        "port": x["port"],
+        "users": x["users"],
+        "maxUsers": x["maxUsers"],
+        "name": x["name"],
+        "onlinemode": x["onlinemode"],
+        "md5": x["md5"],
+        "public": x["public"],
+    }
+
+    servers = list(map(mapServer, servers))
+    print(servers)
+
+    return Response(json.dumps(servers))
 
 
 if __name__ == '__main__':
