@@ -666,7 +666,7 @@ def loadmap():
 def addclassicserver(): 
     # If there's no salt, just use the standard list endpoint.
     if 'salt' not in request.values:
-        return Response("http://www.minecraft.net/servers.jsp")
+        return Response("http://mineonline.codie.gg/servers.jsp")
 
     port = request.values['port']
     users = request.values['users']
@@ -1080,7 +1080,6 @@ def listservers():
     }
 
     servers = list(map(mapServer, servers))
-    print(servers)
 
     return Response(json.dumps(servers))
 
