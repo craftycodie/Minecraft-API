@@ -18,7 +18,11 @@ List was updated {{timeString}}.<br/><br/>
 	<hr/>
 	{% for server in servers %}
 		{% if 'md5' in server %}
-			<u><b>{{server['name']}}</b> - {{server['versionName'] or "Unknown Version"}} - {{server['users']}}/{{server['maxUsers']}}</u><br/><br/>
+			{% if 'isMineOnline' in server and server['isMineOnline'] == False %}
+				<b>{{server['name']}}</b> - {{server['versionName'] or "Unknown Version"}} - Featured Server<br/><br/>
+			{% else %}
+				<b>{{server['name']}}</b> - {{server['versionName'] or "Unknown Version"}} - {{server['users']}}/{{server['maxUsers']}}<br/><br/>
+			{% endif %}
 
 			<!-- <span>Players: <b>{{server['users']}}/{{server['maxUsers']}}</b></span><br/> -->
 			<span>IP: <b>{{server['ip']}}</b>

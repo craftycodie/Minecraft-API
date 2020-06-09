@@ -525,13 +525,17 @@ def classicservers():
         except:
             pass
 
-    servers = list(mongo.db.classicservers.find())
+    mineOnlineServers = list(mongo.db.classicservers.find())
+    featuredServers = list(mongo.db.featuredservers.find())
+    featuredServers = [dict(server, **{'isMineOnline': False}) for server in featuredServers]
+    servers = mineOnlineServers + featuredServers
 
     serverCount = mongo.db.classicservers.count_documents({})
     usersCount = 0
     privateCount = 0
     for server in servers:
-        usersCount = usersCount + int(server['users'])
+        if 'users' in server:
+            usersCount = usersCount + int(server['users'])
         if 'public' in server and  server['public'] == "false":
             privateCount = privateCount + 1
         
@@ -1065,18 +1069,22 @@ def listservers():
     if (user == None):
         return Response("Invalid Session", 401)
 
-    servers = list(mongo.db.classicservers.find())
+    mineOnlineServers = list(mongo.db.classicservers.find())
+    featuredServers = list(mongo.db.featuredservers.find())
+    featuredServers = [dict(server, **{'isMineOnline': False}) for server in featuredServers]
+    servers = mineOnlineServers + featuredServers
 
-    def mapServer(x): return {
-        "createdAt": str(x["createdAt"]),
+    def mapServer(x): return { 
+        "createdAt": str(x["createdAt"]) if "createdAt" in x else None,
         "ip": x["ip"],
         "port": x["port"],
-        "users": x["users"],
-        "maxUsers": x["maxUsers"],
+        "users": x["users"] if "users" in x else "0",
+        "maxUsers": x["maxUsers"] if "maxUsers" in x else "24",
         "name": x["name"],
         "onlinemode": x["onlinemode"],
         "md5": x["md5"],
         "public": x["public"],
+        "isMineOnline": x["isMineOnline"] if "isMineOnline" in x else True,
     }
 
     servers = list(map(mapServer, servers))
