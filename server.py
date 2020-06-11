@@ -28,10 +28,10 @@ app.config['MONGO_DBNAME'] = os.getenv("MONGO_DBNAME")
 app.config['MONGO_URI'] = os.getenv("MONGO_URI")
 ALLOWED_EXTENSIONS = ['png']
 secretkey = os.getenv("SECRET_KEY")
-port = os.getenv("PORT", 80)
+app.secret_key = secretkey
 
 app.config.update(dict(
-    DEBUG = True,
+    DEBUG = False,
     MAIL_SERVER = 'smtp.gmail.com',
     MAIL_PORT = 465,
     MAIL_USE_TLS = False,
@@ -215,7 +215,7 @@ def cloak(username):
 
 def allowed_file(filename):
     return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+        filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/profile/', methods=['POST'])
 def uploadSkin():
@@ -666,7 +666,7 @@ def loadmap():
         return response
 
 #classic
-@app.route('/heartbeat.jsp', methods=["POST"])
+@app.route('/heartbeat.jsp', methods=["POST", "GET"])
 def addclassicserver(): 
     # If there's no salt, just use the standard list endpoint.
     if 'salt' not in request.values:
@@ -773,8 +773,11 @@ def getmmpass():
         return Response("Server not found.", 404)
 
     if server:
-        mppass = str(hashlib.md5((server['salt'] + user['user']).encode('utf-8')).hexdigest())
-        return Response(mppass)
+        if "salt" in server:
+            mppass = str(hashlib.md5((server['salt'] + user['user']).encode('utf-8')).hexdigest())
+            return Response(mppass)
+        else:
+            return Response("Classic server not found.", 404)
     else:
         return Response("Server not found.", 404)
 
@@ -1055,6 +1058,25 @@ def addserver():
 
     return Response("Something went wrong.", 500)
 
+def filterServer(x):
+    return "md5" in x
+
+def mapServer(x): 
+    if(not"md5" in x):
+        return
+    return { 
+        "createdAt": str(x["createdAt"]) if "createdAt" in x else None,
+        "ip": x["ip"],
+        "port": x["port"],
+        "users": x["users"] if "users" in x else "0",
+        "maxUsers": x["maxUsers"] if "maxUsers" in x else "24",
+        "name": x["name"],
+        "onlinemode": x["onlinemode"],
+        "md5": x["md5"],
+        "public": x["public"],
+        "isMineOnline": x["isMineOnline"] if "isMineOnline" in x else True,
+    }
+
 @app.route('/mineonline/listservers.jsp')
 def listservers():
     username = request.args.get('user')
@@ -1070,28 +1092,12 @@ def listservers():
         return Response("Invalid Session", 401)
 
     mineOnlineServers = list(mongo.db.classicservers.find())
+    mineOnlineServers = list(filter(filterServer, mineOnlineServers))
+
     featuredServers = list(mongo.db.featuredservers.find())
     featuredServers = [dict(server, **{'isMineOnline': False}) for server in featuredServers]
     servers = mineOnlineServers + featuredServers
 
-    def mapServer(x): return { 
-        "createdAt": str(x["createdAt"]) if "createdAt" in x else None,
-        "ip": x["ip"],
-        "port": x["port"],
-        "users": x["users"] if "users" in x else "0",
-        "maxUsers": x["maxUsers"] if "maxUsers" in x else "24",
-        "name": x["name"],
-        "onlinemode": x["onlinemode"],
-        "md5": x["md5"],
-        "public": x["public"],
-        "isMineOnline": x["isMineOnline"] if "isMineOnline" in x else True,
-    }
-
     servers = list(map(mapServer, servers))
 
     return Response(json.dumps(servers))
-
-
-if __name__ == '__main__':
-    app.secret_key = secretkey
-    app.run(host= '0.0.0.0', port=port, debug=True)

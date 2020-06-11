@@ -15,9 +15,9 @@ List was updated {{timeString}}.<br/><br/>
 {% if serverCount < 1 %}
 	<p>There are currently no servers online.</p>
 {% else %}
-	<hr/>
 	{% for server in servers %}
 		{% if 'md5' in server %}
+			<hr/>
 			{% if 'isMineOnline' in server and server['isMineOnline'] == False %}
 				<b>{{server['name']}}</b> - {{server['versionName'] or "Unknown Version"}} - Featured Server<br/><br/>
 			{% else %}
@@ -31,10 +31,9 @@ List was updated {{timeString}}.<br/><br/>
 				{% endif %}
 				<br/>
 				Port: <b>{{server['port']}}</b></span>
-			<hr/>
 		{% endif %}
 	{% endfor %}
-	<br/><br/>There are {{usersCount}} players playing on {{serverCount}} servers ({{privateCount}} of them private).
+	<br/><br/>
 {% endif %}
 <br/>
 </div>
