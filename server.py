@@ -50,7 +50,7 @@ mail = Mail(app)
 mongo = PyMongo(app)
 mongo.db.classicservers.create_indexes([
     IndexModel([("realmId", ASCENDING)], unique = True, partialFilterExpression = { "realmId": {"$type": "number"}}),
-    IndexModel([("createdAt", ASCENDING)], expireAfterSeconds = 600)
+    IndexModel([("createdAt", ASCENDING)], expireAfterSeconds = 90)
 ])
 mongo.db.serverjoins.create_index( "createdAt", expireAfterSeconds = 600 )
 mongo.db.users.create_index("user", unique = True )
@@ -1497,7 +1497,7 @@ def addserver():
 
             while(True):
                 cursor = classicservers.find_one(sort = [("realmId", DESCENDING)])
-                seq = cursor.realmId + 1 if cursor != None and "realmId" in cursor and cursor.realmId != None else 1
+                seq = cursor["realmId"] + 1 if cursor != None and "realmId" in cursor and cursor["realmId"] != None else 1
                 
                 try:
                     classicservers.insert_one({
