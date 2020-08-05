@@ -4,6 +4,7 @@ import os
 import bcrypt
 import re
 from flask_pymongo import PyMongo
+from pymongo import IndexModel, ASCENDING, DESCENDING
 from bson import json_util
 from bson.objectid import ObjectId
 from utils.modified_utf8 import utf8m_to_utf8s, utf8s_to_utf8m
@@ -15,6 +16,10 @@ from flask_mail import Mail, Message
 from threading import Thread
 from PIL import Image, PngImagePlugin
 from io import BytesIO, StringIO
+from uuid import uuid4, UUID
+import base64
+import time
+import sys
 
 # import config if present
 try: import config
@@ -43,10 +48,14 @@ app.config.update(dict(
 mail = Mail(app)
 
 mongo = PyMongo(app)
-mongo.db.classicservers.create_index( "createdAt", expireAfterSeconds = 90)
+mongo.db.classicservers.create_indexes([
+    IndexModel([("realmId", ASCENDING)], unique = True, partialFilterExpression = { "realmId": {"$type": "number"}}),
+    IndexModel([("createdAt", ASCENDING)], expireAfterSeconds = 600)
+])
 mongo.db.serverjoins.create_index( "createdAt", expireAfterSeconds = 600 )
 mongo.db.users.create_index("user", unique = True )
 mongo.db.users.create_index("email", unique = True )
+mongo.db.featuredservers.create_index("realmId", unique = True, partialFilterExpression = { "realmId": {"$type": "number"} })
 
 latestVersion = "1589019440"
 
@@ -122,7 +131,7 @@ def joinserver():
 
         serverjoins.insert_one({
             "createdAt": datetime.utcnow(),
-            "user": username,
+            "playerName": user["user"],
             "serverId": serverId,
         })
 
@@ -161,7 +170,7 @@ def checkserver():
     serverjoins = mongo.db.serverjoins
 
     try:
-        found = serverjoins.find_one({"user": username, "serverId": serverId})
+        found = serverjoins.find_one({"playerName": username, "serverId": serverId})
         if not found:
             return Response("Invalid Session", 401)
 
@@ -248,7 +257,7 @@ def uploadSkin():
         skinBytes.seek(0)
         skin = Image.open(skinBytes)
         croppedSkin = BytesIO()
-        skin = skin.crop((0, 0, 64, 32))
+        skin = skin.crop((0, 0, 64, 64))
         skin.save(croppedSkin, "PNG")
         skinBytes.flush()
         croppedSkin.seek(0)
@@ -327,7 +336,6 @@ def changepasspost():
     try:
         if token:
             try:
-                print(token)
                 user = users.find_one({"passwordReset._id": ObjectId(token)})
             except:
                 return render_template("public/changepass.html", error="Invalid password reset.", token=token)
@@ -511,6 +519,16 @@ def classic():
         sessionIdInvalid=sessionIdInvalid
     )
 
+WHITELISTED = "WHITELISTED"
+ON_THE_WHITELIST = "ON_THE_WHITELIST"
+BANNED = "BANNED"
+OFFLINEMODE = "OFFLINEMODE"
+NOT_ON_THE_WHITELIST = "NOT_ON_THE_WHITELIST"
+NONE = "NONE"
+
+def filterServer(x):
+    return x != None
+
 @app.route('/servers.jsp')
 def classicservers():
     user = None
@@ -540,6 +558,49 @@ def classicservers():
             privateCount = privateCount + 1
         
     timeString = datetime.utcnow().strftime("%H:%M") + " (UTC) " + datetime.utcnow().strftime("%B %d")
+
+    def mapServer(x): 
+        if(not"md5" in x):
+            return
+        if(not "whitelisted" in x):
+            return
+
+        if ("public" in x and x["public"] == False):
+            return
+
+        status = NONE
+
+        if (x["onlinemode"] == False):
+            status = OFFLINEMODE
+        
+        if (x["whitelisted"] == True and "whitelistUsers" in x and "whitelistIPs" in x):
+            if (user != None):
+                if(user["user"] in x["whitelistUsers"] or request.remote_addr in x["whitelistIPs"]):
+                    status = ON_THE_WHITELIST
+                else:
+                    status = NOT_ON_THE_WHITELIST
+            else:
+                status = WHITELISTED
+
+        if (user != None and "bannedUsers" in x and "bannedIPs" in x and (user["user"] in x["bannedUsers"] or request.remote_addr in x["bannedIPs"])):
+            status = BANNED
+
+        return { 
+            "createdAt": str(x["createdAt"]) if "createdAt" in x else None,
+            "ip": x["ip"] if status != BANNED and status != NOT_ON_THE_WHITELIST else None,
+            "port": x["port"] if status != BANNED and status != NOT_ON_THE_WHITELIST else None,
+            "users": x["users"] if "users" in x else "0",
+            "maxUsers": x["maxUsers"] if "maxUsers" in x else "24",
+            "name": x["name"],
+            "onlinemode": x["onlinemode"],
+            "md5": x["md5"],
+            "isMineOnline": x["isMineOnline"] if "isMineOnline" in x else True,
+            "status": status,
+            "versionName": x["versionName"] if "versionName" in x else None
+        }
+
+    servers = list(map(mapServer, servers))
+    servers = list(filter(filterServer, servers))
 
 
     return render_template("public/servers.html", 
@@ -802,9 +863,58 @@ def removeCloak():
     return Response("You must be logged in to do this.", 401)
 
 #mineonline
-@app.route('/mineonline/skin.jsp', methods=['POST'])
-def saveskin():
-    username = None
+@app.route('/mineonline/playeruuid/<username>')
+def playeruuid(username):
+    sessionId = request.args['session']
+    if sessionId:
+        try:
+            users = mongo.db.users
+            user = users.find_one({"sessionId": ObjectId(sessionId)})
+            if not user:
+                return Response("Invalid session.", 400)
+            if user["user"] != username:
+                return Response("Wrong username.", 400)
+            if (not "uuid" in user):
+                uuid = str(uuid4())
+                users.update_one({ "_id": user["_id"] }, { "$set": { "uuid": uuid } })
+                return make_response(json.dumps({
+                    "uuid": uuid
+                }), 200)
+            else:
+                return make_response(json.dumps({
+                    "uuid": user["uuid"]
+                }), 200)
+        except:
+            return Response("Something went wrong!", 500)
+
+    return Response("You must be logged in to do this.", 401)
+
+#mineonline
+@app.route('/mineonline/player/<uuid>/skin', methods=['GET'])
+@app.route('/skin/<uuid>', methods=['GET'])
+def mineonlineskin(uuid):
+    uuid = str(UUID(uuid))
+    try:
+        user = mongo.db.users.find_one({ "uuid": uuid })
+    except:
+        return abort(404)
+
+    if not user or not 'skin' in user or not user['skin']:
+        return abort(404)
+
+    response = Response(user['skin'], mimetype="image/png")
+    
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    response.headers['Cache-Control'] = 'public, max-age=0'
+
+    return response
+
+#mineonline
+@app.route('/mineonline/player/<uuid>/skin', methods=['POST'])
+def saveskin(uuid):
+    uuid = str(UUID(uuid))
     sessionId = None
 
     user = None
@@ -812,14 +922,11 @@ def saveskin():
     try:
         requestData = request.stream.read()
 
-        username_length = int.from_bytes(requestData[1 : 2], byteorder='big')
-        username = requestData[2 : 2 + username_length]
-        sessionId_length = int.from_bytes(requestData[2 + username_length + 1 : 2 + username_length + 2], byteorder='big')
-        sessionId = requestData[2 + username_length + 2 : 2 + username_length + 2 + sessionId_length]
-        skinLength = int.from_bytes(requestData[2 + username_length + 2 + sessionId_length + 2: 2 + username_length + 2 + sessionId_length + 2 + 4], byteorder='big')
-        skinData = requestData[2 + username_length + 2 + sessionId_length + 4 : len(requestData)]
+        sessionId_length = int.from_bytes(requestData[1 : 2], byteorder='big')
+        sessionId = requestData[2 : 2 + sessionId_length]
+        skinLength = int.from_bytes(requestData[2 + sessionId_length + 2: 2 + sessionId_length + 2 + 4], byteorder='big')
+        skinData = requestData[2 + sessionId_length + 4 : len(requestData)]
 
-        username = str(utf8m_to_utf8s(username), 'utf-8')
         sessionId = str(utf8m_to_utf8s(sessionId), 'utf-8')
 
     except:
@@ -827,7 +934,7 @@ def saveskin():
 
     try:
         users = mongo.db.users
-        user = users.find_one({"user" : username, "sessionId": ObjectId(sessionId)})
+        user = users.find_one({"uuid" : uuid, "sessionId": ObjectId(sessionId)})
     except:
         return Response("Invalid Session", 401)
 
@@ -841,7 +948,7 @@ def saveskin():
         skinBytes.seek(0)
         skin = Image.open(skinBytes)
         croppedSkin = BytesIO()
-        skin = skin.crop((0, 0, 64, 32))
+        skin = skin.crop((0, 0, 64, 64))
         skin.save(croppedSkin, "PNG")
         skinBytes.flush()
         croppedSkin.seek(0)
@@ -852,9 +959,10 @@ def saveskin():
     return Response("ok")
 
 #mineonline
-@app.route('/mineonline/cloak.jsp', methods=['POST'])
-def savecloak():
-    username = None
+@app.route('/mineonline/player/<uuid>/cloak', methods=['POST'])
+@app.route('/cloak/<uuid>', methods=['GET'])
+def savecloak(uuid):
+    uuid = str(UUID(uuid))
     sessionId = None
 
     user = None
@@ -862,14 +970,11 @@ def savecloak():
     try:
         requestData = request.stream.read()
 
-        username_length = int.from_bytes(requestData[1 : 2], byteorder='big')
-        username = requestData[2 : 2 + username_length]
-        sessionId_length = int.from_bytes(requestData[2 + username_length + 1 : 2 + username_length + 2], byteorder='big')
-        sessionId = requestData[2 + username_length + 2 : 2 + username_length + 2 + sessionId_length]
-        cloakLength = int.from_bytes(requestData[2 + username_length + 2 + sessionId_length + 2: 2 + username_length + 2 + sessionId_length + 2 + 4], byteorder='big')
-        cloakData = requestData[2 + username_length + 2 + sessionId_length + 4 : len(requestData)]
+        sessionId_length = int.from_bytes(requestData[1 : 2], byteorder='big')
+        sessionId = requestData[2 : 2 + sessionId_length]
+        cloakLength = int.from_bytes(requestData[2 + sessionId_length + 2: 2 + sessionId_length + 2 + 4], byteorder='big')
+        cloakData = requestData[2 + sessionId_length + 4 : len(requestData)]
 
-        username = str(utf8m_to_utf8s(username), 'utf-8')
         sessionId = str(utf8m_to_utf8s(sessionId), 'utf-8')
 
     except:
@@ -877,7 +982,7 @@ def savecloak():
 
     try:
         users = mongo.db.users
-        user = users.find_one({"user" : username, "sessionId": ObjectId(sessionId)})
+        user = users.find_one({"uuid" : uuid, "sessionId": ObjectId(sessionId)})
     except:
         return Response("Invalid Session", 401)
 
@@ -900,6 +1005,27 @@ def savecloak():
         return Response("Failed to upload skin.", 500)
 
     return Response("ok")
+
+#mineonline
+@app.route('/mineonline/player/<uuid>/cloak', methods=['GET'])
+def mineonlinecloak(uuid):
+    uuid = str(UUID(uuid))
+    try:
+        user = mongo.db.users.find_one({ "uuid": uuid })
+    except:
+        return abort(404)
+
+    if not user or not 'cloak' in user or not user['cloak']:
+        return abort(404)
+
+    response = Response(user['cloak'], mimetype="image/png")
+    
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    response.headers['Cache-Control'] = 'public, max-age=0'
+
+    return response
 
 @app.route('/mineonline/account.jsp')
 def account():
@@ -926,6 +1052,324 @@ def account():
 
     return Response("Invalid Session", 400)
 
+@app.route('/session/minecraft/profile/<uuid>')
+def sessionProfile(uuid):
+    uuid = str(UUID(uuid))
+
+    try:
+        users = mongo.db.users
+        user = users.find_one({"uuid": uuid})
+
+        if user:
+            profile = {
+                    "timestamp": int(round(time.time() * 1000)),
+                    "profileId": user["uuid"].replace("-", ""),
+                    "profileName": user["user"],
+                    "textures": {}
+            }
+
+            if "unsigned" in request.args and request.args["unsigned"] == "false":
+                profile["signatureRequired"] = True
+
+        if "cape" in user:
+            profile["textures"]["CAPE"] = {
+                "url": "http://localhost/cloak/" + user["uuid"]
+            }
+
+        if "skin" in user:
+            profile["textures"]["SKIN"] = {
+                "url": "http://localhost/skin/" + user["uuid"]
+            }
+
+            profile = json.dumps(profile)
+
+            profile = str(base64.b64encode(profile.encode("utf-8")), "utf-8")
+
+            res = {
+                "id" : user["uuid"].replace("-", ""),
+                "name" : user["user"],
+                "properties": [ 
+                    {
+                        "name": "textures",
+                        "value": profile,
+                    }
+                ],
+            }
+
+            if "unsigned" in request.args and request.args["unsigned"] == "false":
+                res["properties"][0]["signature"] = "wMtWktUN2RsPewNxAl2+sV/zuZQh03uG2Sf1KXlr2U6W8Zq63qiffvPNfF25KekP7CYogTEgCY4nfLgVUvy+FO4mdH1sg2D0qJ53pBCCdy8Uoq0XOZYrxtqrH5GhF0naH7kKuc8tjyMQ26sgIONUPGJpfJl1iWstRc30ilv78Gx+1oQullQX6lYYvbSZ0iIh6NI+2QkVJDJ4jl3H1ttLVYHldtFQO0IQLH3Yx/QGG/svD+TGMFdgDhIyGRDC4T+yty4uqEbUj25cfhrAL8uJWCa6TFOIeVbqdwldJb9uBFOqctezOT/GehETieNWEQ+zO9MH2R7F/KWYSfwFlIJF94CmCZoRe12LjIFn5NA7lUeQu0mqCoXeoRVfTi/po4ZOoV2nYSBz9KgXhCIz+NtxYIv51Lb1daSViz33tXvP+mJBU7EJlVYVPwNoSnO3KZZNB4WVElt4cEWOZV1J2hVr7uYXzxx9tV20PsiSw4dcwr0g0LcwEMVO9lA1r6rMOHxJ1z9cJ39FQKMU4nrB+OMXIRySrcadsS4ykfr1+EGqfTuxqGmy8h2DiahQvUIoKpntg2feGB7GI5inNWM1kFjN3rKa3XEa7grvfK1TwMP5CHUNwT5LQdtdng4j6kiu1U8xTWxieFAY8asUIX4KW63GFTJyMn2KZRRZTAhQd5D0UaA="
+
+            res = make_response(json.dumps(res))
+            res.mimetype = 'application/json'
+            return res
+        else:
+            return Response("User not found.", 404)
+    except:
+        return Response("User not found.", 404)
+
+
+
+@app.route('/mco/client/compatible')
+def realms():
+    return Response("COMPATIBLE")
+
+@app.route('/invites/count/pending')
+def realmsInviteCount():
+    return Response("0")
+
+@app.route('/trial')
+def realmsTrial():
+    return Response("false")
+
+@app.route('/mco/available')
+def realmsAvailable():
+    return Response("true")
+
+@app.route('/invites/<realmId>', methods=["DELETE"])
+def leaveRealm(realmId):
+    return Response("Not yet implemented.", 400)
+
+@app.route('/mco/v1/news')
+def realmsNews():
+    return make_response(json.dumps({
+        "newsLink": "https://discord.com/invite/RBKKnxf"
+    }))
+
+@app.route('/activities/liveplayerlist')
+def liveplayerlist():
+    return make_response(json.dumps({ "lists": [
+        # {
+        #     "serverId": "1",
+        #     "players": ["MineOnline Realms! WIP"]
+        # }
+    ]}))
+
+@app.route('/worlds')
+def realmsworlds():
+    global serverID
+    mineOnlineServers = list(mongo.db.classicservers.find())
+    featuredServers = list(mongo.db.featuredservers.find())
+    featuredServers = [dict(server, **{'isMineOnline': False}) for server in featuredServers]
+    servers = mineOnlineServers + featuredServers
+
+    serverCount = mongo.db.classicservers.count_documents({})
+    usersCount = 0
+    privateCount = 0
+    for server in servers:
+        if 'users' in server:
+            usersCount = usersCount + int(server['users'])
+        if 'public' in server and  server['public'] == "false":
+            privateCount = privateCount + 1
+
+    def mapServer(x): 
+        if (not "md5" in x):
+            return
+        if (not "whitelisted" in x):
+            return
+        if (not "realmId" in x):
+            return
+
+        if ("public" in x and x["public"] == False):
+            return
+
+        status = NONE
+
+        if (x["onlinemode"] == False):
+            status = OFFLINEMODE
+        
+        if (x["whitelisted"] == True and "whitelistUsers" in x and "whitelistIPs" in x):
+            status = WHITELISTED
+
+        return { 
+            "id": x["realmId"],
+            "remoteSubscriptionId":"aaaa0000bbbb1111cccc2222dddd3333",
+            "owner":"Whitelisted" if status == WHITELISTED else "Offline-Mode" if status == OFFLINEMODE else "",
+            "ownerUUID":"806f3493624332a29166b098a0b03fd0",
+            "name":x["name"],
+            "motd":x["versionName"] if "versionName" in x else "Unknown Version",
+            "state":"OPEN",
+            "daysLeft":696969,
+            "expired":False,
+            "expiredTrial":False,
+            "worldType":"NORMAL",
+            "players":[],
+            "maxPlayers":x["maxUsers"] if "maxUsers" in x else "24",
+            "minigameName":None,
+            "minigameId":None,
+            "minigameImage":None,
+            "activeSlot":1,
+            "slots":None,
+            "member":False
+        }
+
+    servers = list(map(mapServer, servers))
+    servers = list(filter(filterServer, servers))
+    res = make_response(json.dumps({"servers":servers}))  
+    res.mimetype = 'application/json'
+    return res
+
+@app.route('/worlds/v1/<realmId>/join/pc')
+@app.route('/worlds/<realmId>/join')
+def joinRealm(realmId):
+    realmId = int(realmId)
+
+    classicservers = mongo.db.classicservers
+    featuredservers = mongo.db.featuredservers
+
+    server = classicservers.find_one({"realmId": realmId})
+
+    if server is None:
+        server = featuredservers.find_one({"realmId": realmId})
+
+    if server is None:
+        return Response("Realm not found.", 404)
+
+    res = make_response(json.dumps({
+        "address": server["ip"] + ":" + server["port"],
+        "pendingUpdate": False
+    }))
+    res.mimetype = 'application/json'
+    return res
+
+@app.route('/session/minecraft/join', methods=["POST"])
+def joinSession():
+    sessionId = request.json["accessToken"]
+    uuid = str(UUID(request.json["selectedProfile"]))
+    serverId = request.json["serverId"]
+
+    serverjoins = mongo.db.serverjoins
+
+    user = None
+
+    try:
+        users = mongo.db.users
+        user = users.find_one({"sessionId": ObjectId(sessionId), "uuid": uuid})
+
+        if not user:
+            res =  make_response(json.dumps({"errorMessage": "Invalid Session"}), 401)
+            res.mimetype = 'application/json'
+            return res
+        if not user['premium']:
+            res =  make_response(json.dumps({"errorMessage": "User not premium"}), 401)
+            res.mimetype = 'application/json'
+            return res
+
+        serverjoins.delete_many({"playerUuid": uuid})
+
+        serverjoins.insert_one({
+            "createdAt": datetime.utcnow(),
+            "playerName": user["user"],
+            "playerUuid": user["uuid"],
+            "serverId": serverId,
+        })
+
+        response = Response(None, 204)
+        return response
+    except:
+        res =  make_response(json.dumps({"errorMessage": "Invalid Session"}), 401)
+        res.mimetype = 'application/json'
+        return res
+
+    return make_response(json.dumps({"errorMessage": "Something went wrong."}), 401)
+
+@app.route('/profiles/minecraft', methods=["POST"])
+def postprofiles():
+    return make_response(json.dumps({}))
+
+@app.route('/mco/client/outdated')
+def realmsoutdated():
+    return Response("", 200)
+
+@app.route('/payments/unused')
+def paymentsunused():
+    return Response("0", 200)
+
+@app.route('/blockedservers')
+def blockedservers():
+    return Response("", 200)
+
+@app.route('/session/minecraft/hasJoined')
+def hasJoined():
+    username = request.args.get('username')
+    serverId = request.args.get('serverId')
+
+    serverjoins = mongo.db.serverjoins
+    users = mongo.db.users
+
+    try:
+        found = serverjoins.find_one({"playerName": username, "serverId": serverId})
+
+        if not found:
+            return Response("Invalid Session", 401)
+
+        serverjoins.delete_one({"_id": found['_id']})
+
+        user = users.find_one({"uuid": found["playerUuid"], "user": found["playerName"]})
+
+        if not user:
+            return Response("Invalid Session", 401)
+
+        profile = {
+                "timestamp": int(round(time.time() * 1000)),
+                "profileId": user["uuid"].replace("-", ""),
+                "profileName": user["user"],
+                "signatureRequired": True,
+                "textures": { }
+        }
+
+        if "unsigned" in request.args and request.args["unsigned"] == "false":
+            profile["signatureRequired"] = True
+
+        if "cape" in user:
+            profile["textures"]["CAPE"] = {
+                "url": "http://localhost/cloak/" + user["uuid"]
+            }
+
+        if "skin" in user:
+            profile["textures"]["SKIN"] = {
+                "url": "http://localhost/skin/" + user["uuid"]
+            }
+
+        profile = json.dumps(profile, indent=2)
+
+        profile = str(base64.b64encode(profile.encode("utf-8")), "utf-8")
+
+        res = {
+            "id" : user["uuid"].replace("-", ""),
+            "name" : user["user"],
+            "properties": [ 
+                {
+                    "name": "textures",
+                    "value": profile,
+                    "signature": "wMtWktUN2RsPewNxAl2+sV/zuZQh03uG2Sf1KXlr2U6W8Zq63qiffvPNfF25KekP7CYogTEgCY4nfLgVUvy+FO4mdH1sg2D0qJ53pBCCdy8Uoq0XOZYrxtqrH5GhF0naH7kKuc8tjyMQ26sgIONUPGJpfJl1iWstRc30ilv78Gx+1oQullQX6lYYvbSZ0iIh6NI+2QkVJDJ4jl3H1ttLVYHldtFQO0IQLH3Yx/QGG/svD+TGMFdgDhIyGRDC4T+yty4uqEbUj25cfhrAL8uJWCa6TFOIeVbqdwldJb9uBFOqctezOT/GehETieNWEQ+zO9MH2R7F/KWYSfwFlIJF94CmCZoRe12LjIFn5NA7lUeQu0mqCoXeoRVfTi/po4ZOoV2nYSBz9KgXhCIz+NtxYIv51Lb1daSViz33tXvP+mJBU7EJlVYVPwNoSnO3KZZNB4WVElt4cEWOZV1J2hVr7uYXzxx9tV20PsiSw4dcwr0g0LcwEMVO9lA1r6rMOHxJ1z9cJ39FQKMU4nrB+OMXIRySrcadsS4ykfr1+EGqfTuxqGmy8h2DiahQvUIoKpntg2feGB7GI5inNWM1kFjN3rKa3XEa7grvfK1TwMP5CHUNwT5LQdtdng4j6kiu1U8xTWxieFAY8asUIX4KW63GFTJyMn2KZRRZTAhQd5D0UaA="
+                }
+            ]
+        }
+
+        res = make_response(json.dumps(res))
+        res.mimetype = 'application/json'
+        return res
+    except:
+        return Response("Invalid Session", 401)
+
+    return Response("Invalid Session", 401)
+
+@app.route('/invites/pending')
+def realmInvites():
+    res = make_response(json.dumps({
+        "invites": [
+            # {
+            #     "invitationId": "21538412",
+            #     "worldName": "Anything Crafting 2020",
+            #     "worldDescription": "We're back!",
+            #     "worldOwnerName": "720Pony",
+            #     "worldOwnerUuid": "e75e2d263b724a93a3e7a2491f4c454f",
+            #     "date": 1568125140562
+            # }
+        ]
+    }))
+    res.mimetype = 'application/json'
+    return res
 
 @app.route('/', defaults={'path': 'index'})
 @app.route('/<path:path>')
@@ -977,18 +1421,25 @@ def send_email(subject, sender, recipients, text_body):
     Thread(target=send_async_email, args=(app, msg)).start() 
 
 @app.route('/mineonline/listserver.jsp', methods=["POST"])
-def addserver(): 
-    port = request.values['port']
-    maxUsers = request.values['max']
-    name = request.values['name']
-    onlinemode = request.values['onlinemode']
-    md5 = request.values['md5']
-    public = request.values['public']
+def addserver():
+    port = request.json['port']
+    maxUsers = request.json['max']
+    name = request.json['name']
+    onlinemode = request.json['onlinemode']
+    md5 = request.json['md5']
+    whitelisted = request.json['whitelisted']
+    whitelistUsers = request.json['whitelistUsers']
+    whitelistIPs = request.json['whitelistIPs']
+    whitelistUUIDs = request.json['whitelistUUIDs']
+    bannedUsers = request.json['bannedUsers']
+    bannedIPs = request.json['bannedIPs']
+    bannedUUIDs = request.json['bannedUUIDs']
 
-    versionName = "unknown version"
 
-    if 'ip' in request.values and request.values['ip'] != '':
-        ip = request.values['ip'] # new to mineonline to allow classic servers on different IPs
+    versionName = "Unknown Version"
+
+    if 'ip' in request.json and request.json['ip'] != '':
+        ip = request.json['ip'] # new to mineonline to allow classic servers on different IPs
     else:
         ip = request.remote_addr
 
@@ -1001,8 +1452,8 @@ def addserver():
 
     for version in versions:
         if(version["md5"] == md5 and version["type"] == "server"):
-            if('clientName' in version):
-                versionName = version["clientName"]
+            if('clientVersions' in version):
+                versionName = str(version["clientVersions"]).replace("'", "").replace("[", "").replace("]", "")
             else:
                 versionName = version["name"]
         pass
@@ -1015,7 +1466,7 @@ def addserver():
             _id = currentlisting['_id']
             classicservers.delete_many({"port": port, "ip": ip, "_id": {"$ne": _id}})
 
-            users = request.values['users'] if 'users' in request.values else currentlisting['users']
+            users = request.json['users'] if 'users' in request.json else currentlisting['users']
 
             classicservers.update_one({"_id": _id}, { "$set": {
                 "createdAt": datetime.utcnow(),
@@ -1027,7 +1478,13 @@ def addserver():
                 "onlinemode": onlinemode,
                 "versionName": versionName,
                 "md5": md5,
-                "public": public,
+                "whitelisted": whitelisted,
+                "whitelistUsers": whitelistUsers,
+                "whitelistedIPs": whitelistIPs,
+                "whitelistUUIDs": whitelistUUIDs,
+                "bannedUsers": bannedUsers,
+                "bannedIPs": bannedIPs,
+                "bannedUUIDs": bannedUUIDs
             }})
 
         else:
@@ -1035,56 +1492,59 @@ def addserver():
             classicservers.delete_many({"port": port, "ip": ip})
             _id = ObjectId()
 
-            users = request.values['users'] if 'users' in request.values else 0
+            users = request.json['users'] if 'users' in request.json else 0
 
-            classicservers.insert_one({
-                "_id": _id,
-                "createdAt": datetime.utcnow(),
-                "ip": ip,
-                "port": port,
-                "users": users,
-                "maxUsers": maxUsers,
-                "name": name,
-                "onlinemode": onlinemode,
-                "versionName": versionName,
-                "md5": md5,
-                "public": public,
-            })
+
+            while(True):
+                cursor = classicservers.find_one(sort = [("realmId", DESCENDING)])
+                seq = cursor.realmId + 1 if cursor != None and "realmId" in cursor and cursor.realmId != None else 1
+                
+                try:
+                    classicservers.insert_one({
+                        "_id": _id,
+                        "realmId": seq,
+                        "createdAt": datetime.utcnow(),
+                        "ip": ip,
+                        "port": port,
+                        "users": users,
+                        "maxUsers": maxUsers,
+                        "name": name,
+                        "onlinemode": onlinemode,
+                        "versionName": versionName,
+                        "md5": md5,
+                        "whitelisted": whitelisted,
+                        "whitelistUsers": whitelistUsers,
+                        "whitelistIPs": whitelistIPs,
+                        "whitelistUUIDs": whitelistUUIDs,
+                        "bannedUsers": bannedUsers,
+                        "bannedIPs": bannedIPs,
+                        "bannedUUIDs": bannedUUIDs
+                    })
+                except errors.WriteError as writeError:
+                    if writeError.code == 11000:
+                        continue
+                    else:
+                        return Response("Something went wrong.", 500)
+
+                break
+        
         
         return Response("ok")
 
     except:
+        print("Unexpected error:", sys.exc_info()[1])
         return Response("Something went wrong.", 500)
 
     return Response("Something went wrong.", 500)
 
-def filterServer(x):
-    return "md5" in x
-
-def mapServer(x): 
-    if(not"md5" in x):
-        return
-    return { 
-        "createdAt": str(x["createdAt"]) if "createdAt" in x else None,
-        "ip": x["ip"],
-        "port": x["port"],
-        "users": x["users"] if "users" in x else "0",
-        "maxUsers": x["maxUsers"] if "maxUsers" in x else "24",
-        "name": x["name"],
-        "onlinemode": x["onlinemode"],
-        "md5": x["md5"],
-        "public": x["public"],
-        "isMineOnline": x["isMineOnline"] if "isMineOnline" in x else True,
-    }
-
 @app.route('/mineonline/listservers.jsp')
 def listservers():
-    username = request.args.get('user')
+    uuid = request.args.get('user')
     sessionId = request.args.get('sessionId')
 
     try:
         users = mongo.db.users
-        user = users.find_one({"user" : username, "sessionId": ObjectId(sessionId)})
+        user = users.find_one({"uuid" : uuid, "sessionId": ObjectId(sessionId)})
     except:
         return Response("Invalid Session", 401)
 
@@ -1092,12 +1552,47 @@ def listservers():
         return Response("Invalid Session", 401)
 
     mineOnlineServers = list(mongo.db.classicservers.find())
-    mineOnlineServers = list(filter(filterServer, mineOnlineServers))
-
     featuredServers = list(mongo.db.featuredservers.find())
     featuredServers = [dict(server, **{'isMineOnline': False}) for server in featuredServers]
     servers = mineOnlineServers + featuredServers
 
+    def mapServer(x): 
+        if(not"md5" in x):
+            return
+        if(not "whitelisted" in x):
+            return
+
+        if ("public" in x and x["public"] == False):
+            return
+
+        status = NONE
+
+        if (x["onlinemode"] == False):
+            status = OFFLINEMODE
+        
+        if (x["whitelisted"] == True and "whitelistUsers" in x and "whitelistIPs" in x and "whitelistUUIDs" in x):
+            if(user["user"] in x["whitelistUsers"] or request.remote_addr in x["whitelistIPs"]):
+                status = ON_THE_WHITELIST
+            else:
+                status = NOT_ON_THE_WHITELIST
+
+        if ("bannedUsers" in x and "bannedIPs" in x and "bannedUUIDs" in x and (user["user"] in x["bannedUsers"] or request.remote_addr in x["bannedIPs"] or uuid in x["bannedUUIDs"])):
+            status = BANNED
+
+        return { 
+            "createdAt": str(x["createdAt"]) if "createdAt" in x else None,
+            "ip": x["ip"] if status != BANNED and status != NOT_ON_THE_WHITELIST else None,
+            "port": x["port"] if status != BANNED and status != NOT_ON_THE_WHITELIST else None,
+            "users": x["users"] if "users" in x else "0",
+            "maxUsers": x["maxUsers"] if "maxUsers" in x else "24",
+            "name": x["name"],
+            "onlinemode": x["onlinemode"],
+            "md5": x["md5"],
+            "isMineOnline": x["isMineOnline"] if "isMineOnline" in x else True,
+            "status": status
+        }
+
     servers = list(map(mapServer, servers))
+    servers = list(filter(filterServer, servers))
 
     return Response(json.dumps(servers))
