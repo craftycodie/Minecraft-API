@@ -20,6 +20,7 @@ from uuid import uuid4, UUID
 import base64
 import time
 import sys
+import glob
 
 # import config if present
 try: import config
@@ -63,8 +64,12 @@ readme_file = codecs.open("README.md", mode="r", encoding="utf-8")
 readme_html = Markup(markdown(readme_file.read()))
 readme_file.close()
 
-with open("public/versions.json", "r") as read_file:
-    versions = json.load(read_file)
+versions = []
+
+for subdir, dirs, files in os.walk('./public/versions/'):
+    for file in files:
+        openFile = open(os.path.join(subdir, file))
+        versions.append(json.load(openFile))
 
 @app.route('/game/getversion.jsp', methods = ["POST"])
 def getversion():
@@ -1596,3 +1601,24 @@ def listservers():
     servers = list(filter(filterServer, servers))
 
     return Response(json.dumps(servers))
+
+
+@app.route('/mineonline/versions')
+def versionsindex():
+    indexJson = { "versions" : []}
+
+    versionsPath = './public/versions/'
+
+    for subdir, dirs, files in os.walk('./public/versions/'):
+        for file in files:
+            openFile = open(os.path.join(subdir, file))
+            data = openFile.read().encode("utf-8")
+            indexJson["versions"].append({
+                "name": file,
+                "url": os.path.join(subdir, file).replace(versionsPath, "/public/versions/").replace("\\", "/"),
+                "md5": hashlib.md5(data).hexdigest()
+            })
+
+    res = make_response(json.dumps(indexJson))
+    res.mimetype = 'application/json'
+    return res
