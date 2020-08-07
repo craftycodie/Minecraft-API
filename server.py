@@ -1078,12 +1078,12 @@ def sessionProfile(uuid):
 
         if "cape" in user:
             profile["textures"]["CAPE"] = {
-                "url": "http://localhost/cloak/" + user["uuid"]
+                "url": "http://mineonline.codie.gg/cloak/" + user["uuid"]
             }
 
         if "skin" in user:
             profile["textures"]["SKIN"] = {
-                "url": "http://localhost/skin/" + user["uuid"]
+                "url": "http://mineonline.codie.gg/skin/" + user["uuid"]
             }
 
             profile = json.dumps(profile)
@@ -1327,12 +1327,12 @@ def hasJoined():
 
         if "cape" in user:
             profile["textures"]["CAPE"] = {
-                "url": "http://localhost/cloak/" + user["uuid"]
+                "url": "http://mineonline.codie.gg/cloak/" + user["uuid"]
             }
 
         if "skin" in user:
             profile["textures"]["SKIN"] = {
-                "url": "http://localhost/skin/" + user["uuid"]
+                "url": "http://mineonline.codie.gg/skin/" + user["uuid"]
             }
 
         profile = json.dumps(profile, indent=2)
