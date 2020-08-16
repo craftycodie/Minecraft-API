@@ -208,6 +208,10 @@ def skin(username):
 
     return response
 
+@app.route('/cloak/get.jsp')
+def legacyCloak():
+    return cloak(request.values["user"])
+
 @app.route('/MinecraftCloaks/<username>.png')
 def cloak(username):
     try:
@@ -965,7 +969,7 @@ def saveskin(uuid):
 
 #mineonline
 @app.route('/mineonline/player/<uuid>/cloak', methods=['POST'])
-@app.route('/cloak/<uuid>', methods=['GET'])
+#@app.route('/cloak/<uuid>', methods=['GET'])
 def savecloak(uuid):
     uuid = str(UUID(uuid))
     sessionId = None
