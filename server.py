@@ -210,10 +210,6 @@ def skin(username):
 
     return response
 
-@app.route('/cloak/get.jsp')
-def legacyCloak():
-    return cloak(request.values["user"])
-
 @app.route('/MinecraftCloaks/<username>.png')
 def cloak(username):
     try:
@@ -1044,7 +1040,7 @@ def saveskin(uuid):
 
 #mineonline
 @app.route('/mineonline/player/<uuid>/cloak', methods=['POST'])
-#@app.route('/cloak/<uuid>', methods=['GET'])
+@app.route('/cloak/<uuid>', methods=['GET'])
 def savecloak(uuid):
     uuid = str(UUID(uuid))
     sessionId = None
@@ -1089,6 +1085,10 @@ def savecloak(uuid):
         return Response("Failed to upload skin.", 500)
 
     return Response("ok")
+
+@app.route('/cloak/get.jsp')
+def legacyCloak():
+    return cloak(request.values["user"])
 
 #mineonline
 @app.route('/mineonline/player/<uuid>/cloak', methods=['GET'])
@@ -1269,7 +1269,9 @@ def hasJoined():
                 "profileId": user["uuid"].replace("-", ""),
                 "profileName": user["user"],
                 "signatureRequired": True,
-                "textures": { }
+                "textures": {
+                    "skin": { }
+                }
         }
 
         if "unsigned" in request.args and request.args["unsigned"] == "false":
@@ -1281,9 +1283,10 @@ def hasJoined():
             }
 
         if "skin" in user:
-            profile["textures"]["SKIN"] = {
-                "url": "http://mineonline.codie.gg/skin/" + user["uuid"]
-            }
+            profile["textures"]["SKIN"]["url"] = "http://mineonline.codie.gg/skin/" + user["uuid"]
+
+        if user["slim"]:
+            profile["textures"]["SKIN"]["metadata"] = { "model": "slim" }
 
         profile = json.dumps(profile, indent=2)
 
