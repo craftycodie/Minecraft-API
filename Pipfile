@@ -13,6 +13,7 @@ gunicorn = "*"
 markdown = "*"
 flask-mail = "*"
 pillow = "*"
+flask-uuid = "*"
 
 [requires]
 python_version = "3.7"

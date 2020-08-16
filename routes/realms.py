@@ -144,3 +144,20 @@ def register_routes(app):
         }))
         res.mimetype = 'application/json'
         return res
+
+    @app.route('/invites/pending')
+    def realmInvites():
+        res = make_response(json.dumps({
+            "invites": [
+                # {
+                #     "invitationId": "21538412",
+                #     "worldName": "Anything Crafting 2020",
+                #     "worldDescription": "We're back!",
+                #     "worldOwnerName": "720Pony",
+                #     "worldOwnerUuid": "e75e2d263b724a93a3e7a2491f4c454f",
+                #     "date": 1568125140562
+                # }
+            ]
+        }))
+        res.mimetype = 'application/json'
+        return res

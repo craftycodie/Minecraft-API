@@ -1,4 +1,5 @@
 from flask import Flask, Response, request, send_from_directory, abort, send_file, render_template, redirect, url_for, make_response, Markup, jsonify
+from flask_uuid import FlaskUUID
 import json
 import os
 import bcrypt
@@ -31,6 +32,8 @@ except: pass
 app = Flask(__name__,
             static_folder='public/',
             template_folder='templates')
+            
+FlaskUUID(app)
 
 app.config['MONGO_DBNAME'] = os.getenv("MONGO_DBNAME")
 app.config['MONGO_URI'] = os.getenv("MONGO_URI")
@@ -228,6 +231,10 @@ def cloak(username):
     response.headers['Cache-Control'] = 'public, max-age=0'
 
     return response
+
+@app.route('/cloak/get.jsp')
+def legacyCloak():
+    return cloak(request.values["user"])
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -903,8 +910,8 @@ def playeruuid(username):
 
 #mineonline
 @app.route('/mineonline/player/<uuid>/skin', methods=['GET'])
-@app.route('/skin/<uuid>', methods=['GET'])
-def mineonlineskin(uuid):
+@app.route('/skin/<uuid>/<md5>', methods=['GET'])
+def mineonlineskin(uuid, md5 = None):
     uuid = str(UUID(uuid))
     try:
         user = mongo.db.users.find_one({ "uuid": uuid })
@@ -1040,7 +1047,6 @@ def saveskin(uuid):
 
 #mineonline
 @app.route('/mineonline/player/<uuid>/cloak', methods=['POST'])
-@app.route('/cloak/<uuid>', methods=['GET'])
 def savecloak(uuid):
     uuid = str(UUID(uuid))
     sessionId = None
@@ -1086,13 +1092,10 @@ def savecloak(uuid):
 
     return Response("ok")
 
-@app.route('/cloak/get.jsp')
-def legacyCloak():
-    return cloak(request.values["user"])
-
 #mineonline
 @app.route('/mineonline/player/<uuid>/cloak', methods=['GET'])
-def mineonlinecloak(uuid):
+@app.route('/cloak/<uuid>/<md5>', methods=['GET'])
+def mineonlinecloak(uuid, md5 = None):
     uuid = str(UUID(uuid))
     try:
         user = mongo.db.users.find_one({ "uuid": uuid })
@@ -1157,13 +1160,13 @@ def sessionProfile(uuid):
             if "unsigned" in request.args and request.args["unsigned"] == "false":
                 profile["signatureRequired"] = True
 
-            if "cape" in user:
+            if "cloak" in user:
                 profile["textures"]["CAPE"] = {
-                    "url": "http://mineonline.codie.gg/cloak/" + user["uuid"]
+                    "url": "http://mineonline.codie.gg/cloak/" + user["uuid"] + "/" + hashlib.md5(user["cloak"]).hexdigest()
                 }
 
             if "skin" in user:
-                profile["textures"]["SKIN"]["url"] = "http://mineonline.codie.gg/skin/" + user["uuid"]
+                profile["textures"]["SKIN"]["url"] = "http://mineonline.codie.gg/skin/" + user["uuid"] + "/" + hashlib.md5(user["skin"]).hexdigest()
 
             if "slim" in user and user["slim"]:
                 profile["textures"]["SKIN"]["metadata"] = { "model": "slim" }
@@ -1277,13 +1280,13 @@ def hasJoined():
         if "unsigned" in request.args and request.args["unsigned"] == "false":
             profile["signatureRequired"] = True
 
-        if "cape" in user:
+        if "cloak" in user:
             profile["textures"]["CAPE"] = {
-                "url": "http://mineonline.codie.gg/cloak/" + user["uuid"]
+                "url": "http://mineonline.codie.gg/cloak/" + user["uuid"] + "/" + hashlib.md5(user["cloak"]).hexdigest()
             }
 
         if "skin" in user:
-            profile["textures"]["SKIN"]["url"] = "http://mineonline.codie.gg/skin/" + user["uuid"]
+            profile["textures"]["SKIN"]["url"] = "http://mineonline.codie.gg/skin/" + user["uuid"] + "/" + hashlib.md5(user["skin"]).hexdigest()
 
         if "slim" in user and user["slim"]:
             profile["textures"]["SKIN"]["metadata"] = { "model": "slim" }
@@ -1311,23 +1314,6 @@ def hasJoined():
         return Response("Invalid Session", 401)
 
     return Response("Invalid Session", 401)
-
-@app.route('/invites/pending')
-def realmInvites():
-    res = make_response(json.dumps({
-        "invites": [
-            # {
-            #     "invitationId": "21538412",
-            #     "worldName": "Anything Crafting 2020",
-            #     "worldDescription": "We're back!",
-            #     "worldOwnerName": "720Pony",
-            #     "worldOwnerUuid": "e75e2d263b724a93a3e7a2491f4c454f",
-            #     "date": 1568125140562
-            # }
-        ]
-    }))
-    res.mimetype = 'application/json'
-    return res
 
 @app.route('/', defaults={'path': 'index'})
 @app.route('/<path:path>')
