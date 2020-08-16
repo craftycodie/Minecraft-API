@@ -29,9 +29,14 @@
       Skin:<br/>
       <img src="/MinecraftSkins/{{user.user}}.png" width="64" height="32"  onerror="this.style.opacity='0'" style="float:left;" /><input type="file" id="file" name="file"><br/><br/>
       Cloak:<br/>
-      <img src="/MinecraftCloaks/{{user.user}}.png" width="64" height="32" onerror="this.style.opacity='0'" style="float:left;" /><input type="file" id="cloak" name="cloak"> <button type="button" onclick="removeCloak()">Remove</button><br/>
+      <img src="/MinecraftCloaks/{{user.user}}.png" width="64" height="32" onerror="this.style.opacity='0'" style="float:left;" /><input type="file" id="cloak" name="cloak"> <button type="button" onclick="removeCloak()">Remove</button><br/><br/>
+      Model:<br/>
+      <select name="slim" id="slim">
+        <option value="false" {% if not user["slim"] %}selected{% endif %}>Steve</option>
+        <option value="true" {% if user["slim"] %}selected{% endif %}>Alex</option>
+        </select>
       <br/><br/>
-      <button>Upload</button>
+      <button>Submit</button>
   </form>
   <br/><br/>
 </div>

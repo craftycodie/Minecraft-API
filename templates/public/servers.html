@@ -12,6 +12,17 @@ List was updated {{timeString}}.<br/><br/>
 </p>
 <br>
 
+<!--
+	Status Types
+
+	WHITELISTED
+	ON_THE_WHITELIST
+	BANNED
+	OFFLINEMODE
+	NOT_ON_THE_WHITELIST
+	NONE
+ -->
+
 {% if serverCount < 1 %}
 	<p>There are currently no servers online.</p>
 {% else %}
@@ -19,18 +30,30 @@ List was updated {{timeString}}.<br/><br/>
 		{% if 'md5' in server %}
 			<hr/>
 			{% if 'isMineOnline' in server and server['isMineOnline'] == False %}
-				<b>{{server['name']}}</b> - {{server['versionName'] or "Unknown Version"}} - Featured Server<br/><br/>
+				<b>{{server['name']}}</b> - {{server['versionName'] or "Unknown Version"}} - Featured Server<br/>
 			{% else %}
-				<b>{{server['name']}}</b> - {{server['versionName'] or "Unknown Version"}} - {{server['users']}}/{{server['maxUsers']}}<br/><br/>
+				<b>{{server['name']}}</b> - {{server['versionName'] or "Unknown Version"}} - {{server['users']}}/{{server['maxUsers']}}<br/>
 			{% endif %}
 
-			<!-- <span>Players: <b>{{server['users']}}/{{server['maxUsers']}}</b></span><br/> -->
+			{% if server["status"] == "OFFLINEMODE" %}
+			<span style="color: #AA0000">Offline Mode</span><br/>
+			{% elif server["status"] == "WHITELISTED" %}
+			<span>Whitelisted</span><br/>
+			{% elif server["status"] == "ON_THE_WHITELIST" %}
+			<span style="color: #00AA00">Whitelisted</span><br/>
+			{% elif server["status"] == "NOT_ON_THE_WHITELIST" %}
+			<span style="color: #AA0000">You're not Whitelisted</span><br/>
+			{% elif server["status"] == "BANNED" %}
+			<span style="color: #AA0000">Banned</span><br/>
+			{% else %}
+			<br/>
+			{% endif %}
+
+			{% if server['ip'] %}
 			<span>IP: <b>{{server['ip']}}</b>
-				{% if server['onlinemode'] == "false" %} 
-				<span><font color="#ff0000">Offline Mode</font></span>
-				{% endif %}
 				<br/>
 				Port: <b>{{server['port']}}</b></span>
+			{% endif %}
 		{% endif %}
 	{% endfor %}
 	<br/><br/>
