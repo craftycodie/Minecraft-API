@@ -1165,7 +1165,7 @@ def sessionProfile(uuid):
             if "skin" in user:
                 profile["textures"]["SKIN"]["url"] = "http://mineonline.codie.gg/skin/" + user["uuid"]
 
-            if user["slim"]:
+            if "slim" in user and user["slim"]:
                 profile["textures"]["SKIN"]["metadata"] = { "model": "slim" }
 
             profile = json.dumps(profile)
@@ -1270,7 +1270,7 @@ def hasJoined():
                 "profileName": user["user"],
                 "signatureRequired": True,
                 "textures": {
-                    "skin": { }
+                    "SKIN": { }
                 }
         }
 
@@ -1285,7 +1285,7 @@ def hasJoined():
         if "skin" in user:
             profile["textures"]["SKIN"]["url"] = "http://mineonline.codie.gg/skin/" + user["uuid"]
 
-        if user["slim"]:
+        if "slim" in user and user["slim"]:
             profile["textures"]["SKIN"]["metadata"] = { "model": "slim" }
 
         profile = json.dumps(profile, indent=2)
