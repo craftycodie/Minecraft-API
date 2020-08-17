@@ -49,6 +49,9 @@ List was updated {{timeString}}.<br/><br/>
 			<br/>
 			{% endif %}
 
+			{% if 'players' in server and server['players'] |length > 1 %}
+ 			<span>Players: {{", ".join(server['players'])}}</span><br/><br/>
+			{% endif %}
 			{% if server['ip'] %}
 			<span>IP: <b>{{server['ip']}}</b>
 				<br/>

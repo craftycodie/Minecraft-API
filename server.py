@@ -204,7 +204,18 @@ def skin(username):
     if not user or not 'skin' in user or not user['skin']:
         return abort(404)
 
-    response = Response(user['skin'], mimetype="image/png")
+    # Crop 64x64 skins to 64x32
+    skinBytes = BytesIO(user['skin'])
+    skinBytes.flush()
+    skinBytes.seek(0)
+    skin = Image.open(skinBytes)
+    croppedSkin = BytesIO()
+    skin = skin.crop((0, 0, 64, 32))
+    skin.save(croppedSkin, "PNG")
+    skinBytes.flush()
+    croppedSkin.seek(0)
+
+    response = Response(croppedSkin.read(), mimetype="image/png")
     
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     response.headers["Pragma"] = "no-cache"
@@ -615,7 +626,8 @@ def classicservers():
             "md5": x["md5"],
             "isMineOnline": x["isMineOnline"] if "isMineOnline" in x else True,
             "status": status,
-            "versionName": x["versionName"] if "versionName" in x else None
+            "versionName": x["versionName"] if "versionName" in x else None,
+            "players": x["players"] if "players" in x else []
         }
 
     servers = list(map(mapServer, servers))
@@ -806,9 +818,9 @@ def addclassicserver():
             })
         
         if (port != "25565"):
-            return Response("http://www.minecraft.net/servers.jsp")
+            return Response("http://mineonline.codie.gg/servers.jsp")
         else:
-            return Response("http://www.minecraft.net/servers.jsp")
+            return Response("http://mineonline.codie.gg/servers.jsp")
 
     except:
         return Response("Something went wrong.", 500)
@@ -1538,7 +1550,8 @@ def listservers():
             "onlinemode": x["onlinemode"],
             "md5": x["md5"],
             "isMineOnline": x["isMineOnline"] if "isMineOnline" in x else True,
-            "status": status
+            "status": status,
+            "players": x["players"] if "players" in x else []
         }
 
     servers = list(map(mapServer, servers))
