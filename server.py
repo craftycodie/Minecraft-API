@@ -1274,8 +1274,6 @@ def postprofiles():
             "name": username
         })
 
-    print(responseData)
-
     res = make_response(json.dumps(responseData))
     res.mimetype = 'application/json'
     return res
