@@ -1261,7 +1261,24 @@ def joinSession():
 
 @app.route('/profiles/minecraft', methods=["POST"])
 def postprofiles():
-    return make_response(json.dumps({}))
+    responseData = []
+
+    users = mongo.db.users
+
+    for username in request.json:
+        user = users.find_one({"user": username})
+        if not user:
+            continue
+        responseData.append({
+            "id": user["uuid"].replace("-", ""),
+            "name": username
+        })
+
+    print(responseData)
+
+    res = make_response(json.dumps(responseData))
+    res.mimetype = 'application/json'
+    return res
 
 @app.route('/blockedservers')
 def blockedservers():
