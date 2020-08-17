@@ -15,7 +15,7 @@ from markdown import markdown
 import codecs
 from flask_mail import Mail, Message
 from threading import Thread
-from PIL import Image, PngImagePlugin
+from PIL import Image, PngImagePlugin, ImageOps
 from io import BytesIO, StringIO
 from uuid import uuid4, UUID
 import base64
@@ -933,24 +933,33 @@ def mineonlineskin(uuid, md5 = None):
     if not user or not 'skin' in user or not user['skin']:
         return abort(404)
 
-    # if skinFile and allowed_file(skinFile.filename):
-    #     if skinFile.stream.tell() > 8096:
-    #         return render_template("private/profile.html", error="Skin too large.", user=user)
-    #     skinBytes = BytesIO()
-    #     skinFile.save(skinBytes)
-    #     skinBytes.flush()
-    #     skinBytes.seek(0)
-    #     skin = Image.open(skinBytes)
-    #     croppedSkin = BytesIO()
-    #     skin = skin.crop((0, 0, 64, 64))
-    #     skin.save(croppedSkin, "PNG")
-    #     skinBytes.flush()
-    #     croppedSkin.seek(0)
-    #     users.update_one({ "_id": user["_id"] }, { "$set": { "skin": croppedSkin.read() } })
 
-    # skin = Image.open(skinBytes)
+    skinBytes = BytesIO(user['skin'])
+    skinBytes.flush()
+    skinBytes.seek(0)
+    skin = Image.open(skinBytes)
 
-    response = Response(user['skin'], mimetype="image/png")
+    [width, height] = skin.size
+
+    # Convert 64x32 skins to 64x64
+    if(height < 64):
+        legacySkin = skin
+        skin = Image.new("RGBA", (64, 64), (255, 255, 255, 0))
+        skin.paste(legacySkin, (0, 0))
+        #skin = ImageOps.expand(skin, (0, 0, 0, 64 - height), (255, 255, 255, 0))
+        leg = skin.crop((0, 16, 16, 32))
+        arm = skin.crop((40, 16, 56, 32))
+        skin.paste(leg, (16, 48))
+        skin.paste(arm, (32, 48))
+    else:
+        skin = skin.crop((0, 0, 64, 64))
+
+    croppedSkin = BytesIO()
+    skin.save(croppedSkin, "PNG")
+    skinBytes.flush()
+    croppedSkin.seek(0)
+
+    response = Response(croppedSkin.read(), mimetype="image/png")
     
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     response.headers["Pragma"] = "no-cache"
@@ -1573,7 +1582,7 @@ def versionsindex():
             indexJson["versions"].append({
                 "name": file,
                 "url": os.path.join(subdir, file).replace(versionsPath, "/public/versions/").replace("\\", "/"),
-                "md5": hashlib.md5(data).hexdigest()
+                "modified": os.path.getmtime(os.path.join(subdir, file)),
             })
 
     res = make_response(json.dumps(indexJson))
