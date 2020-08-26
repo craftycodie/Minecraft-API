@@ -1,20 +1,9 @@
 from flask import Response, request, make_response
 import json
 from flask_pymongo import PyMongo
+from utils.servers import *
 
-WHITELISTED = "WHITELISTED"
-ON_THE_WHITELIST = "ON_THE_WHITELIST"
-BANNED = "BANNED"
-OFFLINEMODE = "OFFLINEMODE"
-NOT_ON_THE_WHITELIST = "NOT_ON_THE_WHITELIST"
-NONE = "NONE"
-
-def filterServer(x):
-    return x != None
-
-def register_routes(app):
-    mongo = PyMongo(app)
-
+def register_routes(app, mongo):
     @app.route('/mco/client/outdated')
     def realmsoutdated():
         return Response("", 200)
@@ -60,7 +49,6 @@ def register_routes(app):
 
     @app.route('/worlds')
     def realmsworlds():
-        global serverID
         mineOnlineServers = list(mongo.db.classicservers.find())
         featuredServers = list(mongo.db.featuredservers.find())
         featuredServers = [dict(server, **{'isMineOnline': False}) for server in featuredServers]
