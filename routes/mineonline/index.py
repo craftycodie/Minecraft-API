@@ -4,10 +4,14 @@ from flask_pymongo import PyMongo
 from bson.objectid import ObjectId
 import hashlib
 from uuid import uuid4
-from routes.mineonline.skins import register_routes as register_skin_routes
+from routes.mineonline.skins import register_routes as register_skins_routes
+from routes.mineonline.servers import register_routes as register_servers_routes
+import os
+
 
 def register_routes(app, mongo):
-    register_skin_routes(app, mongo)
+    register_skins_routes(app, mongo)
+    register_servers_routes(app, mongo)
 
     # Classic authentication route.
     # Modified for mineonline.
@@ -68,3 +72,23 @@ def register_routes(app, mongo):
                 return Response("Something went wrong!", 500)
 
         return Response("You must be logged in to do this.", 401)
+
+    @app.route('/mineonline/versions')
+    def versionsindex():
+        indexJson = { "versions" : []}
+
+        versionsPath = './public/versions/'
+
+        for subdir, dirs, files in os.walk('./public/versions/'):
+            for file in files:
+                openFile = open(os.path.join(subdir, file))
+                data = openFile.read().encode("utf-8")
+                indexJson["versions"].append({
+                    "name": file,
+                    "url": os.path.join(subdir, file).replace(versionsPath, "/public/versions/").replace("\\", "/"),
+                    "modified": os.path.getmtime(os.path.join(subdir, file)),
+                })
+
+        res = make_response(json.dumps(indexJson))
+        res.mimetype = 'application/json'
+        return res
