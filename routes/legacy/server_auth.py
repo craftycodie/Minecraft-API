@@ -5,6 +5,7 @@ from bson.objectid import ObjectId
 import hashlib
 from uuid import uuid4
 import bcrypt
+from datetime import datetime
 
 def register_routes(app, mongo):
     @app.route('/game/joinserver.jsp')

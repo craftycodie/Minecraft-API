@@ -1,4 +1,4 @@
-from flask import Response, request, make_response
+from flask import Response, request, make_response, send_file
 import json
 from flask_pymongo import PyMongo
 from bson.objectid import ObjectId
@@ -16,7 +16,7 @@ def register_routes(app, mongo):
         # This never seems to hold anything.
         # version = request.form['version']
 
-        latestVersion = open("public\\MinecraftDownload\\version", mode="r", encoding="utf-8")
+        latestVersion = open("./public/MinecraftDownload/version", mode="r", encoding="utf-8")
         latestVersion = latestVersion.readline()
 
         downloadToken = "deprecated"

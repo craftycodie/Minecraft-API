@@ -51,7 +51,7 @@ def register_routes(app, mongo):
             except:
                 return Response("Invalid Session", 401)
         else:
-            return Response(401)
+            return abort(401)
 
         uuid = str(UUID(uuid))
         try:
@@ -68,7 +68,7 @@ def register_routes(app, mongo):
 
         users.update_one({ "_id": user["_id"] }, { "$set": updates })
 
-        return Response(200)
+        return Response("ok")
 
     #mineonline
     @app.route('/mineonline/player/<uuid>/skin', methods=['POST'])
