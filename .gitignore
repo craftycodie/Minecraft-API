@@ -2,3 +2,14 @@ __pycache__
 public/MinecraftDownload
 public/MinecraftResources
 public/download
+public/resources
+public/minecraft-server
+MineOnline_API.egg-info/
+MineOnline.egg-info/
+templates_mc/
+ngrok.exe
+ngrok.bat
+config.py
+config_prod.py
+config_local.py
+dist/

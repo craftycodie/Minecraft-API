@@ -12,9 +12,7 @@ NONE = "NONE"
 def filterServer(x):
     return x != None
 
-def register_routes(app):
-    mongo = PyMongo(app)
-
+def register_routes(app, mongo):
     @app.route('/mco/client/outdated')
     def realmsoutdated():
         return Response("", 200)

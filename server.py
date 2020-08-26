@@ -5,7 +5,7 @@ import os
 import bcrypt
 import re
 from flask_pymongo import PyMongo
-from pymongo import IndexModel, ASCENDING, DESCENDING
+from pymongo import IndexModel, ASCENDING, DESCENDING, errors
 from bson import json_util
 from bson.objectid import ObjectId
 from utils.modified_utf8 import utf8m_to_utf8s, utf8s_to_utf8m
@@ -56,14 +56,12 @@ mail = Mail(app)
 mongo = PyMongo(app)
 mongo.db.classicservers.create_indexes([
     IndexModel([("realmId", ASCENDING)], unique = True, partialFilterExpression = { "realmId": {"$type": "number"}}),
-    IndexModel([("createdAt", ASCENDING)], expireAfterSeconds = 90)
+    IndexModel([("createdAt", ASCENDING)], expireAfterSeconds = 120, background = True)
 ])
 mongo.db.serverjoins.create_index( "createdAt", expireAfterSeconds = 600 )
 mongo.db.users.create_index("user", unique = True )
 mongo.db.users.create_index("email", unique = True )
 mongo.db.featuredservers.create_index("realmId", unique = True, partialFilterExpression = { "realmId": {"$type": "number"} })
-
-latestVersion = "1589019440"
 
 readme_file = codecs.open("README.md", mode="r", encoding="utf-8")
 readme_html = Markup(markdown(readme_file.read()))
@@ -75,123 +73,6 @@ for subdir, dirs, files in os.walk('./public/versions/'):
     for file in files:
         openFile = open(os.path.join(subdir, file))
         versions.append(json.load(openFile))
-
-@app.route('/game/getversion.jsp', methods = ["POST"])
-def getversion():
-    username = request.form['user']
-    password = request.form['password']
-    # version = request.form['version']
-
-    downloadToken = "deprecated"
-
-    users = mongo.db.users
-
-    if username == "":
-        return Response("Bad login")
-    elif password == "":
-        return Response("Bad login")
-    elif not users.find_one({"user": username}):
-        return Response("Bad login")
-    else:
-        try:
-            user = users.find_one({"user": username})
-            matched = bcrypt.checkpw(password.encode('utf-8'), user['password'].encode('utf-8'))
-            if not matched:
-                return Response("Bad login")
-            if not user['premium']:
-                return Response("User not premium.")
-            if user:
-                sessionId = ObjectId()
-                users.update_one({"_id": user["_id"]}, { "$set": { "sessionId": sessionId } })
-                response = Response(" \n" + (':'.join([latestVersion, downloadToken, username, str(sessionId)])))
-                return response
-            else:
-                return Response("Something went wrong, please try again!")
-        except:
-            return Response("Something went wrong, please try again!")
-
-    # If the launcher is updated
-    # res  "Old version"
-
-    return Response("Something went wrong, please try again!")
-
-@app.route('/game/joinserver.jsp')
-def joinserver():
-    username = request.args.get('user')
-    sessionId = request.args.get('sessionId')
-    serverId = request.args.get('serverId')
-
-    if not 'sessionId' in request.args or sessionId == None:
-        return Response("Invalid Session: you are not logged in.")
-
-    serverjoins = mongo.db.serverjoins
-
-    user = None
-
-    try:
-        users = mongo.db.users
-        user = users.find_one({"sessionId": ObjectId(sessionId), "user": username})
-
-        if not user:
-            return Response("Invalid Session")
-        if not user['premium']:
-            return Response("User not premium.")
-
-        serverjoins.delete_many({"user": username})
-
-        serverjoins.insert_one({
-            "createdAt": datetime.utcnow(),
-            "playerName": user["user"],
-            "serverId": serverId,
-        })
-
-        response = Response("ok")
-        return response
-    except:
-        return Response("Invalid Session")
-
-    return Response("Something went wrong.")
-
-@app.route('/login/session.jsp')
-def checksession():
-    username = request.args.get('name')
-    sessionId = request.args.get('session')
-
-    user = None
-    
-    try:
-        users = mongo.db.users
-        user = users.find_one({"sessionId": ObjectId(sessionId), "user": username})
-
-        if user and user['premium']:
-            return Response("ok")
-        else:
-            return Response("Invalid Session", 400)
-    except:
-        return Response("Invalid Session", 400)
-
-    return Response("Invalid Session", 400)
-
-@app.route('/game/checkserver.jsp')
-def checkserver():
-    username = request.args.get('user')
-    serverId = request.args.get('serverId')
-
-    serverjoins = mongo.db.serverjoins
-
-    try:
-        found = serverjoins.find_one({"playerName": username, "serverId": serverId})
-        if not found:
-            return Response("Invalid Session", 401)
-
-        serverjoins.delete_one({"_id": found['_id']})
-
-        response = Response("YES")
-        return response
-    except:
-        return Response("Invalid Session", 401)
-
-    return Response("Invalid Session", 401)
 
 @app.route('/skin/<username>.png') # classic
 @app.route('/MinecraftSkins/<username>.png')
@@ -223,29 +104,6 @@ def skin(username):
     response.headers['Cache-Control'] = 'public, max-age=0'
 
     return response
-
-@app.route('/MinecraftCloaks/<username>.png')
-def cloak(username):
-    try:
-        user = mongo.db.users.find_one({ "user": username })
-    except:
-        return abort(404)
-
-    if not user or not 'cloak' in user or not user['cloak']:
-        return abort(404)
-
-    response = Response(user['cloak'], mimetype="image/png")
-    
-    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-    response.headers["Pragma"] = "no-cache"
-    response.headers["Expires"] = "0"
-    response.headers['Cache-Control'] = 'public, max-age=0'
-
-    return response
-
-@app.route('/cloak/get.jsp')
-def legacyCloak():
-    return cloak(request.values["user"])
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -301,12 +159,6 @@ def uploadSkin():
     user = users.find_one({"_id": user["_id"]})
 
     return render_template("private/profile.html", user=user)
-
-@app.route('/MinecraftDownload/minecraft.jar')
-def downloadgame():
-    username = request.args.get('user')
-    downloadTicket = request.args.get('ticket')
-    return send_file("public/MinecraftDownload/minecraft.jar")
 
 @app.route('/resources/') # classic
 def resourcesArray():
@@ -644,119 +496,6 @@ def classicservers():
         timeString=timeString,
     )
 
-
-#classic
-@app.route('/listmaps.jsp')
-def listmaps():
-    username = request.args['user']
-    maps = None
-
-    try:
-        users = mongo.db.users
-        user = users.find_one({"user" : username})
-    except:
-        return Response("User not found.", 404)
-
-    if (user == None):
-        return Response("User not found.", 404)
-
-    if 'maps' in user:
-        maps = user['maps']
-    else:
-        return Response("-;-;-;-;-")
-
-    return Response(';'.join([
-        maps['0']['name'] if '0' in maps else '-',
-        maps['1']['name'] if '1' in maps else '-',
-        maps['2']['name'] if '2' in maps else '-',
-        maps['3']['name'] if '3' in maps else '-',
-        maps['4']['name'] if '4' in maps else '-',
-    ]))
-
-#classic
-#TODO: GZIP V1 maps.
-@app.route('/level/save.html', methods=['POST'])
-def savemap():
-    username = None
-    sessionId = None
-    mapId = None
-    mapLength = None
-    mapName = None
-
-    nullcount = 0
-    lastNull = 0
-
-    user = None
-
-    try:
-        requestData = request.stream.read()
-
-        username_length = int.from_bytes(requestData[1 : 2], byteorder='big')
-        username = requestData[2 : 2 + username_length]
-        sessionId_length = int.from_bytes(requestData[2 + username_length + 1 : 2 + username_length + 2], byteorder='big')
-        sessionId = requestData[2 + username_length + 2 : 2 + username_length + 2 + sessionId_length]
-        mapName_length = int.from_bytes(requestData[2 + username_length + 2 + sessionId_length + 1 : 2 + username_length + 2 + sessionId_length + 2], byteorder='big')
-        mapName = requestData[2 + username_length + 2 + sessionId_length + 2 : 2 + username_length + 2 + sessionId_length + 2 + mapName_length]
-        mapId = requestData[2 + username_length + 2 + sessionId_length + 2 + mapName_length]
-        mapLength = int.from_bytes(requestData[2 + username_length + 2 + sessionId_length + 2 + mapName_length + 1 : 2 + username_length + 2 + sessionId_length + 2 + mapName_length + 1 + 4], byteorder='big')
-        mapData = requestData[2 + username_length + 2 + sessionId_length + 2 + mapName_length + 1 + 4 : len(requestData)]
-
-        username = str(utf8m_to_utf8s(username), 'utf-8')
-        sessionId = str(utf8m_to_utf8s(sessionId), 'utf-8')
-        mapName = str(utf8m_to_utf8s(mapName), 'utf-8')
-
-        version = 2 if mapData[0:2] == bytes([0x1F, 0x8B]) else 1
-
-    except:
-        return Response("Something went wrong!", 500)
-
-    try:
-        users = mongo.db.users
-        user = users.find_one({"user" : username, "sessionId": ObjectId(sessionId)})
-    except:
-        return Response("Invalid Session", 401)
-
-    if (user == None):
-        return Response("Invalid Session", 401)
-
-    try:
-        users.update_one({"_id": user["_id"]}, { "$set": { ("maps." + str(mapId)): {
-            "name": mapName,
-            "length": mapLength,
-            "data": mapData,
-            "createdAt": datetime.utcnow(),
-            "version" : version
-        } } })
-    except:
-        return Response("Failed to save data.", 500)
-
-    return Response("ok")
-
-#classic
-@app.route('/level/load.html')
-def loadmap():
-    username = request.args['user']
-    mapId = request.args['id']
-    maps = None
-
-    try:
-        users = mongo.db.users
-        user = users.find_one({"user" : username})
-    except:
-        return Response("User not found.", 404)
-
-    if (user == None):
-        return Response("User not found.", 404)
-
-    if 'maps' in user:
-        maps = user['maps']
-    else:
-        return Response("Map not found.", 404)
-
-    if mapId in maps:
-        response = Response(bytes([0x00, 0x02, 0x6F, 0x6B]) + maps[mapId]['data'], mimetype='application/x-mine')
-        return response
-
 #classic
 @app.route('/heartbeat.jsp', methods=["POST", "GET"])
 def addclassicserver(): 
@@ -843,83 +582,6 @@ def haspaid():
 
     return Response("true")
 
-#classic, mineonline
-@app.route('/mineonline/mppass.jsp')
-def getmmpass():
-    sessionId = request.args['sessionId']
-    serverIP = request.args['serverIP']
-    serverPort = request.args['serverPort']
-
-    try:
-        users = mongo.db.users
-        user = users.find_one({"sessionId": ObjectId(sessionId)})
-    except:
-        return Response("User not found.", 404)
-
-    if (user == None):
-        return Response("User not found.", 404)
-
-    try:
-        server = mongo.db.classicservers.find_one({"ip": serverIP, "port": serverPort})
-    except:
-        return Response("Server not found.", 404)
-
-    if server:
-        if "salt" in server:
-            mppass = str(hashlib.md5((server['salt'] + user['user']).encode('utf-8')).hexdigest())
-            return Response(mppass)
-        else:
-            return Response("Classic server not found.", 404)
-    else:
-        return Response("Server not found.", 404)
-
-    return Response("Something went wrong!", 500)
-
-#classic, mineonline
-@app.route('/mineonline/removecloak.jsp')
-def removeCloak():
-    sessionId = request.args['sessionId']
-
-    if sessionId:
-        try:
-            users = mongo.db.users
-            user = users.find_one({"sessionId": ObjectId(sessionId)})
-            if not user:
-                return Response("Invalid session.", 400)
-            users.update_one({ "_id": user["_id"] }, { "$set": { "cloak": "" } })
-            return Response("ok", 200)
-        except:
-            return Response("Something went wrong!", 500)
-
-    return Response("You must be logged in to do this.", 401)
-
-#mineonline
-@app.route('/mineonline/playeruuid/<username>')
-def playeruuid(username):
-    sessionId = request.args['session']
-    if sessionId:
-        try:
-            users = mongo.db.users
-            user = users.find_one({"sessionId": ObjectId(sessionId)})
-            if not user:
-                return Response("Invalid session.", 400)
-            if user["user"] != username:
-                return Response("Wrong username.", 400)
-            if (not "uuid" in user):
-                uuid = str(uuid4())
-                users.update_one({ "_id": user["_id"] }, { "$set": { "uuid": uuid } })
-                return make_response(json.dumps({
-                    "uuid": uuid
-                }), 200)
-            else:
-                return make_response(json.dumps({
-                    "uuid": user["uuid"]
-                }), 200)
-        except:
-            return Response("Something went wrong!", 500)
-
-    return Response("You must be logged in to do this.", 401)
-
 #mineonline
 @app.route('/mineonline/player/<uuid>/skin', methods=['GET'])
 @app.route('/skin/<uuid>/<md5>', methods=['GET'])
@@ -968,151 +630,6 @@ def mineonlineskin(uuid, md5 = None):
 
     return response
 
-@app.route('/mineonline/player/<uuid>/skin/metadata', methods=['GET'])
-def mineonlineskinmetadata(uuid):
-    uuid = str(UUID(uuid))
-    try:
-        user = mongo.db.users.find_one({ "uuid": uuid })
-    except:
-        return abort(404)
-    if not user:
-        return abort(404)
-
-    return make_response(json.dumps({
-        "slim": user["slim"]
-    }))
-
-@app.route('/mineonline/player/<uuid>/skin/metadata', methods=['POST'])
-def mineonlineupdateskinmetadata(uuid):
-    sessionId = request.args['session']
-    if sessionId:
-        try:
-            users = mongo.db.users
-            user = users.find_one({"uuid" : uuid, "sessionId": ObjectId(sessionId)})
-        except:
-            return Response("Invalid Session", 401)
-    else:
-        return Response(401)
-
-    uuid = str(UUID(uuid))
-    try:
-        user = mongo.db.users.find_one({ "uuid": uuid })
-    except:
-        return abort(404)
-    if not user:
-        return abort(404)
-
-    updates = {}
-
-    if "slim" in request.json:
-        updates["slim"] = request.json["slim"]
-
-    users.update_one({ "_id": user["_id"] }, { "$set": updates })
-
-    return Response(200)
-
-#mineonline
-@app.route('/mineonline/player/<uuid>/skin', methods=['POST'])
-def saveskin(uuid):
-    uuid = str(UUID(uuid))
-    sessionId = None
-
-    user = None
-
-    try:
-        requestData = request.stream.read()
-
-        sessionId_length = int.from_bytes(requestData[1 : 2], byteorder='big')
-        sessionId = requestData[2 : 2 + sessionId_length]
-        skinLength = int.from_bytes(requestData[2 + sessionId_length + 2: 2 + sessionId_length + 2 + 4], byteorder='big')
-        skinData = requestData[2 + sessionId_length + 4 : len(requestData)]
-
-        sessionId = str(utf8m_to_utf8s(sessionId), 'utf-8')
-
-    except:
-        return Response("Something went wrong!", 500)
-
-    try:
-        users = mongo.db.users
-        user = users.find_one({"uuid" : uuid, "sessionId": ObjectId(sessionId)})
-    except:
-        return Response("Invalid Session", 401)
-
-    if (user == None):
-        return Response("Invalid Session", 401)
-
-    try:
-        skinBytes = BytesIO()
-        skinBytes.write(skinData)
-        skinBytes.flush()
-        skinBytes.seek(0)
-        skin = Image.open(skinBytes)
-        croppedSkin = BytesIO()
-        [width, height] = skin.size
-
-        if (width < 64 or height < 32):
-            return Response("Skin too small.", 400)
-        elif (height < 64):
-            skin = skin.crop((0, 0, 64, 32))
-        elif (height >= 64 or width > 64):
-            skin = skin.crop((0, 0, 64, 64))
-    
-        skin.save(croppedSkin, "PNG")
-        skinBytes.flush()
-        croppedSkin.seek(0)
-        users.update_one({ "_id": user["_id"] }, { "$set": { "skin": croppedSkin.read() } })
-    except:
-        return Response("Failed to upload skin.", 500)
-
-    return Response("ok")
-
-#mineonline
-@app.route('/mineonline/player/<uuid>/cloak', methods=['POST'])
-def savecloak(uuid):
-    uuid = str(UUID(uuid))
-    sessionId = None
-
-    user = None
-
-    try:
-        requestData = request.stream.read()
-
-        sessionId_length = int.from_bytes(requestData[1 : 2], byteorder='big')
-        sessionId = requestData[2 : 2 + sessionId_length]
-        cloakLength = int.from_bytes(requestData[2 + sessionId_length + 2: 2 + sessionId_length + 2 + 4], byteorder='big')
-        cloakData = requestData[2 + sessionId_length + 4 : len(requestData)]
-
-        sessionId = str(utf8m_to_utf8s(sessionId), 'utf-8')
-
-    except:
-        return Response("Something went wrong!", 500)
-
-    try:
-        users = mongo.db.users
-        user = users.find_one({"uuid" : uuid, "sessionId": ObjectId(sessionId)})
-    except:
-        return Response("Invalid Session", 401)
-
-    if (user == None):
-        return Response("Invalid Session", 401)
-
-    try:
-        cloakBytes = BytesIO()
-        cloakBytes.write(cloakData)
-        cloakBytes.flush()
-        cloakBytes.seek(0)
-        cloak = Image.open(cloakBytes)
-        croppedCloak = BytesIO()
-        cloak = cloak.crop((0, 0, 64, 32))
-        cloak.save(croppedCloak, "PNG")
-        cloakBytes.flush()
-        croppedCloak.seek(0)
-        users.update_one({ "_id": user["_id"] }, { "$set": { "cloak": croppedCloak.read() } })
-    except:
-        return Response("Failed to upload skin.", 500)
-
-    return Response("ok")
-
 #mineonline
 @app.route('/mineonline/player/<uuid>/cloak', methods=['GET'])
 @app.route('/cloak/<uuid>/<md5>', methods=['GET'])
@@ -1134,31 +651,6 @@ def mineonlinecloak(uuid, md5 = None):
     response.headers['Cache-Control'] = 'public, max-age=0'
 
     return response
-
-@app.route('/mineonline/account.jsp')
-def account():
-    username = request.args.get('name')
-    sessionId = request.args.get('session')
-
-    user = None
-    
-    try:
-        users = mongo.db.users
-        user = users.find_one({"sessionId": ObjectId(sessionId), "user": username})
-
-        if user:
-            return Response(json.dumps({
-                "user": user['user'],
-                "email": user['email'],
-                "createdAt": str(user['createdAt']),
-                "premium": user['premium']
-            }))
-        else:
-            return Response("Invalid Session", 400)
-    except:
-        return Response("Invalid Session", 400)
-
-    return Response("Invalid Session", 400)
 
 @app.route('/session/minecraft/profile/<uuid>')
 def sessionProfile(uuid):
@@ -1604,4 +1096,4 @@ def versionsindex():
     res.mimetype = 'application/json'
     return res
 
-routes.realms.register_routes(app)
+routes.register_routes(app, mongo)
