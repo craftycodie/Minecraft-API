@@ -58,6 +58,7 @@ public/
 │   │   solaris_natives.jar.lzma
 │   │   windows_natives.jar
 │   │   windows_natives.jar.lzma
+│   │   version                           Contains a version timestamp. Numbers work too.
 │   │
 │   ├───classic                           Classic version applet (browser) files.
 │   │       jinput.jar.pack.lzma
