@@ -1,9 +1,15 @@
-from flask import Response, request, make_response
+from flask import Response, request, make_response, abort
 import json
 from flask_pymongo import PyMongo
 from utils.servers import *
+from bson.objectid import ObjectId
+from uuid import UUID
+
+from routes.realms.management import register_routes as register_management_routes
 
 def register_routes(app, mongo):
+    register_management_routes(app, mongo)
+
     @app.route('/mco/client/outdated')
     def realmsoutdated():
         return Response("", 200)
@@ -40,12 +46,20 @@ def register_routes(app, mongo):
 
     @app.route('/activities/liveplayerlist')
     def liveplayerlist():
-        return make_response(json.dumps({ "lists": [
-            # {
-            #     "serverId": "1",
-            #     "players": ["MineOnline Realms! WIP"]
-            # }
-        ]}))
+        mineOnlineServers = list(mongo.db.classicservers.find())
+        lists = []
+        for server in mineOnlineServers:
+            if "realmId" in server:
+                playerlist = {
+                    "serverId": server["realmId"],
+                }
+
+                if(len(server["players"]) > 0):
+                    playerlist["playerList"] = server["players"]
+                
+                lists.append(playerlist)
+        print(json.dumps({ "lists": lists }))
+        return make_response(json.dumps({ "lists": lists }))
 
     @app.route('/worlds')
     def realmsworlds():
@@ -62,6 +76,8 @@ def register_routes(app, mongo):
                 usersCount = usersCount + int(server['users'])
             if 'public' in server and  server['public'] == "false":
                 privateCount = privateCount + 1
+            if not 'players' in server:
+                server['players'] = []
 
         def mapServer(x): 
             if (not "md5" in x):
@@ -79,14 +95,64 @@ def register_routes(app, mongo):
             if (x["onlinemode"] == False):
                 status = OFFLINEMODE
             
-            if (x["whitelisted"] == True and "whitelistUsers" in x and "whitelistIPs" in x and "whitelistedUUIDs" in x):
+            if (x["whitelisted"] == True):
                 status = WHITELISTED
+
+            playerUUIDs = []
+            users = mongo.db.users
+            for player in server["players"]:
+                try:
+                    playerData = users.find_one({"user": player})
+                    playerUUIDs.append({
+                        "uuid": playerData["uuid"].replace("-", ""),
+                        "name": player,
+                        "operator": True if playerData["uuid"] == server["ownerUUID"] else False,
+                        "accepted": True,
+                        "online": True,
+                        "permission": "MEMBER"
+                    })
+                except:
+                    pass
+
+            if server["whitelisted"] == True and "whitelistUsers" in server and "whitelistUUIDS" in server:
+                # If a player is not in the server but is whitelisted.
+                for player in server["whitelistUsers"]:
+                    try:
+                        if player in server["players"]:
+                            continue
+                        playerData = users.find_one({"user": player})
+                        playerUUIDs.append({
+                            "uuid": playerData["uuid"].replace("-", ""),
+                            "name": player,
+                            "operator": True if playerData["uuid"] == server["ownerUUID"] else False,
+                            "accepted": True,
+                            "online": False,
+                            "permission": "MEMBER"
+                        })
+                    except:
+                        pass
+
+                for playerUUID in server["whitelistUUIDs"]:
+                    try:
+                        playerData = users.find_one({"uuid": str(UUID(playerUUID))})
+                        if playerData["user"] in server["players"] or playerData["user"] in server["whitelistUsers"]:
+                            continue
+                        playerUUIDs.append({
+                            "uuid": playerData["uuid"].replace("-", ""),
+                            "name": player,
+                            "operator": True if playerData["uuid"] == server["ownerUUID"] else False,
+                            "accepted": True,
+                            "online": False,
+                            "permission": "MEMBER"
+                        })
+                    except:
+                        pass
 
             return { 
                 "id": x["realmId"],
                 "remoteSubscriptionId":"aaaa0000bbbb1111cccc2222dddd3333",
                 "owner":"Whitelisted" if status == WHITELISTED else "Offline-Mode" if status == OFFLINEMODE else "",
-                "ownerUUID":"806f3493624332a29166b098a0b03fd0",
+                "ownerUUID":"806f3493624332a29166b098a0b03fd0" if x["ownerUUID"] == None else x["ownerUUID"],
                 "name":x["name"],
                 "motd":x["versionName"] if "versionName" in x else "Unknown Version",
                 "state":"OPEN",
@@ -94,7 +160,7 @@ def register_routes(app, mongo):
                 "expired":False,
                 "expiredTrial":False,
                 "worldType":"NORMAL",
-                "players":[],
+                "players":playerUUIDs,
                 "maxPlayers":x["maxUsers"] if "maxUsers" in x else "24",
                 "minigameName":None,
                 "minigameId":None,

@@ -37,6 +37,17 @@ def register_routes(app, mongo):
         else:
             ip = request.remote_addr
 
+        owner = None
+        ownerUUID = None
+
+        if "owner" in request.json and request.json["owner"] != "":
+            owner = request.json["owner"]
+            try:
+                users = mongo.db.users
+                ownerUUID = users.find_one({"user": request.json["owner"]})["uuid"]
+            except:
+                pass
+
         classicservers = mongo.db.classicservers
 
         user = None
@@ -81,7 +92,9 @@ def register_routes(app, mongo):
                     "bannedUsers": bannedUsers,
                     "bannedIPs": bannedIPs,
                     "bannedUUIDs": bannedUUIDs,
-                    "players": players
+                    "players": players,
+                    "ownerUUID": ownerUUID,
+                    "owner": owner
                 }})
 
             else:
@@ -116,7 +129,9 @@ def register_routes(app, mongo):
                             "bannedUsers": bannedUsers,
                             "bannedIPs": bannedIPs,
                             "bannedUUIDs": bannedUUIDs,
-                            "players": players
+                            "players": players,
+                            "ownerUUID": ownerUUID,
+                            "owner": owner
                         })
                     except errors.WriteError as writeError:
                         if writeError.code == 11000:
