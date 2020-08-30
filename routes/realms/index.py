@@ -58,7 +58,6 @@ def register_routes(app, mongo):
                     playerlist["playerList"] = server["players"]
                 
                 lists.append(playerlist)
-        print(json.dumps({ "lists": lists }))
         return make_response(json.dumps({ "lists": lists }))
 
     @app.route('/worlds')

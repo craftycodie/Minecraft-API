@@ -210,20 +210,20 @@ def register_routes(app, mongo):
 
         res = make_response(json.dumps({
             "backups": [
-                {
-                    "backupId": "2019-09-08T18:04:53.5284117Z",
-                    "lastModifiedDate": 1567965893000,
-                    "size": 11080009,
-                    "metadata": {
-                        "game_difficulty": "1",
-                        "name": "Azerus Team",
-                        "game_server_version": "1.14.4",
-                        "enabled_packs": "{\"resourcePacks\":[],\"behaviorPacks\":[]}",
-                        "description": "§7Creators of §6Puzzle Wars§7 and §6Maze Wars              §8(l’o’l)",
-                        "game_mode": "0",
-                        "world_type": "NORMAL"
-                    }
-                }
+                # {
+                #     "backupId": "2019-09-08T18:04:53.5284117Z",
+                #     "lastModifiedDate": 1567965893000,
+                #     "size": 11080009,
+                #     "metadata": {
+                #         "game_difficulty": "1",
+                #         "name": "Azerus Team",
+                #         "game_server_version": "1.14.4",
+                #         "enabled_packs": "{\"resourcePacks\":[],\"behaviorPacks\":[]}",
+                #         "description": "§7Creators of §6Puzzle Wars§7 and §6Maze Wars              §8(l’o’l)",
+                #         "game_mode": "0",
+                #         "world_type": "NORMAL"
+                #     }
+                # }
             ]
         }))
         res.mimetype = 'application/json'
