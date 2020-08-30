@@ -1,27 +1,25 @@
 # Minecraft API Recreation
 This project aims to provide a server capable of running any pre-release version of Minecraft, fully featured.
 
-## Restored Features
+## Restored and Recreated Features
 These are features which are no longer available through official servers.
 
-- Launcher Authentication and Updates
+- Launcher Authentication and Updates (not including new launcher)
 
 - Server Authentication
 
 - Skins and Cloaks
 
-- Classic Server List
+- Server List
 
 - Online World Saves
 
-## API - Differences
-None known.
+- Realms
   
 ## How To Use
-If you wish to use this API, I recommend that you do so with older versions of Minecraft, as it was tested with Beta 1.7.3 and the alpha launcher.
 To host the site, create a config.py file based on the provided config_example.py and run server.py.
-
-To use the website with a game you will have to point requests to minecraft.net and s3.amazonaws.com to your local machine, or wheever you're hosting this. You can use a proxy, the hosts file, modify game bytecode or just recompile the game entirely.
+To use the website with a game you will have to point requests to minecraft.net and s3.amazonaws.com to your local machine, or wherever you're hosting this.
+The easiest way to connect your game is to use [MineOnline](https://github.com/codieradical/MineOnline), but you can also use a proxy, the hosts file, modify game bytecode or just recompile the game entirely.
 You will also need to provide game files inside the public folder (ie minecraft.jar goes in public/MinecraftDownload/) if you wish to use old updaters.
 
 ## Serving Assets
@@ -58,6 +56,7 @@ public/
 │   │   solaris_natives.jar.lzma
 │   │   windows_natives.jar
 │   │   windows_natives.jar.lzma
+│   │   version                           Contains a version timestamp. Numbers work too.
 │   │
 │   ├───classic                           Classic version applet (browser) files.
 │   │       jinput.jar.pack.lzma
@@ -82,92 +81,6 @@ public/
 │   │   index.txt                         A list of each sound file. Has extra data.
 │
 ├───MinecraftSkins                        Skins for each user, ie /MinecraftSkins/Notch.png
-```
-
-## API Endpoints
-Endpoints have been reimplemented based on what data the client/server/launchers send, where they send it, and what they expect in response. There may be undocumented responses.
-
-
-```
-• POST /game/getversion.jsp
-  ○ Login & check for updates.
-  ○ ?user=<username/email>&password=<password>&version=<unix timestamp>
-  ○ 200 OK "<latestVersion unix timestamp>:<downloadToken>:<username>:<sessionId>
-  ○ 200 OK "Bad login"
-  ○ 200 OK "Old version"
-  ○ 200 OK "User not premium."
-• GET /game/joinserver.jsp
-  ○ Request authentication to join a server.
-  ○ ?user=<username>&sessionId=<session>&serverId=<serverId>
-  ○ 200 OK "ok"
-  ○ 200 OK <error message>
-• GET /game/checkserver.jsp
-  ○ Check if a player has permission to join the server.
-  ○ ?user=<username>&serverId=<serverId>
-  ○ 200 OK "YES"
-  ○ 200 OK <error message>
-• GET /login/session.jsp
-  ○ Check if a player owns the game (/ is logged in elsewhere?).
-  ○ ?name=<username>&session=<sessionId>
-  ○ 200 OK
-  ○ 400 Bad Request
-• GET /listmaps.jsp
-  ○ List saved classic maps.
-  ○ ?user=<username>
-  ○ 200 OK <mapnames>
-    - ; separated list of strings. '-' represents empty slots. 5 maps in total.
-  ○ Any error code.
-• POST /level/save.html
-  ○ Save a classic map.
-  ○ Post contains:
-    1. username
-    2. sessionId
-    3. map name
-    4. map id (0 - 4)
-    5. map length
-    6. map data
-  ○ 200 OK "ok".
-  ○ Any error code.
-• GET /level/load.html
-  ○ Check if a player has permission to join the server.
-  ○ ?id=<0-4>&user=<username>
-  ○ 200 OK "ok" and map data, classic v2 format (gzip/dat).
-  ○ 200 OK <error message>
-  ○ Any error code.
-• POST /heartbeat.jsp
-  ○ Classic server list.
-  ○ ?port=<port>&users=<current user count>&max=<max user count>&name=<name>&public=<true/false>&version=<protocol version (7)>&salt=<A random, 16-character base-62 salt>
-  ○ The endpoint can also take an IP parameter if you are running a modified server capable of binding to a specific IP address.
-• GET /haspaid.jsp
-  ○ Check if a player is premium.
-  ○ ? user=<username>
-  ○ 200 OK "true" or "false"
-```
-
-MineOnline Endpoints
-```
-• Used by https://github.com/codieradical/MineOnline
-• GET /mineonline/mppass.jsp
-  ○ Get an auth token for a pre-alpha server.
-  ○ ?sessionId=<sessionId>&serverIP=<serverIP>&serverPort=<serverPort>
-  ○ 200 OK "<mppass>"
-  ○ 404 Not Found
-• GET /mineonline/removecloak.jsp
-  ○ Removes your cape.
-  ○ ?sessionId=<sessionId>
-  ○ 200 OK "ok"
-• GET /mineonline/account.jsp
-  ○ Gets your account details.
-  ○ ?name=<username>&session=<sessionID>
-  ○ 200 OK Account JSON
-• POST /mineonline/skin.jsp
-  ○ Alternate endpoint for skin upload.
-  ○ Body includes short username, session, skin data.
-  ○ 200 OK "ok"
-• POST /mineonline/cloak.jsp
-  ○ Alternate endpoint for skin upload.
-  ○ Body includes short username, session, skin data.
-  ○ 200 OK "ok"
 ```
 
 ## Playing In Browser (Applet)
@@ -240,9 +153,11 @@ These are used to get server information such as salt, ip and port from the serv
         "$oid": "[redacted]"
     },
     "user": "codie",
+    "uuid": "ddb16e30-646a-45aa-9939-68e1ee10e906"
     "email": "[redacted]",
     "password": "[redacted]",
     "premium": true,
+    "slim": true,
     "sessionId": {
         "$oid": "[redacted]"
     },
