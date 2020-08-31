@@ -53,11 +53,13 @@ def register_routes(app, _mongo):
     from routes.mineonline import register_routes as register_mineonline_routes
     from routes.realms import register_routes as register_realms_routes
     from routes.mojang import register_routes as register_mojang_routes
+    from routes.aka import register_routes as register_aka_routes
 
     register_legacy_routes(app, _mongo)
     register_mineonline_routes(app, _mongo)
     register_realms_routes(app, _mongo)
     register_mojang_routes(app, _mongo)
+    register_aka_routes(app, _mongo)
 
     readme_file = codecs.open("README.md", mode="r", encoding="utf-8")
     readme_html = Markup(markdown(readme_file.read()))
