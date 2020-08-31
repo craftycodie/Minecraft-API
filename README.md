@@ -31,10 +31,10 @@ public/
 │   minecraft-server.zip                  classic server files
 │
 ├───download
-│       Minecraft.exe                     launcher exe (windows)
-│       Minecraft.jar                     launcher jar (linux / any)
-│       Minecraft.zip                     launcher app (zip, mac)
-│       Minecraft_Server.jar              server jar
+│   │   Minecraft.exe                     launcher exe (windows)
+│   │   Minecraft.jar                     launcher jar (linux / any)
+│   │   Minecraft.zip                     launcher app (zip, mac)
+│   │   Minecraft_Server.jar              server jar
 │
 ├───MinecraftDownload                     from http://s3.amazonaws.com/MinecraftDownload/
 │   │   jinput.jar
@@ -59,28 +59,38 @@ public/
 │   │   version                           Contains a version timestamp. Numbers work too.
 │   │
 │   ├───classic                           Classic version applet (browser) files.
-│   │       jinput.jar.pack.lzma
-│   │       linux_natives.jar.lzma
-│   │       logo_small.png
-│   │       lwjgl.jar.pack.lzma
-│   │       lwjgl_applet.jar.pack.lzma
-│   │       lwjgl_util.jar.pack.lzma
-│   │       lwjgl_util_applet.jar
-│   │       lzma.jar
-│   │       macosx_natives.jar.lzma
-│   │       minecraft.jar
-│   │       solaris_natives.jar.lzma
-│   │       windows_natives.jar.lzma
+│   │   │   jinput.jar.pack.lzma
+│   │   │   linux_natives.jar.lzma
+│   │   │   logo_small.png
+│   │   │   lwjgl.jar.pack.lzma
+│   │   │   lwjgl_applet.jar.pack.lzma
+│   │   │   lwjgl_util.jar.pack.lzma
+│   │   │   lwjgl_util_applet.jar
+│   │   │   lzma.jar
+│   │   │   macosx_natives.jar.lzma
+│   │   │   minecraft.jar
+│   │   │   solaris_natives.jar.lzma
+│   │   │   windows_natives.jar.lzma
 │   │
 │   └───launcher
-│           MinecraftLauncher.jar         Used for the in browser game.
+│       │   MinecraftLauncher.jar         Used for the in browser game.
 │
 ├───MinecraftResources                    from http://s3.amazonaws.com/MinecraftResources/
 │   │   download.xml                      This is the index document tree from that url ^
 ├───resources                             Sound files for older minecraft versions.
 │   │   index.txt                         A list of each sound file. Has extra data.
+|
+├───mc
+│   │───assets                            Assets for release minecraft versions.
+│   └───game
+|       |   version_manifest.json         An index of versions for the modern launcher.
 │
-├───MinecraftSkins                        Skins for each user, ie /MinecraftSkins/Notch.png
+├───<package>                             Libraries for release minecraft versions.
+│   └───<name>
+│       └───<version>
+|           │   <name>-<version>.jar
+|           │   <name>-<version>.jar.sha1
+|
 ```
 
 ## Playing In Browser (Applet)
