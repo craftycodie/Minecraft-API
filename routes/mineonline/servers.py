@@ -59,7 +59,9 @@ def register_routes(app, mongo):
 
         for version in versions:
             if(version["md5"] == md5 and version["type"] == "server"):
-                if('clientVersions' in version):
+                if('clientName' in version):
+                    versionName = version["clientName"]
+                elif('clientVersions' in version):
                     versionName = str(version["clientVersions"]).replace("'", "").replace("[", "").replace("]", "")
                 else:
                     versionName = version["name"]
