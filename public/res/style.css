@@ -13,3 +13,11 @@ code {
     height: 2em;
     background-color: white;
 }
+
+#links {
+    display: inline-flex;
+}
+
+#toppanel img {
+	width: 50%;
+}

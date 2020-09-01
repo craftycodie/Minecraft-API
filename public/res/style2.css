@@ -1,0 +1,481 @@
+
+@charset "UTF-8";
+
+a:link {
+	color: #aaf;
+}
+
+a:hover {
+	color: #fff;
+}
+
+a:visited {
+	color: #aaa;
+}
+
+a:active {
+	color: #ff0;
+}
+
+.menuItem {
+	color: white;
+	text-decoration: none;
+	font-size: 16px;
+	padding-top: 5px;
+	font-weight: bold;
+}
+
+a.menuItem {
+	color: white;
+	text-decoration: none;
+	font-size: 16px;
+	padding-top: 0px;
+	font-weight: bold;
+}
+
+a.menuItem:link {
+	color: #FFF;
+}
+
+a.menuItem:hover {
+	color: #CCC;
+}
+
+a.menuItem:visited { /*color:white;		*/
+
+}
+
+h3 {
+	margin-bottom: 3px;
+}
+
+h1 {
+	margin-bottom: 5px;
+}
+
+.footer {
+	left: 0px;
+    bottom: 0px;
+	text-align: center;
+	font-size: 12px;
+	margin-top: 10px;
+	height: 15px;
+	padding-bottom: 10px;
+	padding-top: 10px;
+	width: 100%;
+	background: #111;
+}
+
+.footerIE7 {
+	position: fixed;
+	left: 0px;
+	bottom: 0px;
+	text-align: center;
+	font-size: 12px;
+	margin-top: 10px;
+	height: 15px;
+	padding-bottom: 10px;
+	padding-top: 10px;
+	width: 100%;
+	background: #111;
+}
+
+html {
+	/*	border: none;
+	margin: auto auto;
+	padding: 0 ;
+	background-color: #111;
+	color: #e0d0d0;
+	font-weight: normal;
+	font-family:  Arial, Helvetica, sans-serif;hy
+    height:100%;
+	width:100%;*/
+	/* height: calc(100% - 45px); */
+	/* overflow: hidden; */
+}
+
+header img {
+	height: 40px;
+	width: auto;
+	filter: brightness(1.5);
+	margin-top: -7px;
+	display: inline-block;
+}
+
+header {
+	padding-top: 12px
+}
+
+code {
+    display: block;
+    white-space: break-spaces;
+}
+
+.bulletImg {
+    /* filter: invert(1) brightness(0.93); */
+    height: 2em;
+    background-color: white;
+}
+
+body {
+	border: none;
+	background-color: #222;
+	color: #e0d0d0;
+	background-image: url('/res/bg.gif');
+	/* background-image: url('bg-dev.gif'); */
+	font-weight: normal;
+	font-family: Arial, Helvetica, sans-serif;
+	line-height:1.5em;
+	height: 100%;
+	width: 100%;
+	margin: 0px auto;
+}
+
+#centerpage {
+	text-align: center;
+	margin: 0px auto;
+	height: 100%;
+}
+
+#content {
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: -10px;
+	width: 980px;
+	height: 100%;
+	min-height: 800px;
+	text-align: left;
+}
+
+#page {
+	z-index: 4;
+	margin-top: 0px;
+	padding-top:30px;
+	height: calc(100% - 70px);
+	overflow: auto;
+}
+
+#container {
+	width: 1024px;
+	text-align: left;
+}
+
+#top_center {
+	margin-left: auto;
+	margin-right: auto;
+	width: 100%;
+	height: 100%;
+	overflow: visible;
+}
+
+#linksdiv {
+	display: inline-block;
+}
+
+#subtitle {
+	display: none;
+}
+
+#toppanel {
+	position: relative;
+	top: 0px;
+	margin-top: 0px;
+	height: 50px;
+	overflow: visible;
+	width: 980px;
+	margin-left: auto;
+	margin-right: auto;
+	padding-top: 10px;
+}
+
+#toppanel_bg {
+	position: absolute;
+	top: 0px;
+	height: 48px;
+	width: 100%;
+	background-color: #555;
+	background-image: url('top-bg.gif');
+	border-bottom: 3px solid #000;
+}
+
+div { /*border:#FFF solid 1px;*/
+
+}
+
+#prepurchasesplash {
+	height: 48px;
+	overflow: visible;
+        text-align: left;
+}
+
+#toppanel .buynow {
+	position: relative;
+	margin-top: 0px;
+}
+
+#toppanel .donate {
+	float: right;
+	position: relative;
+	top: 14px;
+	padding-left: 8px;
+}
+
+#toppanel #links {
+	float: left;
+	margin: 12px;
+	margin-top: 0px;
+	margin-left: 10px;
+	margin-right: 5px;
+	text-align: left;
+	width: 415px;
+	font-size: 11px;
+	font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+}
+
+#toppanel td {
+	vertical-align: top;
+	padding: 9px;
+	padding-left: 4px;
+	padding-right: 4px;
+}
+
+#loginpanel {
+	float: right;
+	margin: 12px;
+	margin-top: 0px;
+	font-size: 12px;
+	margin-right: 12px;
+	width: 250px;
+	font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+}
+
+a.loginpanel {
+	color: #aaf;
+	text-decoration: none;
+	font-size: 16px;
+	padding-top: 5px;
+	font-weight: bold;
+}
+
+a.loginpanel:link {
+	color: #aaf;
+}
+
+a.loginpanel:hover {
+	color: white;
+}
+
+a.loginpanel:visited { /*color:white;		*/
+
+}
+
+#toppanel #logo {
+	float: left;
+	border: 0px;
+}
+
+.left {
+	float: left;
+}
+
+.right {
+	float: right;
+}
+
+.pad {
+	margin: 4px;
+}
+
+.rightgap {
+	padding-right: 16px;
+}
+
+#table {
+	width: 900px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+#left {
+	width: 50%;
+	font-size: 14px;
+	padding-left: 20px;
+}
+
+#right {
+	width: 50%;
+	font-size: 14px;
+	padding-left: 100px;
+}
+
+#facebooklike {
+	margin-top: 10px;
+	margin-left: 0px;
+}
+
+#facebookcontainer {
+	width: 350px;
+	color: #FFF;
+	font-size: 16px;
+}
+
+.feedObj {
+	background: #999;
+	border: solid 1px #093;
+}
+
+.formname {
+	width: 100px;
+}
+
+.linkButton {
+	border: none;
+}
+
+.oneColeDiv {
+	width: 560px;
+	padding: 10px;
+	margin-left: 160px;
+}
+
+.tutorialBox {
+	padding: 15px;
+	padding-top: 5px;
+	padding-bottom: 20px;
+	vertical-align: bottom;
+	background: #333;
+	border: #444 solid 2px;
+	border-bottom-color: #555;
+	border-right-color: #555;
+}
+
+.smallText {
+	font-size: 13px;
+}
+
+.infoBox {
+	background: #222;
+	border: #666 1px solid;
+	text-align: center;
+	padding: 10px;
+}
+
+.videoEmbed {
+	background: #111;
+	padding: 5px;
+	max-width: 640px;
+}
+
+.tee {
+	float: left;
+	text-align:center;
+	margin-bottom:60px;
+        overflow:hidden;
+        width: 288px;
+        margin-right: 30px;
+}
+
+.tee img {
+	margin-bottom: 10px;
+}
+
+.tee.last:after { content: "\0020"; display: block; height: 0; overflow: hidden; clear:both }
+.tee.last {
+  zoom: 1;
+  margin-right:0;
+}
+
+.tee-geek {
+  width: 220px;
+  float: left;
+  text-align: center;
+  margin-bottom:30px;
+  margin-right:10px;
+}
+
+.caption .new {
+  color:red;
+}
+
+.profile-row {
+  height:36px;
+}
+
+.profile-row div {
+  float:left;
+}
+
+.profile-row-label {
+  width:120px;
+}
+
+.profile-row-value {
+  width:210px;
+}
+
+.profile-row-hint {
+  font-size:10px;
+  padding-top:1px;
+  width:280px;
+}
+
+.clearfix:before, .clearfix:after { content: "\0020"; display: block; height: 0; overflow: hidden; }
+.clearfix:after { clear: both; }
+.clearfix { zoom: 1; }
+
+.error {
+  color:#f00;
+}
+
+.flash {
+  color:#2d4;
+}
+
+.merch a, .merch img {
+  border:none;
+  outline:none;
+  text-decoration:none;
+}
+
+.payment-method {
+  background-color:#422;
+  margin-bottom:8px;
+  float:left;
+  width:85px;
+  margin-right: 8px;
+  height:28px;
+  cursor:pointer;
+  overflow:hidden;
+  padding-left:4px;
+  padding-top:8px;
+  background: transparent no-repeat right top;
+}
+
+.payment-method-special-mbwallet {
+  background-image: url(/res/moneybookers-wallet.png);
+}
+
+.payment-method-special-paypal {
+  background-image: url(/res/paypal.png);
+}
+/*
+     FILE ARCHIVED ON 08:39:21 Jul 14, 2011 AND RETRIEVED FROM THE
+     INTERNET ARCHIVE ON 04:46:31 May 07, 2020.
+     JAVASCRIPT APPENDED BY WAYBACK MACHINE, COPYRIGHT INTERNET ARCHIVE.
+
+     ALL OTHER CONTENT MAY ALSO BE PROTECTED BY COPYRIGHT (17 U.S.C.
+     SECTION 108(a)(3)).
+*/
+/*
+playback timings (ms):
+  exclusion.robots.policy: 0.128
+  RedisCDXSource: 1.413
+  CDXLines.iter: 14.529 (3)
+  esindex: 0.01
+  exclusion.robots: 0.137
+  PetaboxLoader3.datanode: 129.095 (4)
+  PetaboxLoader3.resolve: 1256.777 (4)
+  LoadShardBlock: 256.888 (3)
+  captures_list: 279.824
+  load_resource: 1153.54
+*/

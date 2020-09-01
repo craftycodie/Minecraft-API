@@ -21,27 +21,29 @@
     {% endif %}
   </head>
   <body style="max-width: 60em; margin-left: auto; margin-right: auto;">
-    <header>
-      <img src="/img/mineonlinelogo.png" alt="MineOnline" width="50%" />
+    <header id="toppanel">
+      <img src="/img/mineonlinelogo.png" alt="MineOnline"/>
       <!-- <h1>MineOnline</h1> -->
-      <h2>Minecraft API Reimplementation</h2>
+      <h2 id="subtitle">Minecraft API Reimplementation</h2>
       
-      <span style="display: inline-flex;">
-        <a href="/" id="menu_" class="menuItem">Home</a>
-        &nbsp; &nbsp; <a href="/profile/" id="menu_profile" class="menuItem">Profile</a>
-        &nbsp; &nbsp; <a href="/servers.jsp">Server List</a><br>
-        &nbsp; &nbsp; <a href="/api.jsp">API</a><br>
-      </span>
+      <div id="linksdiv">
+        <span id="links">
+          <a href="/" id="menu_" class="menuItem">Home</a>
+          &nbsp; &nbsp; <a href="/profile/" id="menu_profile" class="menuItem">Profile</a>
+          &nbsp; &nbsp; <a href="/servers.jsp" class="menuItem">Server List</a><br>
+        </span>
 
+        <span style="float: right;">
+          {% if user %}
+              Logged in as {{user.user}} | <a href="/logout.jsp" class="loginpanel">Log out</a>
+          {% else %}
+              <a href="/login.jsp" class="loginpanel">Log in</a> | <a href="/register.jsp" class="loginpanel">Register</a>
+          {% endif %}
+        </span>
 
-      <span style="float: right;">
-        {% if user %}
-            Logged in as {{user.user}} | <a href="/logout.jsp" class="loginpanel">Log out</a>
-        {% else %}
-            <a href="/login.jsp" class="loginpanel">Log in</a> | <a href="/register.jsp" class="loginpanel">Register</a>
-        {% endif %}
-      </span>
+      </div>
     </header>
+    <div id="toppanel_bg" style="z-index: -1;left:0"></div>
 
     <br/>
     <br/>
