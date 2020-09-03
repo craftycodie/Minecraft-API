@@ -71,6 +71,9 @@ def register_routes(app, mongo):
         else:
             ip = request.remote_addr
 
+        if ip == "127.0.0.1":
+            return Response("Can't list local servers.", 400)
+
         classicservers = mongo.db.classicservers
 
         user = None
