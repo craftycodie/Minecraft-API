@@ -141,8 +141,8 @@ def register_routes(app, mongo):
                 return render_template("public/changepass.html", error="Please enter a password.", token=token)
             elif request.form['password1'] != request.form['password2']:
                 return render_template("public/changepass.html", error="Passwords don't match.", token=token)
-            if len(request.form['password1']) > 32:
-                return render_template("public/changepass.html", error="Password too long. Passwords can be up to 32 characters.", token=token)
+            if len(request.form['password1']) > 64:
+                return render_template("public/changepass.html", error="Password too long. Passwords can be up to 64 characters.", token=token)
             if len(request.form['password1']) < 6:
                 return render_template("public/changepass.html", error="Password too short. Passwords must be at least 6 characters.", token=token)
 
@@ -165,8 +165,8 @@ def register_routes(app, mongo):
 
         if request.form['password1'] == "" or request.form['password2'] == "":
             return render_template("public/register.html", error="Please enter a password.")
-        if len(request.form['password1']) > 32:
-            return render_template("public/register.html", error="Password too long. Passwords can be up to 32 characters.")
+        if len(request.form['password1']) > 64:
+            return render_template("public/register.html", error="Password too long. Passwords can be up to 64 characters.")
         if len(request.form['password1']) < 6:
             return render_template("public/register.html", error="Password too short. Passwords must be at least 6 characters.")
         elif request.form['username'] == "":
