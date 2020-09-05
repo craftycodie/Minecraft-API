@@ -54,11 +54,8 @@ List was updated {{timeString}}.<br/><br/>
 			{% endif %}
 			{% if server['ip'] %}
 			<span>
-				IP: <b>{{server['ip']}}</b>
+				IP: <b>{{server['ip']}}{% if server['port'] != "25565" %}:{{server['port']}}{% endif %}</b>
 				<br/>
-				{% if server['port'] != "25565" %}
-				Port: <b>{{server['port']}}</b>
-				{% endif %}
 			</span>
 			{% endif %}
 		{% endif %}
