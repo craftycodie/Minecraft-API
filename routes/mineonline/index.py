@@ -13,40 +13,6 @@ def register_routes(app, mongo):
     register_skins_routes(app, mongo)
     register_servers_routes(app, mongo)
 
-    # Classic authentication route.
-    # Modified for mineonline.
-    @app.route('/mineonline/servertoken')
-    @app.route('/mineonline/mppass.jsp')
-    def getmmpass():
-        sessionId = request.args['sessionId']
-        serverIP = request.args['serverIP']
-        serverPort = request.args['serverPort']
-
-        try:
-            users = mongo.db.users
-            user = users.find_one({"sessionId": ObjectId(sessionId)})
-        except:
-            return Response("User not found.", 404)
-
-        if (user == None):
-            return Response("User not found.", 404)
-
-        try:
-            server = mongo.db.classicservers.find_one({"ip": serverIP, "port": serverPort})
-        except:
-            return Response("Server not found.", 404)
-
-        if server:
-            if "salt" in server:
-                mppass = str(hashlib.md5((server['salt'] + user['user']).encode('utf-8')).hexdigest())
-                return Response(mppass)
-            else:
-                return Response("Classic server not found.", 404)
-        else:
-            return Response("Server not found.", 404)
-
-        return Response("Something went wrong!", 500)
-
     #Given a username, respond a user uuid.
     @app.route('/mineonline/playeruuid/<username>')
     def playeruuid(username):
