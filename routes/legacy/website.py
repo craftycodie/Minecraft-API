@@ -13,6 +13,7 @@ import re
 from routes import serve
 from utils.servers import *
 from PIL import Image
+from utils.database import getclassicservers
 
 ALLOWED_EXTENSIONS = ['png']
 
@@ -320,12 +321,12 @@ def register_routes(app, mongo):
             except:
                 pass
 
-        mineOnlineServers = list(mongo.db.classicservers.find())
+        mineOnlineServers = getclassicservers(mongo)
         featuredServers = list(mongo.db.featuredservers.find())
         featuredServers = [dict(server, **{'isMineOnline': False}) for server in featuredServers]
         servers = mineOnlineServers + featuredServers
 
-        serverCount = mongo.db.classicservers.count_documents({})
+        serverCount = mongo.db.classicservers.count_documents({}) + mongo.db.featuredservers.count_documents({})
         usersCount = 0
         privateCount = 0
         for server in servers:

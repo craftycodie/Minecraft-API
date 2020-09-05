@@ -1,5 +1,5 @@
 from flask import request, send_file, Response
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from bson.objectid import ObjectId
 
 from routes.legacy.launcher import register_routes as register_launcher_routes
@@ -85,11 +85,13 @@ def register_routes(app, mongo):
             # Find an existing versioned server
             currentlisting = classicservers.find_one({"port": port, "ip": ip, "md5": {'$nin': [None, '']}})
             # Delete the rest
+            expireDuration = timedelta(minutes = 2)
             if(currentlisting):
                 _id = currentlisting['_id']
                 classicservers.delete_many({"port": port, "ip": ip, "_id": {"$ne": _id}})
                 classicservers.update_one({"_id": _id}, { "$set": {
                     "createdAt": datetime.utcnow(),
+                    "expiresAt": datetime.now(timezone.utc) + expireDuration,
                     "ip": ip,
                     "port": port,
                     "users": users,
@@ -107,6 +109,7 @@ def register_routes(app, mongo):
                 classicservers.insert_one({
                     "_id": _id,
                     "createdAt": datetime.utcnow(),
+                    "expiresAt": datetime.now(timezone.utc) + expireDuration,
                     "ip": ip,
                     "port": port,
                     "users": users,

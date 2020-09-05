@@ -4,6 +4,7 @@ from flask_pymongo import PyMongo
 from utils.servers import *
 from bson.objectid import ObjectId
 from uuid import UUID
+from utils.database import getclassicservers
 
 from routes.realms.management import register_routes as register_management_routes
 
@@ -46,7 +47,7 @@ def register_routes(app, mongo):
 
     @app.route('/activities/liveplayerlist')
     def liveplayerlist():
-        mineOnlineServers = list(mongo.db.classicservers.find())
+        mineOnlineServers = getclassicservers(mongo)
         lists = []
         for server in mineOnlineServers:
             if "realmId" in server:
@@ -62,7 +63,7 @@ def register_routes(app, mongo):
 
     @app.route('/worlds')
     def realmsworlds():
-        mineOnlineServers = list(mongo.db.classicservers.find())
+        mineOnlineServers = getclassicservers(mongo)
         featuredServers = list(mongo.db.featuredservers.find())
         featuredServers = [dict(server, **{'isMineOnline': False}) for server in featuredServers]
         servers = mineOnlineServers + featuredServers

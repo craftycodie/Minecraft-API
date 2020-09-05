@@ -54,7 +54,6 @@ app.config.update(dict(
 mongo = PyMongo(app)
 mongo.db.classicservers.create_indexes([
     IndexModel([("realmId", ASCENDING)], unique = True, partialFilterExpression = { "realmId": {"$type": "number"}}),
-    IndexModel([("createdAt", ASCENDING)], expireAfterSeconds = 120, background = True)
 ])
 mongo.db.serverjoins.create_index( "createdAt", expireAfterSeconds = 600 )
 mongo.db.users.create_index("user", unique = True )

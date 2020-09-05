@@ -5,10 +5,11 @@ from bson.objectid import ObjectId
 import hashlib
 from uuid import uuid4, UUID
 from utils.servers import *
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from pymongo import IndexModel, ASCENDING, DESCENDING, errors
 import sys
 from utils.versions import get_versions
+from utils.database import getclassicservers
 
 def register_routes(app, mongo):
     @app.route('/mineonline/listserver.jsp', methods=["POST"])
@@ -73,6 +74,7 @@ def register_routes(app, mongo):
         try:
             # Find an existing salted server
             currentlisting = classicservers.find_one({"port": port, "ip": ip, "salt": {'$nin': [None, '']}})
+            expireDuration = timedelta(minutes = 2)
             # Delete the rest
             if(currentlisting):
                 _id = currentlisting['_id']
@@ -82,6 +84,7 @@ def register_routes(app, mongo):
 
                 classicservers.update_one({"_id": _id}, { "$set": {
                     "createdAt": datetime.utcnow(),
+                    "expiresAt": datetime.now(timezone.utc) + expireDuration,
                     "ip": ip,
                     "port": port,
                     "users": users,
@@ -119,6 +122,7 @@ def register_routes(app, mongo):
                             "_id": _id,
                             "realmId": seq,
                             "createdAt": datetime.utcnow(),
+                            "expiresAt": datetime.now(timezone.utc) + expireDuration,
                             "ip": ip,
                             "port": port,
                             "users": users,
@@ -169,7 +173,7 @@ def register_routes(app, mongo):
         if (user == None):
             return Response("Invalid Session", 401)
 
-        mineOnlineServers = list(mongo.db.classicservers.find())
+        mineOnlineServers = getclassicservers(mongo)
         featuredServers = list(mongo.db.featuredservers.find())
         featuredServers = [dict(server, **{'isMineOnline': False}) for server in featuredServers]
         servers = mineOnlineServers + featuredServers
