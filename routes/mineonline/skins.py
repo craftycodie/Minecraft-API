@@ -10,9 +10,13 @@ from io import BytesIO, StringIO
 
 def register_routes(app, mongo):
     #Deletes a users cloak.
+    @app.route('/mineonline/player/<uuid>/cloak', methods=["DELETE"])
     @app.route('/mineonline/removecloak.jsp')
-    def removeCloak():
+    def removeCloak(uuid = None):
         sessionId = request.args['sessionId']
+
+        if uuid != None:
+            uuid = str(UUID(uuid))
 
         if sessionId:
             try:
@@ -20,7 +24,9 @@ def register_routes(app, mongo):
                 user = users.find_one({"sessionId": ObjectId(sessionId)})
                 if not user:
                     return Response("Invalid session.", 400)
-                users.update_one({ "_id": user["_id"] }, { "$set": { "cloak": "" } })
+                if uuid == None:
+                    uuid = user["uuid"]
+                users.update_one({ "_id": user["_id"], "uuid": uuid }, { "$set": { "cloak": "" } })
                 return Response("ok", 200)
             except:
                 return Response("Something went wrong!", 500)

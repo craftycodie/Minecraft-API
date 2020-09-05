@@ -15,6 +15,7 @@ def register_routes(app, mongo):
 
     # Classic authentication route.
     # Modified for mineonline.
+    @app.route('/mineonline/servertoken')
     @app.route('/mineonline/mppass.jsp')
     def getmmpass():
         sessionId = request.args['sessionId']

@@ -10,8 +10,15 @@ from pymongo import IndexModel, ASCENDING, DESCENDING, errors
 import sys
 from utils.versions import get_versions
 from utils.database import getclassicservers
+from uuid import uuid4, UUID
 
 def register_routes(app, mongo):
+    @app.route("/mineonline/servers/<uuid>", methods=["DELETE"])
+    def deleteserver(uuid):
+        mongo.db.classicservers.delete_one({"uuid": str(UUID(uuid))})
+        return Response("ok", 200)
+
+    @app.route("/mineonline/servers", methods=["POST"])
     @app.route('/mineonline/listserver.jsp', methods=["POST"])
     def addserver():
         port = request.json['port']
@@ -26,6 +33,7 @@ def register_routes(app, mongo):
         bannedUsers = request.json['bannedUsers']
         bannedIPs = request.json['bannedIPs']
         bannedUUIDs = request.json['bannedUUIDs']
+        uuid = str(uuid4())
 
         players = []
         if("players" in request.json):
@@ -81,6 +89,7 @@ def register_routes(app, mongo):
                 classicservers.delete_many({"port": port, "ip": ip, "_id": {"$ne": _id}})
 
                 users = request.json['users'] if 'users' in request.json else currentlisting['users']
+                uuid = currentlisting['uuid'] if 'uuid' in currentlisting else uuid
 
                 classicservers.update_one({"_id": _id}, { "$set": {
                     "createdAt": datetime.utcnow(),
@@ -102,7 +111,8 @@ def register_routes(app, mongo):
                     "bannedUUIDs": bannedUUIDs,
                     "players": players,
                     "ownerUUID": ownerUUID,
-                    "owner": owner
+                    "owner": owner,
+                    "uuid": uuid,
                 }})
 
             else:
@@ -140,7 +150,8 @@ def register_routes(app, mongo):
                             "bannedUUIDs": bannedUUIDs,
                             "players": players,
                             "ownerUUID": ownerUUID,
-                            "owner": owner
+                            "owner": owner,
+                            "uuid": uuid
                         })
                     except errors.WriteError as writeError:
                         if writeError.code == 11000:
@@ -151,7 +162,9 @@ def register_routes(app, mongo):
                     break
             
             
-            return Response("ok")
+            return make_response(json.dumps({
+                "uuid": uuid
+            }), 200)
 
         except:
             print("Unexpected error:", sys.exc_info()[1])
@@ -159,6 +172,7 @@ def register_routes(app, mongo):
 
         return Response("Something went wrong.", 500)
 
+    @app.route("/mineonline/servers", methods=["GET"])
     @app.route('/mineonline/listservers.jsp')
     def listservers():
         uuid = request.args.get('user')
