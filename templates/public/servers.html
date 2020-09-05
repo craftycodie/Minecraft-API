@@ -30,9 +30,9 @@ List was updated {{timeString}}.<br/><br/>
 		{% if 'md5' in server %}
 			<hr/>
 			{% if 'isMineOnline' in server and server['isMineOnline'] == False %}
-				<b>{{server['name']}}</b> - {{server['versionName'] or "Unknown Version"}} - Featured Server<br/>
+				<b>{{server['name']}}</b> - {{server['versionName'] or "Unknown Version"}} - Featured Server
 			{% else %}
-				<b>{{server['name']}}</b> - {{server['versionName'] or "Unknown Version"}} - {{server['users']}}/{{server['maxUsers']}}<br/>
+				<b>{{server['name']}}</b> - {{server['versionName'] or "Unknown Version"}} - {{server['users']}}/{{server['maxUsers']}}
 			{% endif %}
 
 			{% if server["status"] == "OFFLINEMODE" %}
@@ -53,9 +53,13 @@ List was updated {{timeString}}.<br/><br/>
  			<span>Players: {{", ".join(server['players'])}}</span><br/><br/>
 			{% endif %}
 			{% if server['ip'] %}
-			<span>IP: <b>{{server['ip']}}</b>
+			<span>
+				IP: <b>{{server['ip']}}</b>
 				<br/>
-				Port: <b>{{server['port']}}</b></span>
+				{% if server['port'] != "25565" %}
+				Port: <b>{{server['port']}}</b>
+				{% endif %}
+			</span>
 			{% endif %}
 		{% endif %}
 	{% endfor %}
