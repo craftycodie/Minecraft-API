@@ -362,6 +362,16 @@ def register_routes(app, mongo):
             if (user != None and "bannedUsers" in x and "bannedIPs" in x and (user["user"] in x["bannedUsers"] or request.remote_addr in x["bannedIPs"])):
                 status = BANNED
 
+            playerUUIDs = []
+            users = mongo.db.users
+            if "players" in x:
+                for player in x["players"]:
+                    try:
+                        playerData = users.find_one({"user": player})
+                        playerUUIDs.append(playerData["uuid"].replace("-", ""))
+                    except:
+                        playerUUIDs.append(None)
+
             return { 
                 "createdAt": str(x["createdAt"]) if "createdAt" in x else None,
                 "ip": x["ip"] if status != BANNED and status != NOT_ON_THE_WHITELIST else None,
@@ -374,7 +384,8 @@ def register_routes(app, mongo):
                 "isMineOnline": x["isMineOnline"] if "isMineOnline" in x else True,
                 "status": status,
                 "versionName": x["versionName"] if "versionName" in x else None,
-                "players": x["players"] if "players" in x else []
+                "players": x["players"] if "players" in x else [],
+                "playerUUIDs": playerUUIDs
             }
 
         servers = list(map(mapServer, servers))

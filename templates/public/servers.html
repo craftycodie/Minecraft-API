@@ -50,7 +50,17 @@ List was updated {{timeString}}.<br/><br/>
 			{% endif %}
 
 			{% if 'players' in server and server['players'] |length > 0 %}
- 			<span>Players: {{", ".join(server['players'])}}</span><br/><br/>
+ 			<span>Players: 
+				{% for player in server['players'] %}
+					{% if server['playerUUIDs'][loop.index] != None %}
+						<img class="playerHead" onerror="this.src = '/char-head.png'" src="/mineonline/player/{{server['playerUUIDs'][loop.index - 1]}}/skin/head">
+					{% else %}
+						<img class="playerHead" src="/char-head.png">
+					{% endif %}
+					{{player}}
+				{% endfor %}
+			</span>
+			<br/>
 			{% endif %}
 			{% if server['ip'] %}
 			<span>

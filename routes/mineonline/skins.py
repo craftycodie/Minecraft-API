@@ -218,6 +218,41 @@ def register_routes(app, mongo):
 
         return response
 
+    @app.route('/mineonline/player/<uuid>/skin/head', methods=['GET'])
+    def mineonlineskinhead(uuid):
+        uuid = str(UUID(uuid))
+        try:
+            user = mongo.db.users.find_one({ "uuid": uuid })
+        except:
+            return abort(404)
+
+        if not user or not 'skin' in user or not user['skin']:
+            return abort(404)
+
+
+        skinBytes = BytesIO(user['skin'])
+        skinBytes.flush()
+        skinBytes.seek(0)
+        skin = Image.open(skinBytes)
+
+        [width, height] = skin.size
+
+        skin = skin.crop((8, 8, 16, 16))
+
+        croppedSkin = BytesIO()
+        skin.save(croppedSkin, "PNG")
+        skinBytes.flush()
+        croppedSkin.seek(0)
+
+        response = Response(croppedSkin.read(), mimetype="image/png")
+        
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        response.headers['Cache-Control'] = 'public, max-age=0'
+
+        return response
+
     @app.route('/mineonline/player/<uuid>/cloak', methods=['GET'])
     def mineonlinecloak(uuid):
         uuid = str(UUID(uuid))
