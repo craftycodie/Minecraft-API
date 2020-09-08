@@ -236,22 +236,11 @@ def register_routes(app, mongo):
 
     @app.route("/mineonline/getserver", methods=["GET"])
     def getserver():
-        uuid = request.args.get('user')
-        sessionId = request.args.get('sessionId')
         serverIP = request.args.get('serverIP')
         serverPort = request.args.get('serverPort')
 
         if(serverPort == None):
             serverPort = "25565"
-
-        try:
-            users = mongo.db.users
-            user = users.find_one({"uuid" : uuid, "sessionId": ObjectId(sessionId)})
-        except:
-            return Response("Invalid Session", 401)
-
-        if (user == None):
-            return Response("Invalid Session", 401)
 
         try:
             server = mongo.db.classicservers.find_one({"port": serverPort, "ip": serverIP})
