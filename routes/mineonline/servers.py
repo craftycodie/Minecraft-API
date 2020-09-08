@@ -234,6 +234,54 @@ def register_routes(app, mongo):
 
         return Response(json.dumps(servers))
 
+    @app.route("/mineonline/getserver", methods=["GET"])
+    def getserver():
+        uuid = request.args.get('user')
+        sessionId = request.args.get('sessionId')
+        serverIP = request.args.get('serverIP')
+        serverPort = request.args.get('serverPort')
+
+        if(serverPort == None):
+            serverPort = "25565"
+
+        try:
+            users = mongo.db.users
+            user = users.find_one({"uuid" : uuid, "sessionId": ObjectId(sessionId)})
+        except:
+            return Response("Invalid Session", 401)
+
+        if (user == None):
+            return Response("Invalid Session", 401)
+
+        try:
+            server = mongo.db.classicservers.find_one({"port": serverPort, "ip": serverIP})
+        except:
+            pass
+
+        if server == None:
+            try:
+                server = mongo.db.featuredservers.find_one({"port": serverPort, "ip": serverIP})
+            except:
+                pass
+
+        if server == None:
+            return Response("Server not found.", 404)
+        
+        def mapServer(x): 
+            return { 
+                "createdAt": str(x["createdAt"]) if "createdAt" in x else None,
+                "ip": x["ip"],
+                "port": x["port"],
+                "users": x["users"] if "users" in x else "0",
+                "maxUsers": x["maxUsers"] if "maxUsers" in x else "24",
+                "name": x["name"],
+                "onlinemode": x["onlinemode"],
+                "isMineOnline": x["isMineOnline"] if "isMineOnline" in x else True,
+                "players": x["players"] if "players" in x else []
+            }
+
+        return Response(json.dumps(mapServer(server)))
+
     # Classic authentication route.
     # Modified for mineonline.
     @app.route('/mineonline/servertoken')
