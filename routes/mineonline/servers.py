@@ -276,6 +276,7 @@ def register_routes(app, mongo):
                 "maxUsers": x["maxUsers"] if "maxUsers" in x else "24",
                 "name": x["name"],
                 "onlinemode": x["onlinemode"],
+                "md5": x["md5"],
                 "isMineOnline": x["isMineOnline"] if "isMineOnline" in x else True,
                 "players": x["players"] if "players" in x else []
             }
