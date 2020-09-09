@@ -81,85 +81,52 @@ def register_routes(app, mongo):
 
         try:
             # Find an existing salted server
-            currentlisting = classicservers.find_one({"port": port, "ip": ip, "salt": {'$nin': [None, '']}})
+            currentlisting = classicservers.find_one({"port": port, "ip": ip})
             expireDuration = timedelta(minutes = 2)
-            # Delete the rest
-            if(currentlisting):
-                _id = currentlisting['_id']
-                classicservers.delete_many({"port": port, "ip": ip, "_id": {"$ne": _id}})
 
-                users = request.json['users'] if 'users' in request.json else currentlisting['users']
-                uuid = currentlisting['uuid'] if 'uuid' in currentlisting else uuid
+            # Delete existing server record
+            classicservers.delete_many({"port": port, "ip": ip})
 
-                classicservers.update_one({"_id": _id}, { "$set": {
-                    "createdAt": datetime.utcnow(),
-                    "expiresAt": datetime.now(timezone.utc) + expireDuration,
-                    "ip": ip,
-                    "port": port,
-                    "users": users,
-                    "maxUsers": maxUsers,
-                    "name": name,
-                    "onlinemode": onlinemode,
-                    "versionName": versionName,
-                    "md5": md5,
-                    "whitelisted": whitelisted,
-                    "whitelistUsers": whitelistUsers,
-                    "whitelistedIPs": whitelistIPs,
-                    "whitelistUUIDs": whitelistUUIDs,
-                    "bannedUsers": bannedUsers,
-                    "bannedIPs": bannedIPs,
-                    "bannedUUIDs": bannedUUIDs,
-                    "players": players,
-                    "ownerUUID": ownerUUID,
-                    "owner": owner,
-                    "uuid": uuid,
-                }})
-
-            else:
-                # Delete existing server record
-                classicservers.delete_many({"port": port, "ip": ip})
-                _id = ObjectId()
-
-                users = request.json['users'] if 'users' in request.json else 0
+            users = request.json['users'] if 'users' in request.json else 0
 
 
-                while(True):
-                    cursor = classicservers.find_one(sort = [("realmId", DESCENDING)])
-                    seq = cursor["realmId"] + 1 if cursor != None and "realmId" in cursor and cursor["realmId"] != None else 1
-                    
-                    try:
-                        classicservers.insert_one({
-                            "_id": _id,
-                            "realmId": seq,
-                            "createdAt": datetime.utcnow(),
-                            "expiresAt": datetime.now(timezone.utc) + expireDuration,
-                            "ip": ip,
-                            "port": port,
-                            "users": users,
-                            "maxUsers": maxUsers,
-                            "name": name,
-                            "onlinemode": onlinemode,
-                            "versionName": versionName,
-                            "md5": md5,
-                            "whitelisted": whitelisted,
-                            "whitelistUsers": whitelistUsers,
-                            "whitelistIPs": whitelistIPs,
-                            "whitelistUUIDs": whitelistUUIDs,
-                            "bannedUsers": bannedUsers,
-                            "bannedIPs": bannedIPs,
-                            "bannedUUIDs": bannedUUIDs,
-                            "players": players,
-                            "ownerUUID": ownerUUID,
-                            "owner": owner,
-                            "uuid": uuid
-                        })
-                    except errors.WriteError as writeError:
-                        if writeError.code == 11000:
-                            continue
-                        else:
-                            return Response("Something went wrong.", 500)
+            while(True):
+                cursor = classicservers.find_one(sort = [("realmId", DESCENDING)])
+                seq = cursor["realmId"] + 1 if cursor != None and "realmId" in cursor and cursor["realmId"] != None else 1
+                
+                try:
+                    classicservers.insert_one({
+                        "salt": currentlisting["salt"] if "salt" in currentlisting else None,
+                        "realmId": currentlisting["realmId"] if "realmId" in currentlisting else seq,
+                        "createdAt": datetime.utcnow(),
+                        "expiresAt": datetime.now(timezone.utc) + expireDuration,
+                        "ip": ip,
+                        "port": port,
+                        "users": users,
+                        "maxUsers": maxUsers,
+                        "name": name,
+                        "onlinemode": onlinemode,
+                        "versionName": versionName,
+                        "md5": md5,
+                        "whitelisted": whitelisted,
+                        "whitelistUsers": whitelistUsers,
+                        "whitelistIPs": whitelistIPs,
+                        "whitelistUUIDs": whitelistUUIDs,
+                        "bannedUsers": bannedUsers,
+                        "bannedIPs": bannedIPs,
+                        "bannedUUIDs": bannedUUIDs,
+                        "players": players,
+                        "ownerUUID": ownerUUID,
+                        "owner": owner,
+                        "uuid": uuid
+                    })
+                except errors.WriteError as writeError:
+                    if writeError.code == 11000:
+                        continue
+                    else:
+                        return Response("Something went wrong.", 500)
 
-                    break
+                break
             
             
             return make_response(json.dumps({

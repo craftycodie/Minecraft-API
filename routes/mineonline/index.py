@@ -40,6 +40,12 @@ def register_routes(app, mongo):
 
         return Response("You must be logged in to do this.", 401)
 
+    @app.route('/mineonline/getmyip')
+    def ipaddress():
+        return make_response(json.dumps({
+            "ip": request.remote_addr
+        }), 200)
+
     @app.route('/mineonline/versions')
     def versionsindex():
         indexJson = { "versions" : []}
