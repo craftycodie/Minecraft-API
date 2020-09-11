@@ -66,7 +66,7 @@ def register_routes(app, mongo):
         name = request.values['name']
         public = request.values['public']
         salt = request.values['salt']
-        if 'ip' in request.values:
+        if 'ip' in request.values and request.values['ip'] != "":
             ip = request.values['ip'] # new to mineonline to allow classic servers on different IPs
         else:
             ip = request.remote_addr
