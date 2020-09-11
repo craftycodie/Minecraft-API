@@ -54,7 +54,16 @@ def register_routes(app, mongo):
             skinBytes.seek(0)
             skin = Image.open(skinBytes)
             croppedSkin = BytesIO()
-            skin = skin.crop((0, 0, 64, 64))
+
+            [width, height] = skin.size
+
+            if (width < 64 or height < 32):
+                return render_template("private/profile.html", error="Skin too small.", user=user)
+            elif (height < 64):
+                skin = skin.crop((0, 0, 64, 32))
+            elif (height >= 64 or width > 64):
+                skin = skin.crop((0, 0, 64, 64))
+
             skin.save(croppedSkin, "PNG")
             skinBytes.flush()
             croppedSkin.seek(0)
