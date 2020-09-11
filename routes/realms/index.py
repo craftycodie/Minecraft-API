@@ -192,8 +192,13 @@ def register_routes(app, mongo):
         if server is None:
             return Response("Realm not found.", 404)
 
+        ip = server["ip"]
+
+        if(server["ip"] == request.remote_addr):
+            ip = "localhost"
+
         res = make_response(json.dumps({
-            "address": server["ip"] + ":" + server["port"],
+            "address": ip + ":" + server["port"],
             "pendingUpdate": False
         }))
         res.mimetype = 'application/json'

@@ -3,7 +3,7 @@ import json
 from flask_pymongo import PyMongo
 from bson.objectid import ObjectId
 import hashlib
-from uuid import uuid4
+from uuid import uuid4, UUID
 from routes.mineonline.skins import register_routes as register_skins_routes
 from routes.mineonline.servers import register_routes as register_servers_routes
 import os
@@ -63,5 +63,36 @@ def register_routes(app, mongo):
                 })
 
         res = make_response(json.dumps(indexJson))
+        res.mimetype = 'application/json'
+        return res
+        
+    @app.route('/mineonline/player/<uuid>/presence', methods=['GET'])
+    def playerpresence(uuid):
+        uuid = str(UUID(uuid))
+        user = None
+
+        presence = {}
+
+        try:
+            users = mongo.db.users
+            user = users.find_one({"uuid" : uuid})
+        except:
+            return Response("User not found.", 404)
+
+        if (user == None):
+            return Response("User not found.", 404)
+
+        try:
+            servers = mongo.db.classicservers
+            server = servers.find_one({"players": { "$all": [ user["user"] ]}})
+            if server != None:
+                presence = {
+                    "serverIP": server["ip"],
+                    "serverPort": server["port"]
+                }
+        except:
+            pass
+
+        res = make_response(json.dumps(presence))
         res.mimetype = 'application/json'
         return res
