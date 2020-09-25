@@ -39,8 +39,6 @@ def register_routes(app, mongo):
             maps['4']['name'] if '4' in maps else '-',
         ]))
 
-    #classic
-    #TODO: GZIP V1 maps.
     @app.route('/level/save.html', methods=['POST'])
     def savemap():
         username = None

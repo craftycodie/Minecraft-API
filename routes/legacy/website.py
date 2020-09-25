@@ -15,11 +15,12 @@ from utils.servers import *
 from PIL import Image
 from utils.database import getclassicservers
 
-ALLOWED_EXTENSIONS = ['png']
+ALLOWED_EXTENSIONS = ['png', 'mine', 'dat']
+MAX_WORLD_SIZE = 10000000 # 10 MB
 
 def allowed_file(filename):
     return '.' in filename and \
-        filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+        filename.rsplit('.')[-1].lower() in ALLOWED_EXTENSIONS
 
 ''' Register legacy website routes. '''
 def register_routes(app, mongo):
@@ -36,9 +37,9 @@ def register_routes(app, mongo):
         else: 
             return redirect('/login.jsp')
 
-        # check if the post request has the file part
-        if 'file' not in request.files:
-            return render_template("private/profile.html", error="Something went wrong.", user=user)
+        # # check if the post request has the file part
+        # if 'file' not in request.files:
+        #     return render_template("private/profile.html", error="Something went wrong.", user=user)
         skinFile = request.files['file']
         cloakFile = request.files['cloak']
 
@@ -77,6 +78,105 @@ def register_routes(app, mongo):
             cloakBytes.flush()
             cloakBytes.seek(0)
             users.update_one({ "_id": user["_id"] }, { "$set": { "cloak": cloakBytes.read() } })
+
+        world1File = request.files['world1'] if "world1" in request.files else None
+        world2File = request.files['world2'] if "world2" in request.files else None
+        world3File = request.files['world3'] if "world3" in request.files else None
+        world4File = request.files['world4'] if "world4" in request.files else None
+        world5File = request.files['world5'] if "world5" in request.files else None
+
+        if world1File != None or world2File != None or world3File != None or world4File != None or world5File != None:
+            maps = dict()
+            if "maps" in user:
+                maps = user["maps"]
+
+            if world1File != None and allowed_file(world1File.filename):
+                if world1File.stream.tell() > MAX_WORLD_SIZE:
+                    return render_template("private/profile.html", error="World 1 is too large.", user=user)
+
+                world1Bytes = BytesIO()
+                world1File.save(world1Bytes)
+                world1Bytes.flush()
+                world1Bytes.seek(0)
+                world1Bytes = world1Bytes.read()
+                maps["0"] = {
+                    "name": world1File.filename[0:world1File.filename.rfind(".")],
+                    "length": len(world1Bytes),
+                    "data": world1Bytes,
+                    "createdAt": datetime.utcnow(),
+                    "version": 2 if world1Bytes[0:2] == bytes([0x1F, 0x8B]) else 1
+                }
+            
+            if world2File != None and allowed_file(world2File.filename):
+                if world2File.stream.tell() > MAX_WORLD_SIZE:
+                    return render_template("private/profile.html", error="World 2 is too large.", user=user)
+
+                world2Bytes = BytesIO()
+                world2File.save(world2Bytes)
+                world2Bytes.flush()
+                world2Bytes.seek(0)
+                world2Bytes = world2Bytes.read()
+                maps["1"] = {
+                    "name": world2File.filename[0:world2File.filename.rfind(".")],
+                    "length": len(world2Bytes),
+                    "data": world2Bytes,
+                    "createdAt": datetime.utcnow(),
+                    "version": 2 if world2Bytes[0:2] == bytes([0x1F, 0x8B]) else 1
+                }
+            
+            if world3File != None and allowed_file(world3File.filename):
+                if world3File.stream.tell() > MAX_WORLD_SIZE:
+                    return render_template("private/profile.html", error="World 3 is too large.", user=user)
+
+                world3Bytes = BytesIO()
+                world3File.save(world3Bytes)
+                world3Bytes.flush()
+                world3Bytes.seek(0)
+                world3Bytes = world3Bytes.read()
+                maps["2"] = {
+                    "name": world3File.filename[0:world3File.filename.rfind(".")],
+                    "length": len(world3Bytes),
+                    "data": world3Bytes,
+                    "createdAt": datetime.utcnow(),
+                    "version": 2 if world3Bytes[0:2] == bytes([0x1F, 0x8B]) else 1
+                }
+            
+            if world4File != None and allowed_file(world4File.filename):
+                if world4File.stream.tell() > MAX_WORLD_SIZE:
+                    return render_template("private/profile.html", error="World 14 is too large.", user=user)
+
+                world4Bytes = BytesIO()
+                world4File.save(world4Bytes)
+                world4Bytes.flush()
+                world4Bytes.seek(0)
+                world4Bytes = world4Bytes.read()
+                maps["3"] = {
+                    "name": world4File.filename[0:world4File.filename.rfind(".")],
+                    "length": len(world4Bytes),
+                    "data": world4Bytes,
+                    "createdAt": datetime.utcnow(),
+                    "version": 2 if world4Bytes[0:2] == bytes([0x1F, 0x8B]) else 1
+                }
+            
+            if world5File != None and allowed_file(world5File.filename):
+                if world5File.stream.tell() > MAX_WORLD_SIZE:
+                    return render_template("private/profile.html", error="World 5 is too large.", user=user)
+
+                world5Bytes = BytesIO()
+                world5File.save(world5Bytes)
+                world5Bytes.flush()
+                world5Bytes.seek(0)
+                world5Bytes = world5Bytes.read()
+                maps["4"] = {
+                    "name": world5File.filename[0:world5File.filename.rfind(".")],
+                    "length": len(world5Bytes),
+                    "data": world5Bytes,
+                    "createdAt": datetime.utcnow(),
+                    "version": 2 if world5Bytes[0:2] == bytes([0x1F, 0x8B]) else 1
+                }
+            
+            users.update_one({ "_id": user["_id"] }, { "$set": { "maps": maps } })
+
 
         users.update_one({ "_id": user["_id"] }, { "$set": { "slim": True if request.form["slim"] == "true" else False } })
         user = users.find_one({"_id": user["_id"]})
