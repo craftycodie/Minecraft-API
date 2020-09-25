@@ -6,7 +6,39 @@
   <h1>Profile</h1>
   <p>Player name: {{user.user}}</p>
   <p>E-mail: {{user.email}}</p>
-  <a href="/changepass.jsp">Click here to change your password.</a>
+  <h2>Worlds</h2>
+  <p>Classic worlds will appear here, and you can download them.</p>
+  {% if "maps" in user and user.maps|length > 0 %}
+  <ol>
+    <li>
+      {% if "0" in user.maps %}
+      <a href="/player/{{user.uuid}}/world/1">{{user.maps["0"].name}}</a> - {{'%0.2f' % (user.maps["0"].length * 0.001)|float}} KB</li>
+      {% endif %}
+    </li>
+    <li>
+      {% if "1" in user.maps %}
+      <a href="/player/{{user.uuid}}/world/2">{{user.maps["1"].name}}</a> - {{'%0.2f' % (user.maps["1"].length * 0.001)|float}} KB</li>
+      {% endif %}
+    </li>
+    <li>
+      {% if "2" in user.maps %}
+      <a href="/player/{{user.uuid}}/world/3">{{user.maps["2"].name}}</a> - {{'%0.2f' % (user.maps["2"].length * 0.001)|float}} KB</li>
+      {% endif %}
+    </li>
+    <li>
+      {% if "3" in user.maps %}
+      <a href="/player/{{user.uuid}}/world/4">{{user.maps["3"].name}}</a> - {{'%0.2f' % (user.maps["3"].length * 0.001)|float}} KB</li>
+      {% endif %}
+    </li>
+    <li>
+      {% if "4" in user.maps %}
+      <a href="/player/{{user.uuid}}/world/5">{{user.maps["4"].name}}</a> - {{'%0.2f' % (user.maps["4"].length * 0.001)|float}} KB</li>
+      {% endif %}
+    </li>
+  </ol>
+  {% else %}
+    <p>You have not saved any worlds online.</p>
+  {% endif %}
   <h2>Change Your Skin</h2>
   <p>Start by <a href="/char.png">downloading the reference skin</a>.</p>
   <img src="/char.png" style="float:left" />

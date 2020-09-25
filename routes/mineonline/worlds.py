@@ -9,8 +9,7 @@ from io import BytesIO, StringIO
 
 def register_routes(app, mongo):
     #Deletes a users cloak.
-    @app.route('/player/<uuid>/worlds/<worldId>')
-    @app.route('/mineonline/player/<uuid>/worlds/<worldId>')
+    @app.route('/player/<uuid>/world/<worldId>')
     def getWorld(uuid, worldId):
         uuid = str(UUID(uuid))
         maps = None
