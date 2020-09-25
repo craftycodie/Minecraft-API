@@ -30,3 +30,7 @@ def register_routes(app, mongo):
         res = make_response(json.dumps(responseData))
         res.mimetype = 'application/json'
         return res
+
+    @app.route('/1_6_has_been_released.flag', methods=["GET"])
+    def release1_6_releasedflag():
+        return Response("", 404)
