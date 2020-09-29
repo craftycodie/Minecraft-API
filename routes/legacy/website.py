@@ -218,6 +218,13 @@ def register_routes(app, mongo):
         
         return render_template("public/forgotpass.html", success="Instructions to reset your password have been sent to your email adress.\r\nMake sure to check the spam folder.")
 
+    @app.route('/changepass.jsp', methods = ["GET"])
+    def changepass():
+        if "token" in request.args:
+            return render_template("private/changepass.html", token=request.args["token"])
+        else:
+            return serve("/changepass.jsp")
+
     @app.route('/changepass.jsp', methods = ["POST"])
     def changepasspost():
         users = mongo.db.users

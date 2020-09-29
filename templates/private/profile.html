@@ -6,6 +6,7 @@
   <h1>Profile</h1>
   <p>Player name: {{user.user}}</p>
   <p>E-mail: {{user.email}}</p>
+  <a href="/changepass.jsp">Click here to change your password.</a>
   <form action="/profile/" method="post" enctype="multipart/form-data">
     <h2>Worlds</h2>
     <p>Classic worlds will appear here, and you can download them.</p>
@@ -43,9 +44,10 @@
         <a href="/player/{{user.uuid}}/world/5">{{user.maps["4"].name}}</a> - {{'%0.2f' % (user.maps["4"].length * 0.001)|float}} KB - <a style="color: darkred;" href="/player/{{user.uuid}}/world/5/delete">Delete</a></li>
         {% else %}
         <input type="file" id="world5" name="world5">
-        {% endif %}
+        {% endif %}   
       </li>
     </ol>
+    <button>Submit</button>
     <h2>Change Your Skin</h2>
     <p>Start by <a href="/char.png">downloading the reference skin</a>.</p>
     <img src="/char.png" style="float:left" />
