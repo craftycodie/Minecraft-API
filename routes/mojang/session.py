@@ -32,7 +32,7 @@ def register_routes(app, mongo):
                 if "unsigned" in request.args and request.args["unsigned"] == "false":
                     profile["signatureRequired"] = True
 
-                if "cloak" in user:
+                if "cloak" in user and user["cloak"] != "":
                     profile["textures"]["CAPE"] = {
                         "url": "http://mineonline.codie.gg/cloak/" + user["uuid"] + "/" + hashlib.md5(user["cloak"]).hexdigest()
                     }
@@ -148,7 +148,7 @@ def register_routes(app, mongo):
             if "unsigned" in request.args and request.args["unsigned"] == "false":
                 profile["signatureRequired"] = True
 
-            if "cloak" in user:
+            if "cloak" in user and user["cloak"] != "":
                 profile["textures"]["CAPE"] = {
                     "url": "http://mineonline.codie.gg/cloak/" + user["uuid"] + "/" + hashlib.md5(user["cloak"]).hexdigest()
                 }
@@ -178,7 +178,7 @@ def register_routes(app, mongo):
             res = make_response(json.dumps(res))
             res.mimetype = 'application/json'
             return res
-        except:
+        except Exception as e:
             return Response("Invalid Session", 401)
 
         return Response("Invalid Session", 401)
