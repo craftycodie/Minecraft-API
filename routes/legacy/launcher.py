@@ -8,12 +8,11 @@ import bcrypt
 
 def register_routes(app, mongo):
     
-    '''Old server login route.'''
+    '''Old login route.'''
     @app.route('/game/getversion.jsp', methods = ["POST"])
     def getversion():
         username = request.form['user']
         password = request.form['password']
-        # This never seems to hold anything.
         # version = request.form['version']
 
         latestVersion = open("./public/MinecraftDownload/version", mode="r", encoding="utf-8")

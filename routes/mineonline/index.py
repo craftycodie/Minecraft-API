@@ -8,6 +8,7 @@ from routes.mineonline.skins import register_routes as register_skins_routes
 from routes.mineonline.servers import register_routes as register_servers_routes
 from routes.mineonline.worlds import register_routes as register_worlds_routes
 import os
+import bcrypt
 
 
 def register_routes(app, mongo):
@@ -102,3 +103,40 @@ def register_routes(app, mongo):
         res = make_response(json.dumps(presence))
         res.mimetype = 'application/json'
         return res
+
+    @app.route('/api/login', methods = ["POST"])
+    def apilogin():
+        username = request.json['username']
+        password = request.json['password']
+
+        users = mongo.db.users
+
+        if username == "":
+            return Response("Bad login")
+        elif password == "":
+            return Response("Bad login")
+        elif not users.find_one({"user": username}):
+            return Response("Bad login")
+        else:
+            try:
+                user = users.find_one({"user": username})
+                matched = bcrypt.checkpw(password.encode('utf-8'), user['password'].encode('utf-8'))
+                if not matched:
+                    return Response("Bad login")
+                if not user['premium']:
+                    return Response("User not premium.")
+                if user:
+                    sessionId = ObjectId()
+                    users.update_one({"_id": user["_id"]}, { "$set": { "sessionId": sessionId } })
+                    res = make_response(json.dumps({
+                        "uuid": user["uuid"],
+                        "sessionId": str(sessionId)
+                    }))
+                    res.mimetype = 'application/json'
+                    return res
+                else:
+                    return Response("Something went wrong, please try again!")
+            except:
+                return Response("Something went wrong, please try again!")
+
+        return Response("Something went wrong, please try again!")
