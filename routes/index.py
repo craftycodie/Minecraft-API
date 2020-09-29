@@ -35,7 +35,7 @@ def serve(path):
         if user:
             return render_template("private/" + path + ".html", user=user)
         else:
-            return redirect('/login.jsp')
+            return redirect('/login')
     elif os.path.exists("templates/public/" + path + ".html"):
         return render_template("public/" + path + ".html", user=user, readme_html=readme_html, args=request.args)
     elif os.path.exists(static_folder + '/' + path):

@@ -10,7 +10,9 @@ from io import BytesIO, StringIO
 
 def register_routes(app, mongo):
     #Deletes a users cloak.
+    @app.route('/api/player/<uuid>/cloak', methods=["DELETE"])
     @app.route('/mineonline/player/<uuid>/cloak', methods=["DELETE"])
+    @app.route('/api/player/<uuid>/cloak/delete')
     @app.route('/mineonline/removecloak.jsp')
     def removeCloak(uuid = None):
         sessionId = request.args['sessionId']
@@ -33,6 +35,7 @@ def register_routes(app, mongo):
 
         return Response("You must be logged in to do this.", 401)
 
+    @app.route('/api/player/<uuid>/skin/metadata', methods=['GET'])
     @app.route('/mineonline/player/<uuid>/skin/metadata', methods=['GET'])
     def mineonlineskinmetadata(uuid):
         uuid = str(UUID(uuid))
@@ -47,6 +50,7 @@ def register_routes(app, mongo):
             "slim": user["slim"]
         }))
 
+    @app.route('/api/player/<uuid>/skin/metadata', methods=['POST'])
     @app.route('/mineonline/player/<uuid>/skin/metadata', methods=['POST'])
     def mineonlineupdateskinmetadata(uuid):
         sessionId = request.args['session']
@@ -76,7 +80,7 @@ def register_routes(app, mongo):
 
         return Response("ok")
 
-    #mineonline
+    @app.route('/api/player/<uuid>/skin', methods=['POST'])
     @app.route('/mineonline/player/<uuid>/skin', methods=['POST'])
     def saveskin(uuid):
         uuid = str(UUID(uuid))
@@ -132,6 +136,7 @@ def register_routes(app, mongo):
         return Response("ok")
 
     #mineonline
+    @app.route('/api/player/<uuid>/cloak', methods=['POST'])
     @app.route('/mineonline/player/<uuid>/cloak', methods=['POST'])
     def savecloak(uuid):
         uuid = str(UUID(uuid))
@@ -178,6 +183,7 @@ def register_routes(app, mongo):
 
         return Response("ok")
 
+    @app.route('/api/player/<uuid>/skin', methods=['GET'])
     @app.route('/mineonline/player/<uuid>/skin', methods=['GET'])
     def mineonlineskin(uuid):
         uuid = str(UUID(uuid))
@@ -224,6 +230,7 @@ def register_routes(app, mongo):
 
         return response
 
+    @app.route('/api/player/<uuid>/skin/head', methods=['GET'])
     @app.route('/mineonline/player/<uuid>/skin/head', methods=['GET'])
     def mineonlineskinhead(uuid):
         uuid = str(UUID(uuid))
@@ -259,6 +266,7 @@ def register_routes(app, mongo):
 
         return response
 
+    @app.route('/api/player/<uuid>/cloak', methods=['GET'])
     @app.route('/mineonline/player/<uuid>/cloak', methods=['GET'])
     def mineonlinecloak(uuid):
         uuid = str(UUID(uuid))

@@ -53,7 +53,7 @@ List was updated {{timeString}}.<br/><br/>
  			<span>Players: 
 				{% for player in server['players'] %}
 					{% if server['playerUUIDs'][loop.index] != None %}
-						<img class="playerHead" onerror="this.src = '/char-head.png'" src="/mineonline/player/{{server['playerUUIDs'][loop.index - 1]}}/skin/head">
+						<img class="playerHead" onerror="this.src = '/char-head.png'" src="/api/player/{{server['playerUUIDs'][loop.index - 1]}}/skin/head">
 					{% else %}
 						<img class="playerHead" src="/char-head.png">
 					{% endif %}

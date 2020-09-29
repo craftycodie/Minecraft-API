@@ -30,14 +30,14 @@
         <span id="links">
           <a href="/" id="menu_" class="menuItem">Home</a>
           &nbsp; &nbsp; <a href="/profile/" id="menu_profile" class="menuItem">Profile</a>
-          &nbsp; &nbsp; <a href="/servers.jsp" class="menuItem">Server List</a><br>
+          &nbsp; &nbsp; <a href="/servers" class="menuItem">Server List</a><br>
         </span>
 
         <span style="float: right;">
           {% if user %}
-              Logged in as {{user.user}} | <a href="/logout.jsp" class="loginpanel">Log out</a>
+              Logged in as {{user.user}} | <a href="/logout" class="loginpanel">Log out</a>
           {% else %}
-              <a href="/login.jsp" class="loginpanel">Log in</a> | <a href="/register.jsp" class="loginpanel">Register</a>
+              <a href="/login" class="loginpanel">Log in</a> | <a href="/register" class="loginpanel">Register</a>
           {% endif %}
         </span>
 

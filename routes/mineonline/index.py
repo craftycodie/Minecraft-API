@@ -16,6 +16,7 @@ def register_routes(app, mongo):
     register_worlds_routes(app, mongo)
 
     #Given a username, respond a user uuid.
+    @app.route('/api/playeruuid/<username>')
     @app.route('/mineonline/playeruuid/<username>')
     def playeruuid(username):
         sessionId = request.args['session']
@@ -42,12 +43,14 @@ def register_routes(app, mongo):
 
         return Response("You must be logged in to do this.", 401)
 
+    @app.route('/api/getmyip')
     @app.route('/mineonline/getmyip')
     def ipaddress():
         return make_response(json.dumps({
             "ip": request.remote_addr
         }), 200)
 
+    @app.route('/api/versions')
     @app.route('/mineonline/versions')
     def versionsindex():
         indexJson = { "versions" : []}
@@ -68,6 +71,7 @@ def register_routes(app, mongo):
         res.mimetype = 'application/json'
         return res
         
+    @app.route('/api/player/<uuid>/presence', methods=['GET'])
     @app.route('/mineonline/player/<uuid>/presence', methods=['GET'])
     def playerpresence(uuid):
         uuid = str(UUID(uuid))

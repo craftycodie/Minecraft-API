@@ -13,11 +13,13 @@ from utils.database import getclassicservers
 from uuid import uuid4, UUID
 
 def register_routes(app, mongo):
+    @app.route("/api/servers/<uuid>", methods=["DELETE"])
     @app.route("/mineonline/servers/<uuid>", methods=["DELETE"])
     def deleteserver(uuid):
         mongo.db.classicservers.delete_one({"uuid": str(UUID(uuid))})
         return Response("ok", 200)
 
+    @app.route("/api/servers", methods=["POST"])
     @app.route("/mineonline/servers", methods=["POST"])
     @app.route('/mineonline/listserver.jsp', methods=["POST"])
     def addserver():
@@ -134,6 +136,7 @@ def register_routes(app, mongo):
 
         return Response("Something went wrong.", 500)
 
+    @app.route("/api/servers", methods=["GET"])
     @app.route("/mineonline/servers", methods=["GET"])
     @app.route('/mineonline/listservers.jsp')
     def listservers():
@@ -196,6 +199,7 @@ def register_routes(app, mongo):
 
         return Response(json.dumps(servers))
 
+    @app.route("/api/getserver", methods=["GET"])
     @app.route("/mineonline/getserver", methods=["GET"])
     def getserver():
         serverIP = request.args.get('serverIP')
@@ -236,6 +240,7 @@ def register_routes(app, mongo):
 
     # Classic authentication route.
     # Modified for mineonline.
+    @app.route('/api/servertoken')
     @app.route('/mineonline/servertoken')
     @app.route('/mineonline/mppass.jsp')
     def getmmpass():

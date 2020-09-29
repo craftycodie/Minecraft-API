@@ -58,7 +58,7 @@ def register_routes(app, mongo):
     def addclassicserver(): 
         # If there's no salt, just use the standard list endpoint.
         if 'salt' not in request.values:
-            return Response("http://mineonline.codie.gg/servers.jsp")
+            return Response("http://mineonline.codie.gg/servers")
 
         port = request.values['port']
         users = request.values['users']
@@ -120,9 +120,9 @@ def register_routes(app, mongo):
                 })
             
             if (port != "25565"):
-                return Response("http://mineonline.codie.gg/servers.jsp")
+                return Response("http://mineonline.codie.gg/servers")
             else:
-                return Response("http://mineonline.codie.gg/servers.jsp")
+                return Response("http://mineonline.codie.gg/servers")
 
         except:
             return Response("Something went wrong.", 500)

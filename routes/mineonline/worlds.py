@@ -9,6 +9,7 @@ from io import BytesIO, StringIO
 
 def register_routes(app, mongo):
     # Download a classic world.
+    @app.route('/api/player/<uuid>/world/<worldId>')
     @app.route('/player/<uuid>/world/<worldId>')
     def getWorld(uuid, worldId):
         uuid = str(UUID(uuid))
@@ -37,14 +38,16 @@ def register_routes(app, mongo):
             return Response("Map not found.", 404)
 
     # Website route: Delete a world then go back to the profile page.
+    @app.route('/api/player/<uuid>/world/<worldId>/delete')
     @app.route('/player/<uuid>/world/<worldId>/delete')
     def deleteWorldWebpage(uuid, worldId):
         if 'sessionId' in request.cookies and request.cookies['sessionId'] != "":
             deleteWorld(uuid, worldId, request.cookies['sessionId'])
             return redirect('/profile/')
         else:
-            return redirect('/login.jsp')
+            return redirect('/login')
 
+    @app.route('/api/player/<uuid>/world/<worldId>', methods = ["DELETE"])
     @app.route('/player/<uuid>/world/<worldId>', methods = ["DELETE"])
     def deleteWorld(uuid, worldId, sessionId = None):
         uuid = str(UUID(uuid))

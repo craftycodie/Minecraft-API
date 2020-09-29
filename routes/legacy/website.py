@@ -35,7 +35,7 @@ def register_routes(app, mongo):
             except:
                 pass
         else: 
-            return redirect('/login.jsp')
+            return redirect('/login')
 
         # # check if the post request has the file part
         # if 'file' not in request.files:
@@ -183,12 +183,13 @@ def register_routes(app, mongo):
 
         return render_template("private/profile.html", user=user)
 
+    @app.route('/forgotpass', methods = ["POST"])
     @app.route('/forgotpass.jsp', methods = ["POST"])
     def forgotpass():
         username = request.form['username']
         email = request.form['email']
 
-        url = request.host_url + 'changepass.jsp'
+        url = request.host_url + 'changepass'
         users = mongo.db.users
 
         if not username and not email:
@@ -218,13 +219,15 @@ def register_routes(app, mongo):
         
         return render_template("public/forgotpass.html", success="Instructions to reset your password have been sent to your email adress.\r\nMake sure to check the spam folder.")
 
+    @app.route('/changepass', methods = ["GET"])
     @app.route('/changepass.jsp', methods = ["GET"])
     def changepass():
         if "token" in request.args:
             return render_template("private/changepass.html", token=request.args["token"])
         else:
-            return serve("/changepass.jsp")
+            return serve("/changepass")
 
+    @app.route('/changepass', methods = ["POST"])
     @app.route('/changepass.jsp', methods = ["POST"])
     def changepasspost():
         users = mongo.db.users
@@ -246,13 +249,13 @@ def register_routes(app, mongo):
                 users = mongo.db.users
                 user = users.find_one({"sessionId": ObjectId(request.cookies['sessionId'])})
                 if not user:
-                    return redirect('/login.jsp')
+                    return redirect('/login')
                 
                 matched = bcrypt.checkpw(request.form['currentPassword'].encode('utf-8'), user['password'].encode('utf-8'))
                 if not matched:
                     return render_template("public/changepass.html", error="Incorrect password.", token=token)
             else:
-                return redirect('/login.jsp')
+                return redirect('/login')
 
             if request.form['password1'] == "" or request.form['password2'] == "":
                 return render_template("public/changepass.html", error="Please enter a password.", token=token)
@@ -276,6 +279,7 @@ def register_routes(app, mongo):
             return render_template("public/changepass.html", error="An error occured while resetting your password.", token=request.form['token'])
 
 
+    @app.route('/register', methods = ["POST"])
     @app.route('/register.jsp', methods = ["POST"])
     def register():
         users = mongo.db.users
@@ -324,6 +328,7 @@ def register_routes(app, mongo):
 
         return render_template("public/register.html", error="Something went wrong, please try again!")
 
+    @app.route('/login', methods = ["POST"])
     @app.route('/login.jsp', methods = ["POST"])
     def loginpost():
         users = mongo.db.users
@@ -351,6 +356,7 @@ def register_routes(app, mongo):
 
         return render_template("public/login.html", error="Something went wrong, please try again!")
 
+    @app.route('/login')
     @app.route('/login.jsp')
     def login():
         user = None
@@ -363,9 +369,10 @@ def register_routes(app, mongo):
                     return serve('login')
                 return redirect('/profile/')
             except:
-                return redirect('/login.jsp')
+                return redirect('/login')
         return serve('login')
 
+    @app.route('/logout')
     @app.route('/logout.jsp')
     def logout():
         try:
@@ -380,7 +387,7 @@ def register_routes(app, mongo):
 
     @app.route('/')
     def index():
-        return serve("index.jsp")
+        return serve("index")
 
     @app.route('/profile/')
     def profile():
@@ -390,6 +397,7 @@ def register_routes(app, mongo):
     def support():
         return serve("profile")
 
+    @app.route('/play')
     @app.route('/play.jsp')
     def classic():
         user = None
@@ -423,6 +431,7 @@ def register_routes(app, mongo):
             sessionIdInvalid=sessionIdInvalid
         )
 
+    @app.route('/servers')
     @app.route('/servers.jsp')
     def classicservers():
         user = None
