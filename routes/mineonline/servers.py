@@ -62,8 +62,6 @@ def register_routes(app, mongo):
 
         classicservers = mongo.db.classicservers
 
-        user = None
-
         if(port == None):
             port = "25565"
 
@@ -89,15 +87,14 @@ def register_routes(app, mongo):
 
             users = request.json['users'] if 'users' in request.json else 0
 
-
             while(True):
                 cursor = classicservers.find_one(sort = [("realmId", DESCENDING)])
                 seq = cursor["realmId"] + 1 if cursor != None and "realmId" in cursor and cursor["realmId"] != None else 1
-                
+
                 try:
                     classicservers.insert_one({
-                        "salt": currentlisting["salt"] if "salt" in currentlisting else None,
-                        "realmId": currentlisting["realmId"] if "realmId" in currentlisting else seq,
+                        "salt": currentlisting["salt"] if currentlisting != None and "salt" in currentlisting else None,
+                        "realmId": currentlisting["realmId"] if currentlisting != None and "realmId" in currentlisting else seq,
                         "createdAt": datetime.utcnow(),
                         "expiresAt": datetime.now(timezone.utc) + expireDuration,
                         "ip": ip,
@@ -127,14 +124,12 @@ def register_routes(app, mongo):
                         return Response("Something went wrong.", 500)
 
                 break
-            
-            
+                        
             return make_response(json.dumps({
                 "uuid": uuid
             }), 200)
 
-        except:
-            print("Unexpected error:", sys.exc_info()[1])
+        except Exception as e:
             return Response("Something went wrong.", 500)
 
         return Response("Something went wrong.", 500)
