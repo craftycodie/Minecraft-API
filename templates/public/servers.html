@@ -9,6 +9,7 @@
 <h2>Public servers</h2>
 <p>
 List was updated {{timeString}}.<br/><br/>
+<p>There are currently {{serverCount}} servers online.</p>
 </p>
 <br>
 
@@ -23,9 +24,7 @@ List was updated {{timeString}}.<br/><br/>
 	NONE
  -->
 
-{% if serverCount < 1 %}
-	<p>There are currently no servers online.</p>
-{% else %}
+{% if serverCount > 1 %}
 	{% for server in servers %}
 		{% if 'md5' in server %}
 			<hr/>
