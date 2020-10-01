@@ -211,6 +211,7 @@ def register_routes(app, mongo):
         } } })
 
         send_email(
+            app,
             subject='MineOnline - Reset Your Password',
             sender='mineonline@codie.gg',
             recipients=[user['email']],
