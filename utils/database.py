@@ -9,4 +9,6 @@ def getclassicservers(mongo):
             
         return True
     classicservers = list(mongo.db.classicservers.find())
-    return list(filter(removeExpired, classicservers))
+    classicservers = list(filter(removeExpired, classicservers))
+    classicservers.sort(key=lambda x: len(x["players"]) if "players" in x else 0, reverse=True)
+    return classicservers
