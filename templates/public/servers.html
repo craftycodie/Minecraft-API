@@ -50,14 +50,16 @@ List was updated {{timeString}}.<br/><br/>
 
 			{% if 'players' in server and server['players'] |length > 0 %}
  			<span>Players: 
+				<span style="display: inline-block;">
 				{% for player in server['players'] %}
-					{% if server['playerUUIDs'][loop.index] != None %}
+					{% if server['playerUUIDs'][loop.index - 1] != None %}
 						<img class="playerHead" onerror="this.src = '/char-head.png'" src="/api/player/{{server['playerUUIDs'][loop.index - 1]}}/skin/head">
 					{% else %}
 						<img class="playerHead" src="/char-head.png">
 					{% endif %}
 					{{player}}
 				{% endfor %}
+				</span>
 			</span>
 			<br/>
 			{% endif %}
