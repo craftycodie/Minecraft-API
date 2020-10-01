@@ -180,6 +180,7 @@ body {
     image-rendering: pixelated; /* Chrome */
     image-rendering: optimize-contrast;         /* CSS3 Proposed                  */
 	-ms-interpolation-mode: nearest-neighbor;   /* IE8+                           */
+	width: 1em;
 	height: 1em;
 }
 
