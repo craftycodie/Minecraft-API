@@ -52,7 +52,7 @@ List was updated {{timeString}}.<br/><br/>
  			<span>Players: 
 				{% for player in server['players'] %}
 				<span style="display: inline-block;">
-					<img class="playerHead" onerror="this.src = '/char-head.png'" src="/api/playerhead?user={{player}}">
+					<img class="playerHead" src="/api/playerhead?user={{player}}">
 					{{player}}
 				</span>
 				{% endfor %}

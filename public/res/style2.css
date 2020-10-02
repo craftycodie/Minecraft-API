@@ -182,6 +182,9 @@ body {
 	-ms-interpolation-mode: nearest-neighbor;   /* IE8+                           */
 	width: 1em;
 	height: 1em;
+	background: url("/img/char-head.png");
+	background-repeat: no-repeat;
+	background-size: 100%;
 }
 
 #subtitle {
