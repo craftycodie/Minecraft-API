@@ -5,6 +5,9 @@ def getclassicservers(mongo):
     def removeExpired(server):
         if (server["expiresAt"].replace(tzinfo=timezone.utc) <= datetime.now(timezone.utc)):
             mongo.db.classicservers.delete_one({"_id": server["_id"]})
+            # Hang on to the salt
+            if (server["salt"] != None):
+                mongo.db.classicservers.insert_one({"ip": server["ip"], "port": server["port"], "salt": server["salt"]})
             return False
             
         return True
