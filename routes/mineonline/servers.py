@@ -154,12 +154,11 @@ def register_routes(app, mongo):
     @app.route("/mineonline/servers", methods=["GET"])
     @app.route('/mineonline/listservers.jsp')
     def listservers():
-        uuid = request.args.get('user')
         sessionId = request.args.get('sessionId')
 
         try:
             users = mongo.db.users
-            user = users.find_one({"uuid" : uuid, "sessionId": ObjectId(sessionId)})
+            user = users.find_one({"sessionId": ObjectId(sessionId)})
         except:
             return Response("Invalid Session", 401)
 
@@ -191,7 +190,7 @@ def register_routes(app, mongo):
                 else:
                     status = NOT_ON_THE_WHITELIST
 
-            if ("bannedUsers" in x and "bannedIPs" in x and "bannedUUIDs" in x and (user["user"] in x["bannedUsers"] or request.remote_addr in x["bannedIPs"] or uuid in x["bannedUUIDs"])):
+            if ("bannedUsers" in x and "bannedIPs" in x and "bannedUUIDs" in x and (user["user"] in x["bannedUsers"] or request.remote_addr in x["bannedIPs"] or user["uuid"] in x["bannedUUIDs"])):
                 status = BANNED
 
             return { 

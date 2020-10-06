@@ -38,6 +38,29 @@ def register_routes(app, mongo):
         except:
             return Response("Something went wrong!", 500)
 
+    #Given a username, respond a user uuid.
+    @app.route('/api/findplayer')
+    def findPlayer():
+        try:
+            users = mongo.db.users
+
+            if "username" in request.values:
+                user = users.find_one({"user": request.values["username"]})
+            elif "discordUserID" in request.values:
+                user = users.find_one({"discordUserID": request.values["discordUserID"]})
+            else: return abort(400)
+
+            if not user:
+                return abort(404)
+
+            return make_response(json.dumps({
+                "uuid": user["uuid"],
+                "discordUserID": user["discordUserID"] if "discordUserID" in user else None,
+                "name": user["user"]
+            }), 200)
+        except:
+            return Response("Something went wrong!", 500)
+
     @app.route('/api/getmyip')
     @app.route('/mineonline/getmyip')
     def ipaddress():
@@ -106,6 +129,7 @@ def register_routes(app, mongo):
     def apilogin():
         username = request.json['username']
         password = request.json['password']
+        discordUserID = request.json["discordUserID"] if "discordUserID" in request.json else None
 
         users = mongo.db.users
 
@@ -125,7 +149,7 @@ def register_routes(app, mongo):
                     return Response("User not premium.")
                 if user:
                     sessionId = ObjectId()
-                    users.update_one({"_id": user["_id"]}, { "$set": { "sessionId": sessionId } })
+                    users.update_one({"_id": user["_id"]}, { "$set": { "sessionId": sessionId, "discordUserID": discordUserID } })
                     if (not "uuid" in user):
                         uuid = str(uuid4())
                         users.update_one({ "_id": user["_id"] }, { "$set": { "uuid": uuid } })
@@ -146,3 +170,42 @@ def register_routes(app, mongo):
                 return Response("Something went wrong, please try again!")
 
         return Response("Something went wrong, please try again!")
+
+    @app.route('/api/player/<uuid>/discordUserID', methods=["POST"])
+    def setDiscordUserID(uuid):
+        sessionId = request.json['sessionId']
+        discordUserID = request.json["discordUserID"]
+
+        if uuid != None:
+            uuid = str(UUID(uuid))
+
+        if sessionId:
+            try:
+                users = mongo.db.users
+                user = users.find_one({"sessionId": ObjectId(sessionId)})
+                if not user:
+                    return Response("Invalid session.", 400)
+                users.update_many({ "discordUserID": discordUserID }, { "$set": { "discordUserID": None }})
+                users.update_one({ "_id": user["_id"], "uuid": uuid }, { "$set": { "discordUserID": discordUserID } })
+                return Response("ok", 200)
+            except:
+                return Response("Something went wrong!", 500)
+
+        return Response("You must be logged in to do this.", 401)
+
+    @app.route('/api/player/<uuid>/discordUserID', methods=["GET"])
+    def getDiscordUserID(uuid):
+        uuid = str(UUID(uuid))
+
+        try:
+            users = mongo.db.users
+            user = users.find_one({"uuid": uuid})
+            if not user:
+                return Response("User not found.", 404)
+            res = make_response(json.dumps({
+                "discordUserID": user["discordUserID"] if "discordUserID" in user else None,
+            }))
+            res.mimetype = 'application/json'
+            return res
+        except:
+            return Response("Something went wrong!", 500)
