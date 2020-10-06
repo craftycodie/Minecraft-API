@@ -1,4 +1,4 @@
-from flask import Response, request, make_response
+from flask import Response, request, make_response, abort
 import json
 from flask_pymongo import PyMongo
 from bson.objectid import ObjectId
@@ -20,29 +20,23 @@ def register_routes(app, mongo):
     @app.route('/api/playeruuid/<username>')
     @app.route('/mineonline/playeruuid/<username>')
     def playeruuid(username):
-        sessionId = request.args['session']
-        if sessionId:
-            try:
-                users = mongo.db.users
-                user = users.find_one({"sessionId": ObjectId(sessionId)})
-                if not user:
-                    return Response("Invalid session.", 400)
-                if user["user"] != username:
-                    return Response("Wrong username.", 400)
-                if (not "uuid" in user):
-                    uuid = str(uuid4())
-                    users.update_one({ "_id": user["_id"] }, { "$set": { "uuid": uuid } })
-                    return make_response(json.dumps({
-                        "uuid": uuid
-                    }), 200)
-                else:
-                    return make_response(json.dumps({
-                        "uuid": user["uuid"]
-                    }), 200)
-            except:
-                return Response("Something went wrong!", 500)
-
-        return Response("You must be logged in to do this.", 401)
+        try:
+            users = mongo.db.users
+            user = users.find_one({"user": username})
+            if not user:
+                return abort(404)
+            if (not "uuid" in user):
+                uuid = str(uuid4())
+                users.update_one({ "_id": user["_id"] }, { "$set": { "uuid": uuid } })
+                return make_response(json.dumps({
+                    "uuid": uuid
+                }), 200)
+            else:
+                return make_response(json.dumps({
+                    "uuid": user["uuid"]
+                }), 200)
+        except:
+            return Response("Something went wrong!", 500)
 
     @app.route('/api/getmyip')
     @app.route('/mineonline/getmyip')
@@ -128,10 +122,18 @@ def register_routes(app, mongo):
                 if user:
                     sessionId = ObjectId()
                     users.update_one({"_id": user["_id"]}, { "$set": { "sessionId": sessionId } })
-                    res = make_response(json.dumps({
-                        "uuid": user["uuid"],
-                        "sessionId": str(sessionId)
-                    }))
+                    if (not "uuid" in user):
+                        uuid = str(uuid4())
+                        users.update_one({ "_id": user["_id"] }, { "$set": { "uuid": uuid } })
+                        res = make_response(json.dumps({
+                            "uuid": uuid,
+                            "sessionId": str(sessionId)
+                        }))
+                    else:
+                        res = make_response(json.dumps({
+                            "uuid": user["uuid"],
+                            "sessionId": str(sessionId)
+                        }))
                     res.mimetype = 'application/json'
                     return res
                 else:
