@@ -88,8 +88,12 @@ def register_routes(app, mongo):
             server = servers.find_one({"players": { "$all": [ user["user"] ]}})
             if server != None:
                 presence = {
-                    "serverIP": server["ip"],
-                    "serverPort": server["port"]
+                    "server": {
+                        "name": server["name"],
+                        "versionName": server["versionName"],
+                        "ip": server["ip"],
+                        "port": server["port"]
+                    },
                 }
         except:
             pass
