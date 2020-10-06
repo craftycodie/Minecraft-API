@@ -19,6 +19,20 @@ def register_routes(app, mongo):
         mongo.db.classicservers.delete_one({"uuid": str(UUID(uuid))})
         return Response("ok", 200)
 
+    @app.route("/api/servers/stats", methods=["GET"])
+    def serverstats():
+        servers = getclassicservers(mongo)
+        servercount = len(servers)
+        playercount = 0
+        for server in servers:
+            if "users" in server:
+                playercount += int(server["users"])
+
+        return Response(json.dumps({
+            "serverCount": servercount,
+            "playerCount": playercount
+        }))
+
     @app.route("/api/servers", methods=["POST"])
     @app.route("/mineonline/servers", methods=["POST"])
     @app.route('/mineonline/listserver.jsp', methods=["POST"])
