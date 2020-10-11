@@ -438,6 +438,9 @@ def register_routes(app, mongo):
         user = None
         sessionIdInvalid = False
 
+        if not request.is_secure:
+            return redirect(request.url.replace('http://', 'https://'))
+
         if 'sessionId' in request.cookies and request.cookies['sessionId'] != "":
             try:
                 users = mongo.db.users

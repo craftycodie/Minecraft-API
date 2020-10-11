@@ -31,6 +31,9 @@ def serve(path):
     if path == "":
         return abort(404)
 
+    if not request.is_secure:
+        return redirect(request.url.replace('http://', 'https://'))
+
     if os.path.exists("templates/private/" + path + ".html"):
         if user:
             return render_template("private/" + path + ".html", user=user)
