@@ -62,9 +62,4 @@ mongo.db.featuredservers.create_index("realmId", unique = True, partialFilterExp
 
 load_versions()
 
-@app.before_request
-def force_https():
-    if not request.is_secure:
-        return redirect(request.url.replace('http://', 'https://'))
-
 routes.register_routes(app, mongo)

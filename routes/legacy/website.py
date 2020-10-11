@@ -452,7 +452,6 @@ def register_routes(app, mongo):
         featuredServers = [dict(server, **{'isMineOnline': False}) for server in featuredServers]
         servers = mineOnlineServers + featuredServers
 
-        serverCount = mongo.db.classicservers.count_documents({}) + mongo.db.featuredservers.count_documents({})
         usersCount = 0
         privateCount = 0
         for server in servers:
@@ -506,6 +505,7 @@ def register_routes(app, mongo):
 
         servers = list(map(mapServer, servers))
         servers = list(filter(filterServer, servers))
+        serverCount = len(servers)
 
 
         return render_template("public/servers.html", 
