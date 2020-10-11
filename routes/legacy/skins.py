@@ -91,7 +91,6 @@ def register_routes(app, mongo):
 
                 return response
             except Exception as e:
-                print(e)
                 abort(404)
             
 
