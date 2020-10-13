@@ -35,7 +35,6 @@ def register_routes(app, mongo):
 
     @app.route("/api/servers", methods=["POST"])
     @app.route("/mineonline/servers", methods=["POST"])
-    @app.route('/mineonline/listserver.jsp', methods=["POST"])
     def addserver():
         port = request.json['port']
         maxUsers = request.json['max']
@@ -152,18 +151,20 @@ def register_routes(app, mongo):
 
     @app.route("/api/servers", methods=["GET"])
     @app.route("/mineonline/servers", methods=["GET"])
-    @app.route('/mineonline/listservers.jsp')
     def listservers():
         sessionId = request.args.get('sessionId')
+
+        user = None
 
         try:
             users = mongo.db.users
             user = users.find_one({"sessionId": ObjectId(sessionId)})
         except:
-            return Response("Invalid Session", 401)
+            pass
+        #     return Response("Invalid Session", 401)
 
-        if (user == None):
-            return Response("Invalid Session", 401)
+        # if (user == None):
+        #     return Response("Invalid Session", 401)
 
         mineOnlineServers = getclassicservers(mongo)
         featuredServers = list(mongo.db.featuredservers.find())
@@ -183,15 +184,16 @@ def register_routes(app, mongo):
 
             if (x["onlinemode"] == False):
                 status = OFFLINEMODE
-            
-            if (x["whitelisted"] == True and "whitelistUsers" in x and "whitelistIPs" in x and "whitelistUUIDs" in x):
-                if(user["user"] in x["whitelistUsers"] or request.remote_addr in x["whitelistIPs"]):
-                    status = ON_THE_WHITELIST
-                else:
-                    status = NOT_ON_THE_WHITELIST
 
-            if ("bannedUsers" in x and "bannedIPs" in x and "bannedUUIDs" in x and (user["user"] in x["bannedUsers"] or request.remote_addr in x["bannedIPs"] or user["uuid"] in x["bannedUUIDs"])):
-                status = BANNED
+            if not user == None:
+                if (x["whitelisted"] == True and "whitelistUsers" in x and "whitelistIPs" in x and "whitelistUUIDs" in x):
+                    if(user["user"] in x["whitelistUsers"] or request.remote_addr in x["whitelistIPs"]):
+                        status = ON_THE_WHITELIST
+                    else:
+                        status = NOT_ON_THE_WHITELIST
+
+                if ("bannedUsers" in x and "bannedIPs" in x and "bannedUUIDs" in x and (user["user"] in x["bannedUsers"] or request.remote_addr in x["bannedIPs"] or user["uuid"] in x["bannedUUIDs"])):
+                    status = BANNED
 
             return { 
                 "createdAt": str(x["createdAt"]) if "createdAt" in x else None,

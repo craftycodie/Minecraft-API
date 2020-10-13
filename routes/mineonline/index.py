@@ -7,6 +7,7 @@ from uuid import uuid4, UUID
 from routes.mineonline.skins import register_routes as register_skins_routes
 from routes.mineonline.servers import register_routes as register_servers_routes
 from routes.mineonline.worlds import register_routes as register_worlds_routes
+from routes.mineonline.mojang import register_routes as register_mojang_routes
 import os
 import bcrypt
 
@@ -15,6 +16,7 @@ def register_routes(app, mongo):
     register_skins_routes(app, mongo)
     register_servers_routes(app, mongo)
     register_worlds_routes(app, mongo)
+    register_mojang_routes(app, mongo)
 
     #Given a username, respond a user uuid.
     @app.route('/api/playeruuid/<username>')
@@ -62,14 +64,12 @@ def register_routes(app, mongo):
             return Response("Something went wrong!", 500)
 
     @app.route('/api/getmyip')
-    @app.route('/mineonline/getmyip')
     def ipaddress():
         return make_response(json.dumps({
             "ip": request.remote_addr
         }), 200)
 
     @app.route('/api/versions')
-    @app.route('/mineonline/versions')
     def versionsindex():
         indexJson = { "versions" : []}
 
@@ -90,7 +90,6 @@ def register_routes(app, mongo):
         return res
         
     @app.route('/api/player/<uuid>/presence', methods=['GET'])
-    @app.route('/mineonline/player/<uuid>/presence', methods=['GET'])
     def playerpresence(uuid):
         uuid = str(UUID(uuid))
         user = None
