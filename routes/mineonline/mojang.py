@@ -18,7 +18,7 @@ def register_routes(app, mongo):
     # Classic authentication route.
     # Modified for mineonline.
     @app.route('/api/mojang/servertoken')
-    def getmmpass():
+    def getmojangmmpass():
         sessionId = request.args['sessionId']
         serverIP = request.args['serverIP']
         serverPort = request.args['serverPort']
