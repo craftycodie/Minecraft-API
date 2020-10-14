@@ -7,7 +7,6 @@ from uuid import uuid4, UUID
 from routes.mineonline.skins import register_routes as register_skins_routes
 from routes.mineonline.servers import register_routes as register_servers_routes
 from routes.mineonline.worlds import register_routes as register_worlds_routes
-from routes.mineonline.mojang import register_routes as register_mojang_routes
 import os
 import bcrypt
 
@@ -16,11 +15,9 @@ def register_routes(app, mongo):
     register_skins_routes(app, mongo)
     register_servers_routes(app, mongo)
     register_worlds_routes(app, mongo)
-    register_mojang_routes(app, mongo)
 
     #Given a username, respond a user uuid.
     @app.route('/api/playeruuid/<username>')
-    @app.route('/mineonline/playeruuid/<username>')
     def playeruuid(username):
         try:
             users = mongo.db.users

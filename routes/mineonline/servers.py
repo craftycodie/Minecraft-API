@@ -153,18 +153,26 @@ def register_routes(app, mongo):
     @app.route("/mineonline/servers", methods=["GET"])
     def listservers():
         sessionId = request.args.get('sessionId')
+        username = request.args.get('username')
+        uuid = request.args.get('uuid')
 
         user = None
 
-        try:
-            users = mongo.db.users
-            user = users.find_one({"sessionId": ObjectId(sessionId)})
-        except:
-            pass
-        #     return Response("Invalid Session", 401)
+        if "sessionId" in request.args:
+            try:
+                users = mongo.db.users
+                user = users.find_one({"sessionId": ObjectId(sessionId)})
+            except:
+                pass
+        elif "username" in request.args or "uuid" in request.args:
+            user = {
+                "user": username,
+                "uuid": uuid
+            }
+            return Response("Invalid Session", 401)
 
-        # if (user == None):
-        #     return Response("Invalid Session", 401)
+        if (user == None):
+            return Response("Invalid Session", 401)
 
         mineOnlineServers = getclassicservers(mongo)
         featuredServers = list(mongo.db.featuredservers.find())
