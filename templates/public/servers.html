@@ -5,70 +5,30 @@
 
 
 <br/>
+{% if not user %}
+<center><font color="#ff0000">You need to log in to join multiplayer games.</font></center>
+{% endif %}
 
 <h2>Public servers</h2>
-<p>
-List was updated {{timeString}}.<br/><br/>
-<p>There are currently {{serverCount}} servers online.</p>
-</p>
-<br>
+If you want to host your own, here's <a href="minecraft-server.zip">the server software</a>!<br>
 
-<!--
-	Status Types
+List was updated {{timeString}}.
+<p><br>
 
-	WHITELISTED
-	ON_THE_WHITELIST
-	BANNED
-	OFFLINEMODE
-	NOT_ON_THE_WHITELIST
-	NONE
- -->
-
-{% if serverCount > 1 %}
+{% if serverCount < 1 %}
+	<p>There are currently no servers online.</p>
+{% else %}
 	{% for server in servers %}
-		{% if 'md5' in server %}
-			<hr/>
-			{% if 'isMineOnline' in server and server['isMineOnline'] == False %}
-				<b>{{server['name']}}</b> - {{server['versionName'] or "Unknown Version"}} - Featured Server
-			{% else %}
-				<b>{{server['name']}}</b> - {{server['versionName'] or "Unknown Version"}} - {{server['users']}}/{{server['maxUsers']}}
-			{% endif %}
-
-			{% if server["status"] == "OFFLINEMODE" %}
-			<span style="color: #AA0000">Offline Mode</span><br/>
-			{% elif server["status"] == "WHITELISTED" %}
-			<span>Whitelisted</span><br/>
-			{% elif server["status"] == "ON_THE_WHITELIST" %}
-			<span style="color: #00AA00">Whitelisted</span><br/>
-			{% elif server["status"] == "NOT_ON_THE_WHITELIST" %}
-			<span style="color: #AA0000">You're not Whitelisted</span><br/>
-			{% elif server["status"] == "BANNED" %}
-			<span style="color: #AA0000">Banned</span><br/>
-			{% else %}
-			<br/>
-			{% endif %}
-
-			{% if 'players' in server and server['players'] |length > 0 %}
- 			<span>Players: 
-				{% for player in server['players'] %}
-				<span style="display: inline-block;">
-					<img class="playerHead" onerror="this.src = '/char-head.png'" src="/api/playerhead?user={{player}}">
-					{{player}}
-				</span>
-				{% endfor %}
-			</span>
-			<br/>
-			{% endif %}
-			{% if server['ip'] %}
-			<span>
-				IP: <b>{{server['ip']}}{% if server['port'] != "25565" %}:{{server['port']}}{% endif %}</b>
-				<br/>
-			</span>
-			{% endif %}
+		{% if user %}
+			<a href="/play.jsp?server={{server['_id']}}"><b>{{server['name']}}</b> {{server['users']}}/{{server['maxUsers']}}</a>
+		{% else %}
+			<b>{{server['name']}}</b> {{server['users']}}/{{server['maxUsers']}}
 		{% endif %}
+		<br/>
 	{% endfor %}
-	<br/><br/>
 {% endif %}
-<br/>
+		    
+<p><br>
+There are {{usersCount}} players playing on {{serverCount}} servers ({{privateCount}} of them private).<br>
 </div>
 {% endblock %}

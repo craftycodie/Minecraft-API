@@ -2,6 +2,34 @@
 
 {% block content %}
 
-Find the latest release on <a href="https://github.com/codieradical/MineOnline/releases">GitHub</a>.
+<div class="oneColeDiv">
+  <h2>Downloading the game</h2>
+
+
+  <p>If you have bought the game, you can download a stand-alone launcher for Minecraft here.<br>
+  It will automatically update the game files with the latest version.<br>
+  You will be able to play the game without an internet connection if you've run the launcher at least once while connected to the internet.<br>
+  </p><h2>Windows:</h2>
+  Download <a href="/download/Minecraft.exe">Minecraft.exe</a>, place it anywhere you want, then run it.<br>
+  If that version doesn't work for some reason, try this: <a href="/download/Minecraft.exe">Minecraft.exe</a>
+  <h2>Mac OSX:</h2>
+  Download <a href="/download/Minecraft.zip">Minecraft.zip</a>, extract the Minecraft app, then run it.
+  <h2>Linux / Other:</h2>
+  Download <a href="/download/Minecraft.jar">Minecraft.jar</a>, an executable jar file. It might work as-is.<br>
+  If you run into out of memory errors, try launching it with <code>java -Xmx1024M -Xms512M -cp Minecraft.jar net.minecraft.LauncherFrame</code><br>
+  Also, please make sure you're running the Sun JVM...<br>
+
+
+  <h2>Multiplayer beta server software</h2>
+  <p>Minecraft beta multiplayer support is currently under heavy development, and is riddled with bugs. You can help test it, though. 
+  It will get better soon, I promise!</p>
+  If you're running on windows and just want to set up a server easily, download <a href="/download/Minecraft_Server.exe">Minecraft_Server.exe</a>, place it anywhere you want, then run it.
+  <br>
+  If you want to run the server on any other OS, or want to run it without the gui, it's a bit more involved.<br>
+  First, make sure you can use java from the command line. On linux and mac, this should automatically work, but on windows you might want to <a href="http://www.java.com/en/download/help/path.xml"></a>set up a PATH system variable.<br>
+  Then download <a href="/download/Minecraft_Server.jar">minecraft_server.jar</a> to anywhere, then launch it as:<br>
+  <code>java -Xmx1024M -Xms1024M -jar minecraft_server.jar nogui</code>
+
+</div>
 
 {% endblock %}

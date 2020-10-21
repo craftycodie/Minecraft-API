@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block content %}
+<script type="text/javascript">
+  function checkform(){
+    var check = $('#terms').is(':checked');
+    if (check) {
+      return true
+    } else {
+      alert("You have to read and agree to the terms!");
+      return false;
+    }
+  }
+
+  function checkform2(){
+    var oChkBox = document.getElementById("agree_box");
+    var oAgreeText = document.getElementById("agreement_text");
+    if (!oChkBox.checked) {
+      alert("You must read the user agreement!");
+      oAgreeText.style.color = "#CCAA00";
+      return false;
+    }
+    else {
+      return true;
+    }
+  }
+</script>
+
+<div style="margin-left:0px;">
+  <table width="900" border="0" id="buy-table">
+    <tr>
+      <td id="left" style="vertical-align:top;">
+        <br/><br/>
+        <h1>Purchase now!</h1>
+        When Minecraft is finished, it will sell for <span class="totalsum-fullprice">&euro;20.00</span>.<br>
+        If you pre-purchase now during beta, you pay just <strong><span class="totalsum">&euro;14.95</span></strong>!<br>
+        <br>
+        <b>Please note that when you buy the game, you're paying for the game as it is right now!</b><br>
+        You will also get the full version of Minecraft when it is released. Read the <a href="copyright.jsp">copyright information</a> for more information on your purchase.<br>
+        <p>
+
+          Please <a href="login.jsp">log in</a> or <a href="register.jsp">register</a> to pre purchase.
+
+          <br>
+          (<a href="gift.jsp">Click here to buy the game for someone other than yourself</a>)
+        <p>
+        <h2>Here's what you get:</h2>
+        <ul>
+          <li>You get early access to the game to a discounted price!
+          <li>You help fund the development of Minecraft
+          <li>Custom skins in multiplayer
+          <li>Once you've bought the game, it's yours. No DRM.
+        </ul>
+
+      </td>
+      <td id="right">
+
+        <div class="buynow">
+
+          
+          {% if not user %}
+          <div class="infoBox" style="height:40px; width:320px; padding:12px;">
+            <span style="font-size:16px;">
+              Please <a href="login.jsp">log in</a> or <a href="register.jsp">register</a> to pre purchase.</span>
+          </div>
+          {% endif %}
+          
+              <br>
+
+
+              
+              <a href="buy_gift_codes.jsp">Click here to buy the game for someone other than yourself</a>.
+              
+            </div>
+
+            <br/>
+
+          </div>
+
+        </div> <!-- buy now end -->
+      </td>
+    </tr>
+  </table>
+</div> <!-- table end -->
+{% endblock %}
